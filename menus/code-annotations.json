@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle code-annotations",
+        "command": "code-annotations:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "code-annotations",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "code-annotations:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
