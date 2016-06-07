@@ -1,0 +1,30 @@
+// The ui-variables file is provided by base themes provided by Atom.
+//
+// See https://github.com/atom/atom-dark-ui/blob/master/styles/ui-variables.less
+// for a full listing of what's available.
+@import "ui-variables";
+@import "octicon-mixins";
+
+.code-annotations {
+    // &::after {
+    //     content: " ";
+    //     display: block;
+    //     clear: both;
+    // }
+}
+
+.line.code-annotation > .source > *:not(.invisible-character) {
+    display: none;
+
+    &::after {
+        .octicon(comment);
+        cursor: pointer;
+    }
+}
+
+// https://discuss.atom.io/t/icon-inside-gutter/19514/8
+// .icon-code-annotation {
+//     // possible: comment, pin, light-bulb, pencil (for editing), question, tools
+//     .octicon(comment);
+//     cursor: pointer;
+// }
