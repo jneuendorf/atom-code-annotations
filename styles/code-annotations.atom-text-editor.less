@@ -4,6 +4,26 @@
 // for a full listing of what's available.
 @import "ui-variables";
 @import "octicon-mixins";
+@import "../node_modules/bootstrap/less/mixins/buttons";
+
+
+.octicon-after(@name, @size: 16px) {
+  @import "octicon-utf-codes.less";
+  &::after {
+    .icon(@size);
+    content: @@name
+  }
+}
+.octicon-after-pointer(@name, @size: 16px) {
+  @import "octicon-utf-codes.less";
+  &::after {
+    .icon(@size);
+    cursor: pointer;
+    content: @@name
+  }
+}
+
+
 
 .code-annotations {
     // &::after {
@@ -13,14 +33,53 @@
     // }
 }
 
-.line.code-annotation > .source > *:not(.invisible-character) {
+.line.code-annotation {
     display: none;
-
-    &::after {
-        .octicon(comment);
-        cursor: pointer;
-    }
+    // & > .source > .comment {
+    //     // padding-left: 20px;
+    //
+    //     & > .punctuation {
+    //         // &::before {
+    //         //     content: " ";
+    //         //     width: 4px;
+    //         //     display: inline-block;
+    //         // }
+    //         .octicon-after(comment);
+    //
+    //     }
+    // }
 }
+// code-annotation-decoration {
+//     display: block;
+// }
+code-annotation-gutter-icon {
+    .octicon(pin);
+    cursor: pointer;
+    text-align: center;
+    width: 14px;
+}
+// .line.code-annotation > .source > .comment {
+//     // opacity: 0;
+//     visibility: hidden;
+//
+//     // &::after {
+//     //     .octicon(comment);
+//     //     cursor: pointer;
+//     // }
+// }
+
+// .highlight.code-annotation > .region {
+//     // .button-variant(white; rgb(70, 131, 222); gray);
+//     .octicon(comment);
+//     // cursor: pointer;
+//     &::before {
+//         cursor: pointer;
+//     }
+//     // &::after {
+//     //     .octicon(comment);
+//     //     cursor: pointer;
+//     // }
+// }
 
 // https://discuss.atom.io/t/icon-inside-gutter/19514/8
 // .icon-code-annotation {

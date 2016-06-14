@@ -1,15 +1,37 @@
 CodeAnnotationsView = require './code-annotations-view'
 {CompositeDisposable, Range} = require 'atom'
-# $ = jQuery = require 'jquery'
+$ = jQuery = require 'jquery'
 
+# class MyRange extends Range
+#     constructor: () ->
+#         super()
+#         @__jim = "sdf"
+# console.log(new MyRange())
 
 module.exports = CodeAnnotations =
 
     codeAnnotationsView: null
     modalPanel: null
     subscriptions: null
+    renderers: {}
 
     activate: (state) ->
+        @_registerElements()
+
+        # add association between decoration model and view (aka. view provider)
+        # atom.views.addViewProvider CodeAnnotationDecoration, (codeAnnotationDecoration) ->
+        #     # codeAnnotationDecorationView = new CodeAnnotationDecorationView()
+        #     # codeAnnotationDecorationView.initialize(codeAnnotationDecoration)
+        #     # return codeAnnotationDecoration
+        #     return undefined
+
+        editor = atom.workspace.getActiveTextEditor()
+        @gutter = editor.addGutter({
+            name: "code-annotations"
+            priority: 100
+            visible: true
+        })
+
         @codeAnnotationsView = new CodeAnnotationsView(state.codeAnnotationsViewState)
         @modalPanel = atom.workspace.addModalPanel({
             item: @codeAnnotationsView.getElement(),
@@ -34,9 +56,40 @@ module.exports = CodeAnnotations =
             codeAnnotationsViewState: @codeAnnotationsView.serialize()
         }
 
+    # API method for plugin packages to register their own renderers for file types
+    registerRendererForFileType: (fileType, renderer) ->
+        if typeof fileType isnt "string" or fileType[0] isnt "."
+            throw new Error("Invalid file type. Expected string starting with a dot.")
+        if @renderers[fileType]?
+            throw new Error("An AssetRenderer is already defined to file type '#{fileType}'.")
+        if renderer not instanceof AssetRenderer
+            throw new Error("Invalid asset renderer. Expected an instance of AssetRenderer.")
+        @renderes[fileType] = renderer
+        return @
+
+    _decorateMarkerWithButton: (marker) ->
+
+    _registerElements: () ->
+        # document.registerElement("code-annotation-decoration", {
+        #     prototype: Object.create(HTMLDivElement.prototype)
+        #     extends: "span"
+        # })
+        document.registerElement("code-annotation-gutter-icon", {
+            prototype: Object.create(HTMLDivElement.prototype)
+            extends: "div"
+        })
+
+    # _createCodeAnnotationDecoration: () ->
+    #     decoration = document.createElement("code-annotation-decoration")
+    #     return decoration
+
+    _createGutterIcon: () ->
+        gutterIcon = document.createElement("code-annotation-gutter-icon")
+        # item.className = ""
+        return gutterIcon
+
     # CODE-ANNOTATION: asdf
     toggle: () ->
-        # console.log('CodeAnnotations was toggled!')
         editor = atom.workspace.getActiveTextEditor()
 
         # start = performance.now()
@@ -55,25 +108,41 @@ module.exports = CodeAnnotations =
         for range in ranges
             marker = editor.markBufferRange(range)
             markers.push marker
-            decorations.push editor.decorateMarker(marker, {
-                # type: "line"
-                # type: "block"
-                # position: "before"
-                # type: "overlay"
-                # position: "head"
-                # position: "before"
-                type: "highlight"
-                class: 'code-annotation'
-                # item: $("<span class='testsests' />").get(0)
+            icon = @_createGutterIcon()
+            atom.tooltips.add(icon, {
+                title: "<div style='background: blue'>test</div>"
+                trigger: "click"
+                placement: "right"
+                html: true
+                delay: 100
             })
-            decorations.push editor.decorateMarker(marker, {
-                type: "line"
-                class: 'code-annotation'
+            decorations.push @gutter.decorateMarker(marker, {
+                # type: "line-number"
+                # class: "code-annotation-gutter-icon"
+                # item: document.createElement "span"
+                item: icon
             })
+            # decorations.push editor.decorateMarker(marker, {
+            #     # type: "line"
+            #     type: "block"
+            #     position: "before"
+            #     # type: "overlay"
+            #     # position: "head"
+            #     # position: "before"
+            #     # type: "highlight"
+            #     # class: 'code-annotation'
+            #     item: @_createCodeAnnotationDecoration()
+            #     # item: $("<span class='code-annotation-decoration testsests'></span>").get(0)
+            # })
+            # decorations.push editor.decorateMarker(marker, {
+            #     type: "line"
+            #     class: 'code-annotation'
+            # })
         # end = performance.now()
         # console.log "using markers:", (end - start), "ms"
         console.log markers
         console.log decorations
+        console.log $(".line.code-annotation")
 
         # THE BELOW IS SLOWER!
         # start = performance.now()

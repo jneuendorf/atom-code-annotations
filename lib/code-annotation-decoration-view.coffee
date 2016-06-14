@@ -1,0 +1,4 @@
+class CodeAnnotationDecorationView
+
+    # CONSTRUCTOR
+    constructor: () ->
