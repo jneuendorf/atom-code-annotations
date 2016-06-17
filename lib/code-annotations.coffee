@@ -1,42 +1,50 @@
-CodeAnnotationsView = require './code-annotations-view'
-{CompositeDisposable, Range} = require 'atom'
+{CompositeDisposable, Directory, Range} = require 'atom'
 $ = jQuery = require 'jquery'
 
-# class MyRange extends Range
-#     constructor: () ->
-#         super()
-#         @__jim = "sdf"
-# console.log(new MyRange())
+CodeAnnotation = require './code-annotation'
+CodeAnnotationsContainer = require './code-annotations-container'
+AssetRenderer = require './asset-renderers/asset-renderer'
+ImageRenderer = require './asset-renderers/image-renderer'
+
+# TODO: make KEYWORD language independent
+KEYWORD = "# CODE-ANNOTATION:"
 
 module.exports = CodeAnnotations =
+# module.exports = class CodeAnnotations
 
     codeAnnotationsView: null
     modalPanel: null
     subscriptions: null
+    # maps: fileType.toString() -> [fileType, renderer]
     renderers: {}
+    codeAnnotations: []
+    # constructor: () ->
+    #     @codeAnnotationsView = null
+    #     @modalPanel = null
+    #     @subscriptions = null
+    #     @renderers = {}
+    #     @codeAnnotations = []
 
     activate: (state) ->
         @_registerElements()
 
-        # add association between decoration model and view (aka. view provider)
-        # atom.views.addViewProvider CodeAnnotationDecoration, (codeAnnotationDecoration) ->
-        #     # codeAnnotationDecorationView = new CodeAnnotationDecorationView()
-        #     # codeAnnotationDecorationView.initialize(codeAnnotationDecoration)
-        #     # return codeAnnotationDecoration
-        #     return undefined
+        # add default renderers
+        # 1. image renderer: supports chrome's native image support.
+        #    see https://en.wikipedia.org/wiki/Comparison_of_web_browsers#Image_format_support
+        @registerRenderer(/.*\.(png|gif|jpg|jpeg|bmp)$/, ImageRenderer)
+        # TODO: enable more than 1 directory
+        @assetDirectory = new Directory("#{atom.project.getDirectories()[0].path}/.code-annotations", false)
 
         editor = atom.workspace.getActiveTextEditor()
+        editorView = atom.views.getView(editor)
         @gutter = editor.addGutter({
             name: "code-annotations"
             priority: 100
             visible: true
         })
 
-        @codeAnnotationsView = new CodeAnnotationsView(state.codeAnnotationsViewState)
-        @modalPanel = atom.workspace.addModalPanel({
-            item: @codeAnnotationsView.getElement(),
-            visible: false
-        })
+        @container = new CodeAnnotationsContainer()
+        editorView.shadowRoot.appendChild @container.getElement()
 
         # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
         @subscriptions = new CompositeDisposable()
@@ -52,114 +60,72 @@ module.exports = CodeAnnotations =
         @codeAnnotationsView.destroy()
 
     serialize: () ->
-        return {
-            codeAnnotationsViewState: @codeAnnotationsView.serialize()
-        }
+        return {}
 
     # API method for plugin packages to register their own renderers for file types
-    registerRendererForFileType: (fileType, renderer) ->
-        if typeof fileType isnt "string" or fileType[0] isnt "."
-            throw new Error("Invalid file type. Expected string starting with a dot.")
+    # fileType = type of the asset
+    registerRenderer: (fileType, rendererClass) ->
+        if typeof fileType isnt "string" and fileType not instanceof RegExp
+            throw new Error("Invalid file type '#{fileType}'. Expected string or regular expression.")
         if @renderers[fileType]?
             throw new Error("An AssetRenderer is already defined to file type '#{fileType}'.")
-        if renderer not instanceof AssetRenderer
-            throw new Error("Invalid asset renderer. Expected an instance of AssetRenderer.")
-        @renderes[fileType] = renderer
+        if not rendererClass.isSubclassOf AssetRenderer
+            throw new Error("Invalid asset renderer. Expected a subclass of AssetRenderer.")
+        @renderers["#{fileType}"] = [fileType, rendererClass]
         return @
 
-    _decorateMarkerWithButton: (marker) ->
-
     _registerElements: () ->
-        # document.registerElement("code-annotation-decoration", {
-        #     prototype: Object.create(HTMLDivElement.prototype)
-        #     extends: "span"
-        # })
         document.registerElement("code-annotation-gutter-icon", {
             prototype: Object.create(HTMLDivElement.prototype)
             extends: "div"
         })
-
-    # _createCodeAnnotationDecoration: () ->
-    #     decoration = document.createElement("code-annotation-decoration")
-    #     return decoration
+        document.registerElement("code-annotation", {
+            prototype: Object.create(HTMLDivElement.prototype)
+            extends: "div"
+        })
+        return @
 
     _createGutterIcon: () ->
         gutterIcon = document.createElement("code-annotation-gutter-icon")
         # item.className = ""
         return gutterIcon
 
-    # CODE-ANNOTATION: asdf
+    # CODE-ANNOTATION: image-testasset.png
     toggle: () ->
         editor = atom.workspace.getActiveTextEditor()
 
-        # start = performance.now()
         text = editor.getText()
         lines = text.split(/\n/g)
         whitespaceRegexp = /^\s*$/
         ranges = []
+        assetData = []
         for line, rowIdx in lines
-            colIdx = line.indexOf("# CODE-ANNOTATION:")
+            colIdx = line.indexOf(KEYWORD)
             if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
                 ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
-        console.log ranges
+                assetData.push {
+                    name: line.slice(colIdx + KEYWORD.length).trim()
+                }
 
         markers = []
         decorations = []
-        for range in ranges
+        for range, i in ranges
             marker = editor.markBufferRange(range)
             markers.push marker
             icon = @_createGutterIcon()
-            atom.tooltips.add(icon, {
-                title: "<div style='background: blue'>test</div>"
-                trigger: "click"
-                placement: "right"
-                html: true
-                delay: 100
-            })
-            decorations.push @gutter.decorateMarker(marker, {
-                # type: "line-number"
-                # class: "code-annotation-gutter-icon"
-                # item: document.createElement "span"
+            decoration = @gutter.decorateMarker(marker, {
                 item: icon
             })
-            # decorations.push editor.decorateMarker(marker, {
-            #     # type: "line"
-            #     type: "block"
-            #     position: "before"
-            #     # type: "overlay"
-            #     # position: "head"
-            #     # position: "before"
-            #     # type: "highlight"
-            #     # class: 'code-annotation'
-            #     item: @_createCodeAnnotationDecoration()
-            #     # item: $("<span class='code-annotation-decoration testsests'></span>").get(0)
-            # })
-            # decorations.push editor.decorateMarker(marker, {
-            #     type: "line"
-            #     class: 'code-annotation'
-            # })
-        # end = performance.now()
-        # console.log "using markers:", (end - start), "ms"
-        console.log markers
-        console.log decorations
-        console.log $(".line.code-annotation")
+            decorations.push decoration
 
-        # THE BELOW IS SLOWER!
-        # start = performance.now()
-        # view = atom.views.getView(editor)
-        # comments = $(view.shadowRoot).find(".coffee.comment.line")
-        # comments.each (idx, comment) ->
-        #     comment = $(comment)
-        #     if not comment.hasClass("code-annotation") and comment.text().slice(0, 18) is "# CODE-ANNOTATION:"
-        #         wrapperSpan = $("<span class='code-annotation' />")
-        #         span = $("<span />").addClass("icon icon-code-annotation")
-        #         wrapperSpan
-        #             .append comment.children(".punctuation")
-        #             .append span
-        #         comment.replaceWith wrapperSpan
-        #         # console.log comment
-        # end = performance.now()
-        # console.log "using dom manipulation:", (end - start), "ms"
-
-        # return if @modalPanel.isVisible() then @modalPanel.hide() else @modalPanel.show()
+            codeAnnotation = new CodeAnnotation(@, marker, decoration, icon, assetData[i])
+            @codeAnnotations.push codeAnnotation
         return true
+
+    showRendered: (renderedContent) ->
+        @container.empty().append(renderedContent).show()
+        return @
+
+    hideRendered: (renderedContent) ->
+        @container.hide()
+        return @
