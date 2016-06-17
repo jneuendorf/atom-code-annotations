@@ -4,10 +4,6 @@ module.exports = class ImageRenderer extends AssetRenderer
 
     @parent = AssetRenderer
 
-    # CONSTRUCTOR
-    constructor: (asset) ->
-        super(asset)
-
     render: () ->
         img = document.createElement("img")
         img.src = @asset.getPath()

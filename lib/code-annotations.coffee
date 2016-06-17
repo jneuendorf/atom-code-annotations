@@ -1,16 +1,16 @@
 {CompositeDisposable, Directory, Range} = require 'atom'
-$ = jQuery = require 'jquery'
+# $ = jQuery = require 'jquery'
 
 CodeAnnotation = require './code-annotation'
 CodeAnnotationsContainer = require './code-annotations-container'
-AssetRenderer = require './asset-renderers/asset-renderer'
-ImageRenderer = require './asset-renderers/image-renderer'
+# AssetRenderer = require './asset-renderers/asset-renderer'
+# ImageRenderer = require './asset-renderers/image-renderer'
+{AssetRenderer, HtmlRenderer, ImageRenderer} = require './asset-renderers/all-renderers'
 
 # TODO: make KEYWORD language independent
 KEYWORD = "# CODE-ANNOTATION:"
 
 module.exports = CodeAnnotations =
-# module.exports = class CodeAnnotations
 
     codeAnnotationsView: null
     modalPanel: null
@@ -18,12 +18,6 @@ module.exports = CodeAnnotations =
     # maps: fileType.toString() -> [fileType, renderer]
     renderers: {}
     codeAnnotations: []
-    # constructor: () ->
-    #     @codeAnnotationsView = null
-    #     @modalPanel = null
-    #     @subscriptions = null
-    #     @renderers = {}
-    #     @codeAnnotations = []
 
     activate: (state) ->
         @_registerElements()
@@ -32,6 +26,7 @@ module.exports = CodeAnnotations =
         # 1. image renderer: supports chrome's native image support.
         #    see https://en.wikipedia.org/wiki/Comparison_of_web_browsers#Image_format_support
         @registerRenderer(/.*\.(png|gif|jpg|jpeg|bmp)$/, ImageRenderer)
+        @registerRenderer(/.*\.(html|htm)$/, HtmlRenderer)
         # TODO: enable more than 1 directory
         @assetDirectory = new Directory("#{atom.project.getDirectories()[0].path}/.code-annotations", false)
 
@@ -90,10 +85,25 @@ module.exports = CodeAnnotations =
         # item.className = ""
         return gutterIcon
 
+    #############################
+    # PUBLIC
+
+    addCodeAnnotation: () ->
+        editor = atom.workspace.getActiveTextEditor()
+        cursorPos = editor.getCursorBufferPosition()
+        # make the user choose an asset
+        dialog = (require "remote").require "dialog"
+        paths = dialog.showOpenDialog({properties: ['openFile']})
+        if not paths?
+            atom.notifications.addError("No asset chosen")
+            return @
+
+        editor.insertText()
+
     # CODE-ANNOTATION: image-testasset.png
+    # CODE-ANNOTATION: html-testasset.html
     toggle: () ->
         editor = atom.workspace.getActiveTextEditor()
-
         text = editor.getText()
         lines = text.split(/\n/g)
         whitespaceRegexp = /^\s*$/
