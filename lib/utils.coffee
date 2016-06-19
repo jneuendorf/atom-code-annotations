@@ -1,12 +1,12 @@
 module.exports = class Utils
 
-    @fileHasType: (filename, fileType) ->
-        if typeof fileType is "string"
+    @fileHasType: (filename, fileExtension) ->
+        if typeof fileExtension is "string"
             # TODO
-            return filename.endsWith(fileType)
-        if fileType instanceof RegExp
-            console.log filename, fileType, fileType.test(filename)
-            return fileType.test(filename)
+            return filename.endsWith(fileExtension)
+        if fileExtension instanceof RegExp
+            console.log filename, fileExtension, fileExtension.test(filename)
+            return fileExtension.test(filename)
         return false
 
     @createElement: (tag, classes = "", callback) ->

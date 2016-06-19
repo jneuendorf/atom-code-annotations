@@ -1,6 +1,7 @@
 module.exports = class AssetRenderer
 
     @parent: null
+    @fileExtension: null
 
     # CONSTRUCTOR
     constructor: (asset) ->

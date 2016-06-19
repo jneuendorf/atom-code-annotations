@@ -15,18 +15,25 @@ module.exports = CodeAnnotations =
     codeAnnotationsView: null
     modalPanel: null
     subscriptions: null
-    # maps: fileType.toString() -> [fileType, renderer]
-    renderers: {}
+    # maps: fileExtension.toString() -> [fileExtension, renderer]
+    # renderers: {}
+    renderers: []
     codeAnnotations: []
 
+    #######################################################################################
+    # PUBLIC (ATOM API)
+
     activate: (state) ->
+        console.log "ACTIVATING CODE-ANNOTATIONS"
         @_registerElements()
 
         # add default renderers
         # 1. image renderer: supports chrome's native image support.
         #    see https://en.wikipedia.org/wiki/Comparison_of_web_browsers#Image_format_support
-        @registerRenderer(/.*\.(png|gif|jpg|jpeg|bmp)$/, ImageRenderer)
-        @registerRenderer(/.*\.(html|htm)$/, HtmlRenderer)
+        # @registerRenderer(/^.*\.(png|gif|jpg|jpeg|bmp)$/, ImageRenderer)
+        # @registerRenderer(/^.*\.(html|htm)$/, HtmlRenderer)
+        @registerRenderer(ImageRenderer)
+        @registerRenderer(HtmlRenderer)
         # TODO: enable more than 1 directory
         @assetDirectory = new Directory("#{atom.project.getDirectories()[0].path}/.code-annotations", false)
 
@@ -45,52 +52,48 @@ module.exports = CodeAnnotations =
         @subscriptions = new CompositeDisposable()
 
         # Register command that toggles this view
-        @subscriptions.add atom.commands.add('atom-workspace', {
-            'code-annotations:toggle': () => @toggle()
-        })
+        @subscriptions.add atom.commands.add 'atom-workspace', {
+            'code-annotations:toggle': () =>
+                return @toggle()
+            'code-annotations:add-code-annotation': () =>
+                return @addCodeAnnotation()
+        }
 
     deactivate: () ->
         @modalPanel.destroy()
         @subscriptions.dispose()
         @codeAnnotationsView.destroy()
+        return @
 
     serialize: () ->
         return {}
 
+    #######################################################################################
+    # PUBLIC
+
     # API method for plugin packages to register their own renderers for file types
-    # fileType = type of the asset
-    registerRenderer: (fileType, rendererClass) ->
-        if typeof fileType isnt "string" and fileType not instanceof RegExp
-            throw new Error("Invalid file type '#{fileType}'. Expected string or regular expression.")
-        if @renderers[fileType]?
-            throw new Error("An AssetRenderer is already defined to file type '#{fileType}'.")
+    # fileExtension = type of the asset
+    # registerRenderer: (fileExtension, rendererClass) ->
+    #     if typeof fileExtension isnt "string" and fileExtension not instanceof RegExp
+    #         throw new Error("Invalid file type '#{fileExtension}'. Expected string or regular expression.")
+    #     if @renderers[fileExtension]?
+    #         throw new Error("An AssetRenderer is already defined to file type '#{fileExtension}'.")
+    #     if not rendererClass.isSubclassOf AssetRenderer
+    #         throw new Error("Invalid asset renderer. Expected a subclass of AssetRenderer.")
+    #     @renderers["#{fileExtension}"] = [fileExtension, rendererClass]
+    #     return @
+    registerRenderer: (rendererClass) ->
+        if rendererClass in @renderers
+            throw new Error("The AssetRenderer is already defined to file type '#{rendererClass.fileExtension}'.")
         if not rendererClass.isSubclassOf AssetRenderer
             throw new Error("Invalid asset renderer. Expected a subclass of AssetRenderer.")
-        @renderers["#{fileType}"] = [fileType, rendererClass]
+        @renderers.push rendererClass
         return @
-
-    _registerElements: () ->
-        document.registerElement("code-annotation-gutter-icon", {
-            prototype: Object.create(HTMLDivElement.prototype)
-            extends: "div"
-        })
-        document.registerElement("code-annotation", {
-            prototype: Object.create(HTMLDivElement.prototype)
-            extends: "div"
-        })
-        return @
-
-    _createGutterIcon: () ->
-        gutterIcon = document.createElement("code-annotation-gutter-icon")
-        # item.className = ""
-        return gutterIcon
-
-    #############################
-    # PUBLIC
 
     addCodeAnnotation: () ->
         editor = atom.workspace.getActiveTextEditor()
         cursorPos = editor.getCursorBufferPosition()
+        console.log "here we are"
         # make the user choose an asset
         dialog = (require "remote").require "dialog"
         paths = dialog.showOpenDialog({properties: ['openFile']})
@@ -139,3 +142,22 @@ module.exports = CodeAnnotations =
     hideRendered: (renderedContent) ->
         @container.hide()
         return @
+
+    #######################################################################################
+    # PRIVATE
+
+    _registerElements: () ->
+        document.registerElement("code-annotation-gutter-icon", {
+            prototype: Object.create(HTMLDivElement.prototype)
+            extends: "div"
+        })
+        document.registerElement("code-annotation", {
+            prototype: Object.create(HTMLDivElement.prototype)
+            extends: "div"
+        })
+        return @
+
+    _createGutterIcon: () ->
+        gutterIcon = document.createElement("code-annotation-gutter-icon")
+        # item.className = ""
+        return gutterIcon

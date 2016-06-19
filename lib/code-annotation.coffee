@@ -45,13 +45,21 @@ module.exports = class CodeAnnotation
         console.log @asset
         return @
 
+    # _setRenderer: () ->
+    #     for fileExtensionStr, data of @codeAnnotations.renderers
+    #         [fileExtension, rendererClass] = data
+    #         if Utils.fileHasType(@assetData.name, fileExtension)
+    #             @renderer = new rendererClass(@asset)
+    #     if not @renderer?
+    #         throw new Error("Could not find a renderer for asset '#{@assetData.name}'.")
+    #     return @
     _setRenderer: () ->
-        for fileTypeStr, data of @codeAnnotations.renderers
-            [fileType, rendererClass] = data
-            if Utils.fileHasType(@assetData.name, fileType)
+        for rendererClass in @codeAnnotations.renderers
+            if Utils.fileHasType(@assetData.name, rendererClass.fileExtension)
                 @renderer = new rendererClass(@asset)
         if not @renderer?
             throw new Error("Could not find a renderer for asset '#{@assetData.name}'.")
+        return @
 
     # PUBLIC
     # needed for being used as a key in an object

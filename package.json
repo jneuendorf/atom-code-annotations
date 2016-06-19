@@ -5,7 +5,10 @@
     "description": "An atom package for creating inline code annotations",
     "keywords": [],
     "activationCommands": {
-        "atom-workspace": "code-annotations:toggle"
+        "atom-workspace": [
+            "code-annotations:toggle",
+            "code-annotations:add-code-annotation"
+        ]
     },
     "repository": "https://github.com/atom/code-annotations",
     "license": "MIT",
