@@ -5,7 +5,7 @@ CodeAnnotation = require './code-annotation'
 CodeAnnotationsContainer = require './code-annotations-container'
 # AssetRenderer = require './asset-renderers/asset-renderer'
 # ImageRenderer = require './asset-renderers/image-renderer'
-{AssetRenderer, HtmlRenderer, ImageRenderer} = require './asset-renderers/all-renderers'
+{AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require './asset-renderers/all-renderers'
 
 # TODO: make KEYWORD language independent
 KEYWORD = "# CODE-ANNOTATION:"
@@ -34,6 +34,7 @@ module.exports = CodeAnnotations =
         # @registerRenderer(/^.*\.(html|htm)$/, HtmlRenderer)
         @registerRenderer(ImageRenderer)
         @registerRenderer(HtmlRenderer)
+        @registerRenderer(TextRenderer)
         # TODO: enable more than 1 directory
         @assetDirectory = new Directory("#{atom.project.getDirectories()[0].path}/.code-annotations", false)
 
@@ -105,6 +106,7 @@ module.exports = CodeAnnotations =
 
     # CODE-ANNOTATION: image-testasset.png
     # CODE-ANNOTATION: html-testasset.html
+    # CODE-ANNOTATION: text-testasset.txt
     toggle: () ->
         editor = atom.workspace.getActiveTextEditor()
         text = editor.getText()

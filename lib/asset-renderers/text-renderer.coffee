@@ -1,6 +1,13 @@
-HtmlRenderer = require './html-renderer'
+AssetRenderer = require './asset-renderer'
 
-module.exports = class TextRenderer extends HtmlRenderer
+module.exports = class TextRenderer extends AssetRenderer
 
-    @parent: HtmlRenderer
+    @parent: AssetRenderer
     @fileExtension: ".txt"
+
+    render: () ->
+        # TODO: use shadow dom. see http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom/
+        div = document.createElement("div")
+        div.innerHTML = @asset.readSync(false).replace(/\n/g, "<br>")
+        div.className = "rendered text-renderer"
+        return div
