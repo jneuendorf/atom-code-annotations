@@ -1,4 +1,0 @@
-class CodeAnnotationDecoration
-
-    # CONSTRUCTOR
-    constructor: () ->
