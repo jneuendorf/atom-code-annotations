@@ -26,8 +26,6 @@ module.exports = CodeAnnotations =
         @_registerElements()
 
         # add default renderers
-        # 1. image renderer: supports chrome's native image support.
-        #    see https://en.wikipedia.org/wiki/Comparison_of_web_browsers#Image_format_support
         @registerRenderer(ImageRenderer)
         @registerRenderer(HtmlRenderer)
         @registerRenderer(TextRenderer)
@@ -88,12 +86,15 @@ module.exports = CodeAnnotations =
             atom.notifications.addError("No asset chosen")
             return @
 
+        # TODO
         editor.insertText()
+        return @
 
     # CODE-ANNOTATION: image-testasset.png
     # CODE-ANNOTATION: html-testasset.html
     # CODE-ANNOTATION: text-testasset.txt
     toggle: () ->
+        # TODO: move marker/decoration code to activate method and toggle gutter visibility only
         editor = atom.workspace.getActiveTextEditor()
         text = editor.getText()
         lines = text.split(/\n/g)
