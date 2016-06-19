@@ -15,8 +15,6 @@ module.exports = CodeAnnotations =
     codeAnnotationsView: null
     modalPanel: null
     subscriptions: null
-    # maps: fileExtension.toString() -> [fileExtension, renderer]
-    # renderers: {}
     renderers: []
     codeAnnotations: []
 
@@ -30,8 +28,6 @@ module.exports = CodeAnnotations =
         # add default renderers
         # 1. image renderer: supports chrome's native image support.
         #    see https://en.wikipedia.org/wiki/Comparison_of_web_browsers#Image_format_support
-        # @registerRenderer(/^.*\.(png|gif|jpg|jpeg|bmp)$/, ImageRenderer)
-        # @registerRenderer(/^.*\.(html|htm)$/, HtmlRenderer)
         @registerRenderer(ImageRenderer)
         @registerRenderer(HtmlRenderer)
         @registerRenderer(TextRenderer)
@@ -73,16 +69,6 @@ module.exports = CodeAnnotations =
     # PUBLIC
 
     # API method for plugin packages to register their own renderers for file types
-    # fileExtension = type of the asset
-    # registerRenderer: (fileExtension, rendererClass) ->
-    #     if typeof fileExtension isnt "string" and fileExtension not instanceof RegExp
-    #         throw new Error("Invalid file type '#{fileExtension}'. Expected string or regular expression.")
-    #     if @renderers[fileExtension]?
-    #         throw new Error("An AssetRenderer is already defined to file type '#{fileExtension}'.")
-    #     if not rendererClass.isSubclassOf AssetRenderer
-    #         throw new Error("Invalid asset renderer. Expected a subclass of AssetRenderer.")
-    #     @renderers["#{fileExtension}"] = [fileExtension, rendererClass]
-    #     return @
     registerRenderer: (rendererClass) ->
         if rendererClass in @renderers
             throw new Error("The AssetRenderer is already defined to file type '#{rendererClass.fileExtension}'.")

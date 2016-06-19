@@ -4,6 +4,7 @@ module.exports = class TextRenderer extends AssetRenderer
 
     @parent: AssetRenderer
     @fileExtension: ".txt"
+    @isTextBased: true
 
     render: () ->
         # TODO: use shadow dom. see http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom/

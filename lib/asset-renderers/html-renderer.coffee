@@ -4,6 +4,7 @@ module.exports = class HtmlRenderer extends AssetRenderer
 
     @parent: AssetRenderer
     @fileExtension: /.*\.(html|htm)$/
+    @isTextBased: true
 
     render: () ->
         # TODO: use shadow dom. see http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom/

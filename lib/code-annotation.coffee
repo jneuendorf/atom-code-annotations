@@ -45,14 +45,6 @@ module.exports = class CodeAnnotation
         console.log @asset
         return @
 
-    # _setRenderer: () ->
-    #     for fileExtensionStr, data of @codeAnnotations.renderers
-    #         [fileExtension, rendererClass] = data
-    #         if Utils.fileHasType(@assetData.name, fileExtension)
-    #             @renderer = new rendererClass(@asset)
-    #     if not @renderer?
-    #         throw new Error("Could not find a renderer for asset '#{@assetData.name}'.")
-    #     return @
     _setRenderer: () ->
         for rendererClass in @codeAnnotations.renderers
             if Utils.fileHasType(@assetData.name, rendererClass.fileExtension)
@@ -73,10 +65,8 @@ module.exports = class CodeAnnotation
             @element = @_createWrapper()
             @element.appendChild @renderer.render()
         @codeAnnotations.showRendered(@element)
-        # @element.style.display = "block"
         return @
 
     hide: () ->
-        # @element.style.display = "none"
         @codeAnnotations.hideRendered()
         return @

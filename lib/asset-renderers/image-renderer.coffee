@@ -4,12 +4,11 @@ module.exports = class ImageRenderer extends AssetRenderer
 
     @parent: AssetRenderer
     @fileExtension: /^.*\.(png|gif|jpg|jpeg|bmp)$/
+    @isTextBased: false
 
     render: () ->
         img = document.createElement("img")
         img.src = @asset.getPath()
-        # img.style.maxWidth = "100%"
-        # img.style.maxHeight = "100%"
         img.className = "rendered image-renderer"
         return img
         # div = document.createElement("div")

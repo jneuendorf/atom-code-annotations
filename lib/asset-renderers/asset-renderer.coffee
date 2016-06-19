@@ -2,6 +2,8 @@ module.exports = class AssetRenderer
 
     @parent: null
     @fileExtension: null
+    # asset kind: text-based -> directly editable, not text-based (= binary) -> replaceable only
+    @isTextBased: null
 
     # CONSTRUCTOR
     constructor: (asset) ->
