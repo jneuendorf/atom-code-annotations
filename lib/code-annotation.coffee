@@ -65,11 +65,11 @@ module.exports = class CodeAnnotation
             @_setRenderer()
             @element = @_createWrapper()
             @element.appendChild @renderer.render()
-        @codeAnnotations.showRendered(@element)
+        @codeAnnotations.showContainer(@element)
         return @
 
     hide: () ->
-        @codeAnnotations.hideRendered()
+        @codeAnnotations.hideContainer()
         return @
 
     getRenderer: () ->

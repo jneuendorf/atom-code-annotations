@@ -29,6 +29,10 @@ module.exports = CodeAnnotations =
 
     activate: (state) ->
         console.log "ACTIVATING CODE-ANNOTATIONS"
+        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
+        @subscriptions = new CompositeDisposable()
+        
+        @_registerCommands()
         @_registerElements()
 
         # add default renderers
@@ -49,17 +53,6 @@ module.exports = CodeAnnotations =
 
         @container = new CodeAnnotationsContainer(@)
         editorView.shadowRoot.appendChild @container.getElement()
-
-        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-        @subscriptions = new CompositeDisposable()
-
-        # Register command that toggles this view
-        @subscriptions.add atom.commands.add 'atom-workspace', {
-            'code-annotations:toggle': () =>
-                return @toggle()
-            'code-annotations:add-code-annotation': () =>
-                return @addCodeAnnotation()
-        }
 
     deactivate: () ->
         @modalPanel.destroy()
@@ -130,11 +123,13 @@ module.exports = CodeAnnotations =
             @codeAnnotations.push codeAnnotation
         return true
 
-    showRendered: (renderedContent) ->
-        @container.empty().append(renderedContent).show()
+    showContainer: (renderedContent) ->
+        @container.empty()
+            .append(renderedContent)
+            .show()
         return @
 
-    hideRendered: (renderedContent) ->
+    hideContainer: () ->
         @container.hide()
         return @
 
@@ -151,6 +146,17 @@ module.exports = CodeAnnotations =
 
     #######################################################################################
     # PRIVATE
+
+    _registerCommands: () ->
+        @subscriptions.add atom.commands.add 'atom-workspace', {
+            'code-annotations:toggle': () =>
+                return @toggle()
+            'code-annotations:add-code-annotation': () =>
+                return @addCodeAnnotation()
+            'code-annotations:hide-container': () =>
+                return @hideContainer()
+        }
+        return @
 
     _registerElements: () ->
         document.registerElement("code-annotation-gutter-icon", {

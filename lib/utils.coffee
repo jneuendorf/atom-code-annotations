@@ -5,7 +5,7 @@ module.exports = class Utils
             # TODO
             return filename.endsWith(fileExtension)
         if fileExtension instanceof RegExp
-            console.log filename, fileExtension, fileExtension.test(filename)
+            # console.log filename, fileExtension, fileExtension.test(filename)
             return fileExtension.test(filename)
         return false
 
