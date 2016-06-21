@@ -10,6 +10,10 @@ CodeAnnotationsContainer = require './code-annotations-container'
 # TODO: make KEYWORD language independent
 KEYWORD = "# CODE-ANNOTATION:"
 
+###
+@class CodeAnnotations
+Has a CodeAnnotationsContainer which contains the output of an asset renderer.
+###
 module.exports = CodeAnnotations =
 
     codeAnnotationsView: null
@@ -17,6 +21,8 @@ module.exports = CodeAnnotations =
     subscriptions: null
     renderers: []
     codeAnnotations: []
+    renderer: null
+    currentCodeAnnotation: null
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -30,6 +36,7 @@ module.exports = CodeAnnotations =
         @registerRenderer(HtmlRenderer)
         @registerRenderer(TextRenderer)
         # TODO: enable more than 1 directory
+        # this.project.resolvePath(uri) ?
         @assetDirectory = new Directory("#{atom.project.getDirectories()[0].path}/.code-annotations", false)
 
         editor = atom.workspace.getActiveTextEditor()
@@ -40,7 +47,7 @@ module.exports = CodeAnnotations =
             visible: true
         })
 
-        @container = new CodeAnnotationsContainer()
+        @container = new CodeAnnotationsContainer(@)
         editorView.shadowRoot.appendChild @container.getElement()
 
         # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
@@ -85,7 +92,6 @@ module.exports = CodeAnnotations =
         if not paths?
             atom.notifications.addError("No asset chosen")
             return @
-
         # TODO
         editor.insertText()
         return @
@@ -131,6 +137,17 @@ module.exports = CodeAnnotations =
     hideRendered: (renderedContent) ->
         @container.hide()
         return @
+
+    setCurrentCodeAnnotation: (codeAnnotation) ->
+        @currentCodeAnnotation = codeAnnotation
+        return @
+
+    getCurrentCodeAnnotation: () ->
+        return @currentCodeAnnotation
+
+    # get current renderer (contained in the CodeAnnotationsContainer)
+    getRenderer: () ->
+        return @currentCodeAnnotation.getRenderer()
 
     #######################################################################################
     # PRIVATE

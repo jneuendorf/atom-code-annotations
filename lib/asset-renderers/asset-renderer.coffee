@@ -21,3 +21,6 @@ module.exports = class AssetRenderer
 
     render: () ->
         throw new Error("AssetRenderer::render() must be implemented by '#{@constructor.name}'!")
+
+    isTextBased: () ->
+        return @constructor.isTextBased

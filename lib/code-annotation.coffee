@@ -30,6 +30,7 @@ module.exports = class CodeAnnotation
             # 3. get according renderer
             # 4. use renderer to create dom element
             # icon.appendChild renderer.render()
+            @codeAnnotations.setCurrentCodeAnnotation(@)
             return @show()
         return @
 
@@ -69,4 +70,22 @@ module.exports = class CodeAnnotation
 
     hide: () ->
         @codeAnnotations.hideRendered()
+        return @
+
+    getRenderer: () ->
+        return @renderer
+
+    edit: () ->
+        console.log "editing code annotation...."
+        if not @renderer
+            throw new Error("Cannot edit a code annotation without a renderer. If you see this message please report a bug.")
+        # get asset associated with the pin that was just clicked
+        # get renderer for asset
+        # according to renderer's isTextBased do:
+        if @renderer.isTextBased()
+            # load asset contents into new tab
+            atom.workspace.open(@asset.getPath())
+        else
+            # show 'choose file' dialog
+        # save changes
         return @

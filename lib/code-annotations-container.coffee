@@ -9,14 +9,14 @@ document.registerElement("code-annotations-container", {
 module.exports = class CodeAnnotationsContainer
 
     # CONSTRUCTOR
-    constructor: (visible = false) ->
+    constructor: (codeAnnotations, visible = false) ->
+        @codeAnnotations = codeAnnotations
         @element = document.createElement("code-annotations-container")
         if not visible
             @hide()
-        @closeBtn = Utils.createElement("div", "close")
-        @editBtn = Utils.createElement("div", "edit")
+        @closeBtn = Utils.createElement("div", "close code-annotation-button")
+        @editBtn = Utils.createElement("div", "edit code-annotation-button")
         @content = Utils.createElement("div", "content")
-
 
         @element.appendChild @content
         @element.appendChild @editBtn
@@ -25,7 +25,7 @@ module.exports = class CodeAnnotationsContainer
         @closeBtn.addEventListener "click", (event) =>
             return @hide()
         @editBtn.addEventListener "click", (event) =>
-            return @editAsset()
+            return @codeAnnotations.getCurrentCodeAnnotation().edit()
 
     getElement: () ->
         return @element
@@ -44,15 +44,4 @@ module.exports = class CodeAnnotationsContainer
 
     append: (element) ->
         @content.appendChild(element)
-        return @
-
-    editAsset: () ->
-        # get asset associated with the pin that was just clicked
-        # get renderer for asset
-        # according to renderer's isTextBased do:
-        #     if renderer.isTextBased is true
-        #         # load asset contents into new tab
-        #     else
-        #         # show 'choose file' dialog
-        # save changes
         return @
