@@ -1,0 +1,32 @@
+{
+    "indentation" : {
+        "level" : "error",
+        "value" : 4
+    },
+    "line_endings" : {
+        "value" : "unix",
+        "level" : "error"
+    },
+    "max_line_length": {
+        "value": 140,
+        "level": "ignore"
+    },
+    "arrow_spacing": {
+        "level": "error"
+    },
+    "no_this": {
+        "level": "error"
+    },
+    "prefer_english_operator": {
+        "level": "error"
+    },
+    "space_operators" : {
+        "level": "warn"
+    },
+    "spacing_after_comma": {
+        "level": "error"
+    },
+    "ensure_comprehensions": {
+        "level": "ignore"
+    }
+}

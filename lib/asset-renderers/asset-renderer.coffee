@@ -24,3 +24,10 @@ module.exports = class AssetRenderer
 
     isTextBased: () ->
         return @constructor.isTextBased
+
+    getFileExtension: () ->
+        return @constructor.fileExtension
+
+    setAsset: (asset) ->
+        @asset = asset
+        return @

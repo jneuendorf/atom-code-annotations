@@ -1,3 +1,8 @@
+remote = require "remote"
+dialog = remote.dialog
+# fs = require "fs-plus"
+fs = require "fs"
+
 module.exports = class Utils
 
     @fileHasType: (filename, fileExtension) ->
@@ -19,3 +24,25 @@ module.exports = class Utils
         while parentNode.firstChild?
             parentNode.removeChild(parentNode.firstChild)
         return parentNode
+
+    @chooseFile: (alertMessage) ->
+        if alertMessage
+            alert alertMessage
+        return dialog.showOpenDialog({properties: ['openFile']})
+
+    @copyFile: (source, destination) ->
+        # fs.copySync(source, destination)
+        try
+            # readStream = fs.createReadStream(source)
+            buffer = fs.readFileSync(source)
+        catch error
+            # atom.notifications.addError("Error creating write stream for '#{destination}'.")
+            throw new Error("Could not read '#{source}'.")
+        # try
+        #     # writeStream = fs.createWriteStream(destination)
+        # catch error
+        #     throw new Error("Error creating write stream for '#{destination}'.")
+        # copy file
+        # readStream.pipe(writeStream)
+        fs.writeFileSync(destination, buffer)
+        return @

@@ -1,6 +1,3 @@
-{
-    "atom-workspace": {
-        "ctrl-alt-o": "code-annotations:toggle"
-        "escape": "code-annotations:hide-container"
-    }
-}
+"atom-workspace":
+    "ctrl-alt-o": "code-annotations:toggle"
+    # "escape": "code-annotations:hide-container"

@@ -1,38 +1,21 @@
 {
     "name": "code-annotations",
-    "main": "./lib/code-annotations",
+    "main": "./lib/code-annotation-manager",
     "version": "0.0.1",
     "description": "An atom package for creating inline code annotations",
     "keywords": [],
-    "activationCommands": {
-        "atom-workspace": [
-            "code-annotations:toggle",
-            "code-annotations:add-code-annotation"
-        ]
-    },
+    "activationCommands": {},
     "repository": "https://github.com/atom/code-annotations",
     "license": "MIT",
     "engines": {
         "atom": ">=1.0.0 <2.0.0"
     },
     "dependencies": {
-        "jquery": "~2.1.4",
-        "bootstrap": "~3.3.6"
+        "atom-space-pen-views": "~2.2.0",
+        "season": "~5.3.0",
+        "fs-plus": "~2.9.1"
     },
-    "coffeelintConfig": {
-        "indentation" : {
-            "level" : "error",
-            "value" : 4
-        },
-        "max_line_length" : {
-            "level" : "error",
-            "value" : 140
-        },
-        "no_this" : {
-            "level" : "error"
-        },
-        "no_trailing_whitespace" : {
-            "level" : "ignore"
-        }
+    "devDependencies": {
+        "coffeelint": "~1.15.7"
     }
 }

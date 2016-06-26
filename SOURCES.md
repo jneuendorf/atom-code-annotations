@@ -1,0 +1,4 @@
+- https://discuss.atom.io/t/why-wont-my-package-activate-on-reload-restart/14626
+- https://discuss.atom.io/t/how-to-create-a-file-dialog/11151/4
+- http://www.html5rocks.com/en/tutorials/webcomponents/customelements/
+- https://discuss.atom.io/t/get-dom-element-under-cursor/20840/3

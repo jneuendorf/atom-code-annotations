@@ -1,23 +1,23 @@
-{CompositeDisposable, Directory, Range} = require 'atom'
-# $ = jQuery = require 'jquery'
+{CompositeDisposable, Directory, Range, TextEditor} = require "atom"
+CSON = require "season"
+# $ = jQuery = require "jquery"
+# {$, jQuery, TextEditorView, View} = require "atom-space-pen-views"
+Utils = require "./utils"
+CodeAnnotation = require "./code-annotation"
+CodeAnnotationContainer = require "./code-annotation-container"
+{AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
+Dialog = require "./dialog.coffee"
+CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
+CodeAnnotations = require "./constants"
 
-CodeAnnotation = require './code-annotation'
-CodeAnnotationsContainer = require './code-annotations-container'
-# AssetRenderer = require './asset-renderers/asset-renderer'
-# ImageRenderer = require './asset-renderers/image-renderer'
-{AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require './asset-renderers/all-renderers'
 
-# TODO: make KEYWORD language independent
-KEYWORD = "# CODE-ANNOTATION:"
 
 ###
-@class CodeAnnotations
-Has a CodeAnnotationsContainer which contains the output of an asset renderer.
+@class CodeAnnotationManager
+Has a CodeAnnotationContainer which contains the output of an asset renderer.
 ###
-module.exports = CodeAnnotations =
+module.exports = CodeAnnotationManager =
 
-    codeAnnotationsView: null
-    modalPanel: null
     subscriptions: null
     renderers: []
     codeAnnotations: []
@@ -31,17 +31,13 @@ module.exports = CodeAnnotations =
         console.log "ACTIVATING CODE-ANNOTATIONS"
         # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
         @subscriptions = new CompositeDisposable()
-        
-        @_registerCommands()
-        @_registerElements()
-
-        # add default renderers
-        @registerRenderer(ImageRenderer)
-        @registerRenderer(HtmlRenderer)
-        @registerRenderer(TextRenderer)
         # TODO: enable more than 1 directory
         # this.project.resolvePath(uri) ?
-        @assetDirectory = new Directory("#{atom.project.getDirectories()[0].path}/.code-annotations", false)
+        @assetDirectories = []
+        @assetDirectory = null
+        @initializedEditors = []
+
+        @_init()
 
         editor = atom.workspace.getActiveTextEditor()
         editorView = atom.views.getView(editor)
@@ -51,13 +47,11 @@ module.exports = CodeAnnotations =
             visible: true
         })
 
-        @container = new CodeAnnotationsContainer(@)
+        @container = new CodeAnnotationContainer(@)
         editorView.shadowRoot.appendChild @container.getElement()
 
     deactivate: () ->
-        @modalPanel.destroy()
         @subscriptions.dispose()
-        @codeAnnotationsView.destroy()
         return @
 
     serialize: () ->
@@ -65,6 +59,16 @@ module.exports = CodeAnnotations =
 
     #######################################################################################
     # PUBLIC
+
+    loadAssetNames: () ->
+        assetNames = {}
+        for assetDirectory in @assetDirectories
+            path = assetDirectory.getPath()
+            assetNames[path] = CSON.readFileSync(path + "/.names.cson")
+        @assetNames = assetNames
+        console.log @assetNames
+        return @
+
 
     # API method for plugin packages to register their own renderers for file types
     registerRenderer: (rendererClass) ->
@@ -76,17 +80,11 @@ module.exports = CodeAnnotations =
         return @
 
     addCodeAnnotation: () ->
-        editor = atom.workspace.getActiveTextEditor()
-        cursorPos = editor.getCursorBufferPosition()
-        console.log "here we are"
-        # make the user choose an asset
-        dialog = (require "remote").require "dialog"
-        paths = dialog.showOpenDialog({properties: ['openFile']})
-        if not paths?
-            atom.notifications.addError("No asset chosen")
+        dialog = new CodeAnnotationNameDialog()
+        dialog.attach().onSubmit (name) =>
+            @_createCodeAnnotationWithName(name)
             return @
-        # TODO
-        editor.insertText()
+        console.log dialog
         return @
 
     # CODE-ANNOTATION: image-testasset.png
@@ -101,11 +99,13 @@ module.exports = CodeAnnotations =
         ranges = []
         assetData = []
         for line, rowIdx in lines
-            colIdx = line.indexOf(KEYWORD)
+            # colIdx = line.indexOf(KEYWORD)
+            colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
             if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
                 ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
                 assetData.push {
-                    name: line.slice(colIdx + KEYWORD.length).trim()
+                    # name: line.slice(colIdx + KEYWORD.length).trim()
+                    name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
                 }
 
         markers = []
@@ -140,12 +140,44 @@ module.exports = CodeAnnotations =
     getCurrentCodeAnnotation: () ->
         return @currentCodeAnnotation
 
-    # get current renderer (contained in the CodeAnnotationsContainer)
+    # get current renderer (contained in the CodeAnnotationContainer)
     getRenderer: () ->
         return @currentCodeAnnotation.getRenderer()
 
     #######################################################################################
     # PRIVATE
+
+    _init: () ->
+        for dir in atom.project.getDirectories()
+            subdir = dir.getSubdirectory(CodeAnnotations.ASSET_DIR_NAME)
+            if subdir.existsSync()
+                @assetDirectories.push subdir
+        # @assetDirectory = atom.project.getDirectories()[0].getSubdirectory(".code-annotations")
+        @assetDirectory = @assetDirectories[0]
+        console.log @assetDirectories
+
+        @_registerCommands()
+        @_registerElements()
+        @loadAssetNames()
+
+        # add default renderers
+        @registerRenderer(ImageRenderer)
+        @registerRenderer(HtmlRenderer)
+        @registerRenderer(TextRenderer)
+
+        atom.workspace.observeActivePaneItem (editor) =>
+            if editor instanceof TextEditor
+                console.log 'observeActivePaneItem: ', editor
+                if editor not in @initializedEditors
+                    @_initEditor editor
+            return @
+
+    # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
+    _initEditor: (editor) ->
+        # TODO: how to associate editors to asset paths?
+        # editor.getPath()
+        @initializedEditors.push editor
+        return @
 
     _registerCommands: () ->
         @subscriptions.add atom.commands.add 'atom-workspace', {
@@ -173,3 +205,20 @@ module.exports = CodeAnnotations =
         gutterIcon = document.createElement("code-annotation-gutter-icon")
         # item.className = ""
         return gutterIcon
+
+    _createCodeAnnotationWithName: (name) ->
+        # editor = atom.workspace.getActiveTextEditor()
+        # cursorPos = editor.getCursorBufferPosition()
+        # console.log "here we are"
+        # # make the user choose an asset
+        # dialog = (require "remote").require "dialog"
+        # paths = dialog.showOpenDialog({properties: ['openFile']})
+        paths = Utils.chooseFile("Choose an asset.")
+        if not paths?
+            atom.notifications.addError("No asset chosen.")
+            return @
+        # if not paths.length > 1
+        #     atom.notifications.addError("Can only choose 1 file for a code annotation.")
+        #     return @
+        # TODO
+        # editor.insertText()

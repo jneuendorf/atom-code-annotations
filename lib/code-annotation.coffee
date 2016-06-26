@@ -1,20 +1,21 @@
 {Directory} = require 'atom'
 Utils = require './utils'
-
+# {Emitter, Disposable, CompositeDisposable} = require 'event-kit'
 
 module.exports = class CodeAnnotation
 
     # CONSTRUCTOR
     constructor: (codeAnnotations, marker, decoration, icon, assetData) ->
-        @codeAnnotations = codeAnnotations
-        @marker = marker
-        @decoraion = decoration
-        @icon = icon
-        @assetData = assetData
-        @createdAt = Date.now()
-        @renderer = null
-        @element = null
         @asset = null
+        @assetData = assetData
+        @codeAnnotations = codeAnnotations
+        @createdAt = Date.now()
+        @decoraion = decoration
+        @element = null
+        @icon = icon
+        @marker = marker
+        # @name =
+        @renderer = null
         @init()
 
     init: () ->
@@ -24,12 +25,6 @@ module.exports = class CodeAnnotation
     # PRIVATE
     _bindEventHandlers: () ->
         @icon.addEventListener "click", (event) =>
-            console.log "clicked on the pin!!!"
-            # 1. find according asset (to display)
-            # 2. get asset file type
-            # 3. get according renderer
-            # 4. use renderer to create dom element
-            # icon.appendChild renderer.render()
             @codeAnnotations.setCurrentCodeAnnotation(@)
             return @show()
         return @
@@ -52,6 +47,18 @@ module.exports = class CodeAnnotation
                 @renderer = new rendererClass(@asset)
         if not @renderer?
             throw new Error("Could not find a renderer for asset '#{@assetData.name}'.")
+        return @
+
+    _updateElement: () ->
+        # Utils.removeChildNodes(@element)
+        # @renderer.setAsset(@asset)
+        # @element.appendChild @renderer.render()
+        @element = null
+        @show()
+        return @
+
+    _updateAssetNameInCode: () ->
+        range = @marker.getBufferRange()
         return @
 
     # PUBLIC
@@ -79,13 +86,28 @@ module.exports = class CodeAnnotation
         console.log "editing code annotation...."
         if not @renderer
             throw new Error("Cannot edit a code annotation without a renderer. If you see this message please report a bug.")
-        # get asset associated with the pin that was just clicked
-        # get renderer for asset
-        # according to renderer's isTextBased do:
+
         if @renderer.isTextBased()
             # load asset contents into new tab
             atom.workspace.open(@asset.getPath())
         else
-            # show 'choose file' dialog
+            paths = Utils.chooseFile()
+            if not paths?
+                atom.notifications.addInfo("No new asset chosen.")
+                return @
+            sourcePath = paths[0]
+            if not Utils.fileHasType(sourcePath, @renderer.getFileExtension())
+                atom.notifications.addError("Chosen asset '#{sourcePath}' is not supported by #{@renderer.constructor.name}.")
+                return @
+            console.log "updating asset to #{sourcePath}..."
+            destPath = @asset.getPath()
+            sourceParts = sourcePath.split(".")
+            destParts = destinationPath.split(".")
+            destParts[destParts.length - 1] = sourceParts[sourceParts.length - 1]
+            sourcePath = sourceParts.join(".")
+            destPath = destParts.join(".")
+            Utils.copyFile(sourcePath, destPath)
+            @_updateElement()
+            @_updateAssetNameInCode()
         # save changes
         return @

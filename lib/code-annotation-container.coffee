@@ -1,17 +1,17 @@
 Utils = require './utils'
 
 
-document.registerElement("code-annotations-container", {
+document.registerElement("code-annotation-container", {
     prototype: Object.create(HTMLDivElement.prototype)
     extends: "div"
 })
 
-module.exports = class CodeAnnotationsContainer
+module.exports = class CodeAnnotationContainer
 
     # CONSTRUCTOR
     constructor: (codeAnnotations, visible = false) ->
         @codeAnnotations = codeAnnotations
-        @element = document.createElement("code-annotations-container")
+        @element = document.createElement("code-annotation-container")
         if not visible
             @hide()
         @closeBtn = Utils.createElement("div", "close code-annotation-button")
