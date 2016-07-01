@@ -5,10 +5,10 @@ Utils = require './utils'
 module.exports = class CodeAnnotation
 
     # CONSTRUCTOR
-    constructor: (codeAnnotations, marker, decoration, icon, assetData) ->
+    constructor: (codeAnnotationManager, marker, decoration, icon, assetData) ->
         @asset = null
         @assetData = assetData
-        @codeAnnotations = codeAnnotations
+        @codeAnnotationManager = codeAnnotationManager
         @createdAt = Date.now()
         @decoraion = decoration
         @element = null
@@ -25,7 +25,7 @@ module.exports = class CodeAnnotation
     # PRIVATE
     _bindEventHandlers: () ->
         @icon.addEventListener "click", (event) =>
-            @codeAnnotations.setCurrentCodeAnnotation(@)
+            @codeAnnotationManager.setCurrentCodeAnnotation(@)
             return @show()
         return @
 
@@ -33,7 +33,7 @@ module.exports = class CodeAnnotation
         return document.createElement("code-annotation")
 
     _setAsset: () ->
-        assets = @codeAnnotations.assetDirectory.getEntriesSync()
+        assets = @codeAnnotationManager.assetDirectory.getEntriesSync()
         for asset in assets when asset.getBaseName() is @assetData.name
             @asset = asset
         if not @asset?
@@ -42,7 +42,7 @@ module.exports = class CodeAnnotation
         return @
 
     _setRenderer: () ->
-        for rendererClass in @codeAnnotations.renderers
+        for rendererClass in @codeAnnotationManager.renderers
             if Utils.fileHasType(@assetData.name, rendererClass.fileExtension)
                 @renderer = new rendererClass(@asset)
         if not @renderer?
@@ -72,11 +72,11 @@ module.exports = class CodeAnnotation
             @_setRenderer()
             @element = @_createWrapper()
             @element.appendChild @renderer.render()
-        @codeAnnotations.showContainer(@element)
+        @codeAnnotationManager.showContainer(atom.workspace.getActiveTextEditor(), @element)
         return @
 
     hide: () ->
-        @codeAnnotations.hideContainer()
+        @codeAnnotationManager.hideContainer()
         return @
 
     getRenderer: () ->

@@ -1,14 +1,18 @@
 {CompositeDisposable, Directory, Range, TextEditor} = require "atom"
 CSON = require "season"
+libpath = require "path"
 # $ = jQuery = require "jquery"
 # {$, jQuery, TextEditorView, View} = require "atom-space-pen-views"
+
+CodeAnnotations = require "./constants"
+config = require "./settings"
 Utils = require "./utils"
+
 CodeAnnotation = require "./code-annotation"
 CodeAnnotationContainer = require "./code-annotation-container"
 {AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
 Dialog = require "./dialog.coffee"
 CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
-CodeAnnotations = require "./constants"
 
 
 
@@ -17,6 +21,7 @@ CodeAnnotations = require "./constants"
 Has a CodeAnnotationContainer which contains the output of an asset renderer.
 ###
 module.exports = CodeAnnotationManager =
+    config: config
 
     subscriptions: null
     renderers: []
@@ -35,20 +40,19 @@ module.exports = CodeAnnotationManager =
         # this.project.resolvePath(uri) ?
         @assetDirectories = []
         @assetDirectory = null
-        @initializedEditors = []
+        @initializedEditors = {}
 
         @_init()
 
-        editor = atom.workspace.getActiveTextEditor()
-        editorView = atom.views.getView(editor)
-        @gutter = editor.addGutter({
-            name: "code-annotations"
-            priority: 100
-            visible: true
-        })
-
-        @container = new CodeAnnotationContainer(@)
-        editorView.shadowRoot.appendChild @container.getElement()
+        # editor = atom.workspace.getActiveTextEditor()
+        # editorView = atom.views.getView(editor)
+        # @gutter = editor.addGutter({
+        #     name: "code-annotations"
+        #     priority: 100
+        #     visible: true
+        # })
+        # @container = new CodeAnnotationContainer(@)
+        # editorView.shadowRoot.appendChild @container.getElement()
 
     deactivate: () ->
         @subscriptions.dispose()
@@ -82,7 +86,11 @@ module.exports = CodeAnnotationManager =
     addCodeAnnotation: () ->
         dialog = new CodeAnnotationNameDialog()
         dialog.attach().onSubmit (name) =>
-            @_createCodeAnnotationWithName(name)
+            editor = atom.workspace.getActiveTextEditor()
+            assetNamesForProject = @assetNames[@_getAssetDirectoryForEditor(editor).getPath()]
+            if assetNamesForProject?[name]? and not confirm("Asset with name '#{name}' already exists. Replace it?")
+                return @
+            @_createCodeAnnotation(editor, name, assetNamesForProject)
             return @
         console.log dialog
         return @
@@ -90,48 +98,54 @@ module.exports = CodeAnnotationManager =
     # CODE-ANNOTATION: image-testasset.png
     # CODE-ANNOTATION: html-testasset.html
     # CODE-ANNOTATION: text-testasset.txt
-    toggle: () ->
-        # TODO: move marker/decoration code to activate method and toggle gutter visibility only
-        editor = atom.workspace.getActiveTextEditor()
-        text = editor.getText()
-        lines = text.split(/\n/g)
-        whitespaceRegexp = /^\s*$/
-        ranges = []
-        assetData = []
-        for line, rowIdx in lines
-            # colIdx = line.indexOf(KEYWORD)
-            colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
-            if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
-                ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
-                assetData.push {
-                    # name: line.slice(colIdx + KEYWORD.length).trim()
-                    name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
-                }
+    # toggle: () ->
+    #     # TODO: move marker/decoration code to activate method and toggle gutter visibility only
+    #     editor = atom.workspace.getActiveTextEditor()
+    #     text = editor.getText()
+    #     lines = text.split(/\n/g)
+    #     whitespaceRegexp = /^\s*$/
+    #     ranges = []
+    #     assetData = []
+    #     for line, rowIdx in lines
+    #         # colIdx = line.indexOf(KEYWORD)
+    #         colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
+    #         if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
+    #             ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
+    #             assetData.push {
+    #                 # name: line.slice(colIdx + KEYWORD.length).trim()
+    #                 name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
+    #             }
+    #
+    #     markers = []
+    #     decorations = []
+    #     for range, i in ranges
+    #         marker = editor.markBufferRange(range)
+    #         markers.push marker
+    #         icon = @_createGutterIcon()
+    #         decoration = @gutter.decorateMarker(marker, {
+    #             item: icon
+    #         })
+    #         decorations.push decoration
+    #
+    #         codeAnnotation = new CodeAnnotation(@, marker, decoration, icon, assetData[i])
+    #         @codeAnnotations.push codeAnnotation
+    #     return true
 
-        markers = []
-        decorations = []
-        for range, i in ranges
-            marker = editor.markBufferRange(range)
-            markers.push marker
-            icon = @_createGutterIcon()
-            decoration = @gutter.decorateMarker(marker, {
-                item: icon
-            })
-            decorations.push decoration
+    showContainer: (editor, renderedContent) ->
+        {container} = @initializedEditors[editor.getPath()]
+        if container?
+            container.empty()
+                .append(renderedContent)
+                .show()
+            return @
+        throw new Error("No container found")
 
-            codeAnnotation = new CodeAnnotation(@, marker, decoration, icon, assetData[i])
-            @codeAnnotations.push codeAnnotation
-        return true
-
-    showContainer: (renderedContent) ->
-        @container.empty()
-            .append(renderedContent)
-            .show()
-        return @
-
-    hideContainer: () ->
-        @container.hide()
-        return @
+    hideContainer: (editor) ->
+        {container} = @initializedEditors[editor.getPath()]
+        if container?
+            container.hide()
+            return @
+        throw new Error("No container found")
 
     setCurrentCodeAnnotation: (codeAnnotation) ->
         @currentCodeAnnotation = codeAnnotation
@@ -167,22 +181,69 @@ module.exports = CodeAnnotationManager =
 
         atom.workspace.observeActivePaneItem (editor) =>
             if editor instanceof TextEditor
-                console.log 'observeActivePaneItem: ', editor
-                if editor not in @initializedEditors
+                # console.log 'observeActivePaneItem: ', editor
+                if not @initializedEditors[editor.getPath()]?
                     @_initEditor editor
             return @
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
     _initEditor: (editor) ->
-        # TODO: how to associate editors to asset paths?
-        # editor.getPath()
-        @initializedEditors.push editor
+        console.log "initializing editor w/ path: #{editor.getPath()}"
+        editorView = atom.views.getView(editor)
+        gutter = editor.addGutter({
+            name: "code-annotations"
+            priority: 100
+            visible: true
+        })
+
+        container = new CodeAnnotationContainer(@)
+        editorView.shadowRoot.appendChild container.getElement()
+
+        text = editor.getText()
+        lines = text.split(/\n/g)
+        whitespaceRegexp = /^\s*$/
+        ranges = []
+        assetData = []
+        for line, rowIdx in lines
+            colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
+            if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
+                ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
+                assetData.push {
+                    name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
+                }
+
+        codeAnnotations = []
+        for range, i in ranges
+            marker = editor.markBufferRange(range)
+            icon = @_createGutterIcon()
+            decoration = gutter.decorateMarker(marker, {
+                item: icon
+            })
+            codeAnnotation = new CodeAnnotation(@, marker, decoration, icon, assetData[i])
+            codeAnnotations.push codeAnnotation
+
+        @initializedEditors[editor.getPath()] =
+            instance: editor
+            container: container
+            gutter: gutter
+            codeAnnotations: codeAnnotations
+            assetDirectory: @_getAssetDirectoryForEditor(editor)
         return @
+
+    _getAssetDirectoryForEditor: (editor) ->
+        editorPath = editor.getPath()
+        # return from "cache"
+        if @initializedEditors[editorPath]?.assetDirectory?
+            return @initializedEditors[editorPath].assetDirectory
+        # actually find the dir
+        for assetDirectory in @assetDirectories
+            projectRoot = assetDirectory.getParent()
+            if projectRoot.contains(editorPath)
+                return assetDirectory
+        throw new Error("Cannot add a code annotation to files outside of the current projects.")
 
     _registerCommands: () ->
         @subscriptions.add atom.commands.add 'atom-workspace', {
-            'code-annotations:toggle': () =>
-                return @toggle()
             'code-annotations:add-code-annotation': () =>
                 return @addCodeAnnotation()
             'code-annotations:hide-container': () =>
@@ -206,17 +267,28 @@ module.exports = CodeAnnotationManager =
         # item.className = ""
         return gutterIcon
 
-    _createCodeAnnotationWithName: (name) ->
+    ###
+    # @param Object assetNames Equals this.assetNames[current editor's asset path].
+    ###
+    _createCodeAnnotation: (editor, name, assetNames) ->
         # editor = atom.workspace.getActiveTextEditor()
         # cursorPos = editor.getCursorBufferPosition()
         # console.log "here we are"
         # # make the user choose an asset
         # dialog = (require "remote").require "dialog"
         # paths = dialog.showOpenDialog({properties: ['openFile']})
-        paths = Utils.chooseFile("Choose an asset.")
+        paths = Utils.chooseFile("Now, choose an asset.")
         if not paths?
             atom.notifications.addError("No asset chosen.")
             return @
+        assetPath = paths[0]
+        console.log name, assetPath
+        # add asset name
+        # assetsPath = @_getAssetDirectoryForEditor(editor).getPath()
+        # assetNames[name] = libpath.relative(assetsPath, assetPath)
+        assetNames[name] = libpath.basename(assetPath)
+        CSON.writeFileSync(@_getAssetDirectoryForEditor(editor).getPath() + "/.names.cson", assetNames)
+
         # if not paths.length > 1
         #     atom.notifications.addError("Can only choose 1 file for a code annotation.")
         #     return @

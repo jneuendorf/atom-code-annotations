@@ -9,8 +9,8 @@ document.registerElement("code-annotation-container", {
 module.exports = class CodeAnnotationContainer
 
     # CONSTRUCTOR
-    constructor: (codeAnnotations, visible = false) ->
-        @codeAnnotations = codeAnnotations
+    constructor: (codeAnnotationManager, visible = false) ->
+        @codeAnnotationManager = codeAnnotationManager
         @element = document.createElement("code-annotation-container")
         if not visible
             @hide()
@@ -25,7 +25,7 @@ module.exports = class CodeAnnotationContainer
         @closeBtn.addEventListener "click", (event) =>
             return @hide()
         @editBtn.addEventListener "click", (event) =>
-            return @codeAnnotations.getCurrentCodeAnnotation().edit()
+            return @codeAnnotationManager.getCurrentCodeAnnotation().edit()
 
     getElement: () ->
         return @element

@@ -12,5 +12,7 @@ module.exports = class CodeAnnotationNameDialog extends Dialog
         })
 
     _submit: (name) ->
-        @close().onSubmitCallback(name)
-        return @
+        if name
+            @close().onSubmitCallback(name)
+            return @
+        atom.notifications.addWarning("Asset name can't be empty.")
