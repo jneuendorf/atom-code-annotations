@@ -1,4 +1,5 @@
 module.exports =
-    # TODO: make KEYWORD language independent
-    CODE_KEYWORD: "# CODE-ANNOTATION:"
+    CODE_KEYWORD: " CODE-ANNOTATION: "
     ASSET_DIR_NAME: ".code-annotations"
+    WHITESPACE_ONLY_REGEX: /^\s*$/
+    WHITESPACE_REGEX_STR: "\\s*"

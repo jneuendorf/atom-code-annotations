@@ -28,6 +28,7 @@ module.exports = CodeAnnotationManager =
     codeAnnotations: []
     renderer: null
     currentCodeAnnotation: null
+    commentCheckers: {}
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -199,18 +200,26 @@ module.exports = CodeAnnotationManager =
         container = new CodeAnnotationContainer(@)
         editorView.shadowRoot.appendChild container.getElement()
 
+        grammar = editor.getGrammar()
         text = editor.getText()
         lines = text.split(/\n/g)
-        whitespaceRegexp = /^\s*$/
+        # whitespaceRegexp = /^\s*$/
         ranges = []
         assetData = []
         for line, rowIdx in lines
-            colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
-            if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
-                ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
+            # reappend line breaks because atom's end patterns expect them
+            if @_isAnnotated(grammar, "#{line}\n")
+                ranges.push new Range([rowIdx, 0], [rowIdx, line.length])
                 assetData.push {
-                    name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
+                    name: line.slice(line.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
                 }
+            # colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
+            # # if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
+            # if (colIdx > 0 and CodeAnnotations.WHITESPACE_ONLY_REGEX.test(line.slice(0, colIdx)) is true) or colIdx is 0
+            #     ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
+            #     assetData.push {
+            #         name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
+            #     }
 
         codeAnnotations = []
         for range, i in ranges
@@ -228,6 +237,7 @@ module.exports = CodeAnnotationManager =
             gutter: gutter
             codeAnnotations: codeAnnotations
             assetDirectory: @_getAssetDirectoryForEditor(editor)
+            # grammar: editor.getGrammar()
         return @
 
     _getAssetDirectoryForEditor: (editor) ->
@@ -271,21 +281,16 @@ module.exports = CodeAnnotationManager =
     # @param Object assetNames Equals this.assetNames[current editor's asset path].
     ###
     _createCodeAnnotation: (editor, name, assetNames) ->
-        # editor = atom.workspace.getActiveTextEditor()
-        # cursorPos = editor.getCursorBufferPosition()
-        # console.log "here we are"
-        # # make the user choose an asset
-        # dialog = (require "remote").require "dialog"
-        # paths = dialog.showOpenDialog({properties: ['openFile']})
+        # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st)
         paths = Utils.chooseFile("Now, choose an asset.")
         if not paths?
             atom.notifications.addError("No asset chosen.")
             return @
         assetPath = paths[0]
         console.log name, assetPath
-        # add asset name
         # assetsPath = @_getAssetDirectoryForEditor(editor).getPath()
         # assetNames[name] = libpath.relative(assetsPath, assetPath)
+        # update asset name "database"
         assetNames[name] = libpath.basename(assetPath)
         CSON.writeFileSync(@_getAssetDirectoryForEditor(editor).getPath() + "/.names.cson", assetNames)
 
@@ -293,4 +298,25 @@ module.exports = CodeAnnotationManager =
         #     atom.notifications.addError("Can only choose 1 file for a code annotation.")
         #     return @
         # TODO
+        # editor = atom.workspace.getActiveTextEditor()
+        # cursorPos = editor.getCursorBufferPosition()
         # editor.insertText()
+
+    _isAnnotated: (grammar, line) ->
+        if @commentCheckers[grammar.name]?
+            return @commentCheckers[grammar.name](line)
+
+        patternData = null
+        for pattern in grammar.rawPatterns
+            if pattern.name.indexOf("comment") >= 0 and pattern.name.indexOf("line") >= 0
+                @commentCheckers[grammar.name] = do (pattern) ->
+                    regex = new RegExp(
+                        CodeAnnotations.WHITESPACE_REGEX_STR +
+                        pattern.begin +
+                        CodeAnnotations.CODE_KEYWORD +
+                        ".*?" +
+                        pattern.end
+                    )
+                    return (line) ->
+                        return regex.test(line)
+                return @commentCheckers[grammar.name](line)
