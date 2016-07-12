@@ -1,21 +1,31 @@
-{
-    "context-menu": {
-        "atom-text-editor": [{
+"context-menu":
+    "atom-text-editor": [
+        {
             "label": "Add code annotation"
-            "command": "code-annotations:add-code-annotation"
-        }]
-    },
-    "menu": [{
-        "label": "Packages"
-        "submenu": [{
-            "label": "Code Annotations"
-            "submenu": [{
-                "label": "Toggle"
-                "command": "code-annotations:toggle"
-            }, {
-                "label": "Add code annotation"
-                "command": "code-annotations:add-code-annotation"
-            }]
-        }]
-    }]
-}
+            "command": "code-annotations:add-code-annotation-at-line"
+        }
+        {
+            "label": "Delete code annotation"
+            "command": "code-annotations:delete-code-annotation-at-line"
+        }
+    ]
+# "menu": [{
+#     "label": "Packages"
+#     "submenu": [{
+#         "label": "Code Annotations"
+#         "submenu": [
+#             {
+#                 "label": "Toggle"
+#                 "command": "code-annotations:toggle"
+#             }
+#             {
+#                 "label": "Add code annotation"
+#                 "command": "code-annotations:add-code-annotation"
+#             }
+#             {
+#                 "label": "Delete code annotation"
+#                 "command": "code-annotations:delete-code-annotation"
+#             }
+#         ]
+#     }]
+# }]

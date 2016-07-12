@@ -29,31 +29,20 @@ module.exports = CodeAnnotationManager =
     renderer: null
     currentCodeAnnotation: null
     commentCheckers: {}
+    annotationRegexCache: {}
 
     #######################################################################################
     # PUBLIC (ATOM API)
 
     activate: (state) ->
         console.log "ACTIVATING CODE-ANNOTATIONS"
-        # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
         @subscriptions = new CompositeDisposable()
         # TODO: enable more than 1 directory
         # this.project.resolvePath(uri) ?
         @assetDirectories = []
         @assetDirectory = null
         @initializedEditors = {}
-
         @_init()
-
-        # editor = atom.workspace.getActiveTextEditor()
-        # editorView = atom.views.getView(editor)
-        # @gutter = editor.addGutter({
-        #     name: "code-annotations"
-        #     priority: 100
-        #     visible: true
-        # })
-        # @container = new CodeAnnotationContainer(@)
-        # editorView.shadowRoot.appendChild @container.getElement()
 
     deactivate: () ->
         @subscriptions.dispose()
@@ -84,53 +73,26 @@ module.exports = CodeAnnotationManager =
         @renderers.push rendererClass
         return @
 
-    addCodeAnnotation: () ->
+    addCodeAnnotationAtLine: (lineNumber) ->
         dialog = new CodeAnnotationNameDialog()
         dialog.attach().onSubmit (name) =>
             editor = atom.workspace.getActiveTextEditor()
             assetNamesForProject = @assetNames[@_getAssetDirectoryForEditor(editor).getPath()]
             if assetNamesForProject?[name]? and not confirm("Asset with name '#{name}' already exists. Replace it?")
                 return @
-            @_createCodeAnnotation(editor, name, assetNamesForProject)
+            @_createCodeAnnotation(editor, lineNumber, name, assetNamesForProject)
             return @
         console.log dialog
+        return @
+
+    addCodeAnnotation: () ->
+
+    deleteCodeAnnotation: () ->
         return @
 
     # CODE-ANNOTATION: image-testasset.png
     # CODE-ANNOTATION: html-testasset.html
     # CODE-ANNOTATION: text-testasset.txt
-    # toggle: () ->
-    #     # TODO: move marker/decoration code to activate method and toggle gutter visibility only
-    #     editor = atom.workspace.getActiveTextEditor()
-    #     text = editor.getText()
-    #     lines = text.split(/\n/g)
-    #     whitespaceRegexp = /^\s*$/
-    #     ranges = []
-    #     assetData = []
-    #     for line, rowIdx in lines
-    #         # colIdx = line.indexOf(KEYWORD)
-    #         colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
-    #         if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
-    #             ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
-    #             assetData.push {
-    #                 # name: line.slice(colIdx + KEYWORD.length).trim()
-    #                 name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
-    #             }
-    #
-    #     markers = []
-    #     decorations = []
-    #     for range, i in ranges
-    #         marker = editor.markBufferRange(range)
-    #         markers.push marker
-    #         icon = @_createGutterIcon()
-    #         decoration = @gutter.decorateMarker(marker, {
-    #             item: icon
-    #         })
-    #         decorations.push decoration
-    #
-    #         codeAnnotation = new CodeAnnotation(@, marker, decoration, icon, assetData[i])
-    #         @codeAnnotations.push codeAnnotation
-    #     return true
 
     showContainer: (editor, renderedContent) ->
         {container} = @initializedEditors[editor.getPath()]
@@ -155,7 +117,7 @@ module.exports = CodeAnnotationManager =
     getCurrentCodeAnnotation: () ->
         return @currentCodeAnnotation
 
-    # get current renderer (contained in the CodeAnnotationContainer)
+    # get current renderer (associated with the CodeAnnotationContainer)
     getRenderer: () ->
         return @currentCodeAnnotation.getRenderer()
 
@@ -189,8 +151,16 @@ module.exports = CodeAnnotationManager =
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
     _initEditor: (editor) ->
+        grammar = editor.getGrammar()
+        try
+            regex = @_getAnnotationRegex(grammar)
+            console.log regex
+        # comments not supported => do not modify editor
+        # TODO: keep list of unsupported editors so this method does not get called when switching to previously done but unsupported editors
+        catch error
+            return @
+
         console.log "initializing editor w/ path: #{editor.getPath()}"
-        editorView = atom.views.getView(editor)
         gutter = editor.addGutter({
             name: "code-annotations"
             priority: 100
@@ -198,28 +168,22 @@ module.exports = CodeAnnotationManager =
         })
 
         container = new CodeAnnotationContainer(@)
+        editorView = atom.views.getView(editor)
         editorView.shadowRoot.appendChild container.getElement()
 
-        grammar = editor.getGrammar()
         text = editor.getText()
         lines = text.split(/\n/g)
-        # whitespaceRegexp = /^\s*$/
         ranges = []
         assetData = []
-        for line, rowIdx in lines
-            # reappend line breaks because atom's end patterns expect them
-            if @_isAnnotated(grammar, "#{line}\n")
-                ranges.push new Range([rowIdx, 0], [rowIdx, line.length])
-                assetData.push {
-                    name: line.slice(line.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
-                }
-            # colIdx = line.indexOf(CodeAnnotations.CODE_KEYWORD)
-            # # if (colIdx > 0 and whitespaceRegexp.test(line.slice(0, colIdx)) is true) or colIdx is 0
-            # if (colIdx > 0 and CodeAnnotations.WHITESPACE_ONLY_REGEX.test(line.slice(0, colIdx)) is true) or colIdx is 0
-            #     ranges.push new Range([rowIdx, colIdx], [rowIdx, line.length])
-            #     assetData.push {
-            #         name: line.slice(colIdx + CodeAnnotations.CODE_KEYWORD.length).trim()
-            #     }
+
+        editor.scan regex, ({match, matchText, range}) ->
+            # matchText = matchText.trim()
+            console.log match, matchText, range.toString()
+            assetData.push {
+                name: matchText.slice(matchText.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
+            }
+            ranges.push range
+            return true
 
         codeAnnotations = []
         for range, i in ranges
@@ -231,6 +195,7 @@ module.exports = CodeAnnotationManager =
             codeAnnotation = new CodeAnnotation(@, marker, decoration, icon, assetData[i])
             codeAnnotations.push codeAnnotation
 
+        # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
         @initializedEditors[editor.getPath()] =
             instance: editor
             container: container
@@ -254,8 +219,18 @@ module.exports = CodeAnnotationManager =
 
     _registerCommands: () ->
         @subscriptions.add atom.commands.add 'atom-workspace', {
-            'code-annotations:add-code-annotation': () =>
-                return @addCodeAnnotation()
+            # 'code-annotations:add-code-annotation': () =>
+            #     return @addCodeAnnotation()
+            # 'code-annotations:delete-code-annotation': () =>
+            #     return @deleteCodeAnnotation()
+            'code-annotations:add-code-annotation-at-line': () =>
+                # TODO: retrieve current line and pass it to addCodeAnnotation()
+                line = null
+                return @addCodeAnnotation(line)
+            'code-annotations:delete-code-annotation-at-line': () =>
+                # TODO: retrieve current line and pass it to deleteCodeAnnotation()
+                line = null
+                return @deleteCodeAnnotation(line)
             'code-annotations:hide-container': () =>
                 return @hideContainer()
         }
@@ -274,13 +249,12 @@ module.exports = CodeAnnotationManager =
 
     _createGutterIcon: () ->
         gutterIcon = document.createElement("code-annotation-gutter-icon")
-        # item.className = ""
         return gutterIcon
 
     ###
     # @param Object assetNames Equals this.assetNames[current editor's asset path].
     ###
-    _createCodeAnnotation: (editor, name, assetNames) ->
+    _createCodeAnnotation: (editor, lineNumber, name, assetNames) ->
         # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st)
         paths = Utils.chooseFile("Now, choose an asset.")
         if not paths?
@@ -302,21 +276,24 @@ module.exports = CodeAnnotationManager =
         # cursorPos = editor.getCursorBufferPosition()
         # editor.insertText()
 
-    _isAnnotated: (grammar, line) ->
-        if @commentCheckers[grammar.name]?
-            return @commentCheckers[grammar.name](line)
+    _getAnnotationRegex: (grammar) ->
+        if @annotationRegexCache[grammar.name]?
+            return @annotationRegexCache[grammar.name]
 
         patternData = null
         for pattern in grammar.rawPatterns
-            if pattern.name.indexOf("comment") >= 0 and pattern.name.indexOf("line") >= 0
-                @commentCheckers[grammar.name] = do (pattern) ->
-                    regex = new RegExp(
-                        CodeAnnotations.WHITESPACE_REGEX_STR +
+            {name, begin, end} = pattern
+            if name? and begin? and end?
+                if pattern.name.indexOf("comment") >= 0 and pattern.name.indexOf("line") >= 0
+                    # TODO: maybe this last line is annotated. in that case a trailing newline (e.g. coffeescript's pattern.end) should not be part of the regex (or optional) so the last line will be matched
+                    @annotationRegexCache[grammar.name] =  new RegExp(
+                        CodeAnnotations.SINGLE_LINE_WHITESPACE_REGEX_STR +
                         pattern.begin +
                         CodeAnnotations.CODE_KEYWORD +
                         ".*?" +
-                        pattern.end
+                        pattern.end,
+                        "g"
                     )
-                    return (line) ->
-                        return regex.test(line)
-                return @commentCheckers[grammar.name](line)
+                    return @annotationRegexCache[grammar.name]
+        # ...some grammars don't have comments (e.g. JSON)
+        throw new Error("Could not find a regular expression for grammar '#{grammar.name}'.")
