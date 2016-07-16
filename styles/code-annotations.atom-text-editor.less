@@ -45,6 +45,13 @@ code-annotation-container {
                 font-size: @code-annotation-button-size - 1;
             }
         }
+        &.delete {
+            .octicon(trashcan);
+            right: 60px;
+            &::before {
+                font-size: @code-annotation-button-size - 1;
+            }
+        }
     }
 
     .content code-annotation {

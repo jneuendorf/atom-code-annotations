@@ -5,9 +5,10 @@ libpath = require "path"
 # {$, jQuery, TextEditorView, View} = require "atom-space-pen-views"
 
 CodeAnnotations = require "./constants"
-config = require "./settings"
+settings = require "./settings"
 Utils = require "./utils"
 
+AssetManager = require "./asset-manager"
 CodeAnnotation = require "./code-annotation"
 CodeAnnotationContainer = require "./code-annotation-container"
 {AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
@@ -21,21 +22,21 @@ CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
 Has a CodeAnnotationContainer which contains the output of an asset renderer.
 ###
 module.exports = CodeAnnotationManager =
-    config: config
+    config: settings
 
+    # instance properties
     subscriptions: null
     renderers: []
     codeAnnotations: []
-    renderer: null
     currentCodeAnnotation: null
-    commentCheckers: {}
     annotationRegexCache: {}
+    assetNames: {}
+    assetManagers: {}
 
     #######################################################################################
     # PUBLIC (ATOM API)
 
     activate: (state) ->
-        console.log "ACTIVATING CODE-ANNOTATIONS"
         @subscriptions = new CompositeDisposable()
         # TODO: enable more than 1 directory
         # this.project.resolvePath(uri) ?
@@ -55,12 +56,14 @@ module.exports = CodeAnnotationManager =
     # PUBLIC
 
     loadAssetNames: () ->
-        assetNames = {}
+        # assetNames = {}
         for assetDirectory in @assetDirectories
             path = assetDirectory.getPath()
-            assetNames[path] = CSON.readFileSync(path + "/.names.cson")
-        @assetNames = assetNames
-        console.log @assetNames
+            # assetNames[path] = CSON.readFileSync(path + "/.names.cson")
+            @assetManagers[path] = new AssetManager(path)
+        # @assetNames = assetNames
+        # console.log @assetNames
+        console.log @assetManagers
         return @
 
 
@@ -73,22 +76,34 @@ module.exports = CodeAnnotationManager =
         @renderers.push rendererClass
         return @
 
-    addCodeAnnotationAtLine: (lineNumber) ->
+    addCodeAnnotationAtLine: (point) ->
         dialog = new CodeAnnotationNameDialog()
         dialog.attach().onSubmit (name) =>
             editor = atom.workspace.getActiveTextEditor()
-            assetNamesForProject = @assetNames[@_getAssetDirectoryForEditor(editor).getPath()]
-            if assetNamesForProject?[name]? and not confirm("Asset with name '#{name}' already exists. Replace it?")
+            assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
+            if assetManager.has(name) and not confirm("Asset with name '#{name}' already exists. Replace it?")
                 return @
-            @_createCodeAnnotation(editor, lineNumber, name, assetNamesForProject)
+            @_createCodeAnnotation(editor, point, name, assetManager)
+            # assetNamesForProject = @assetNames[@_getAssetDirectoryForEditor(editor).getPath()]
+            # if assetNamesForProject?[name]? and not confirm("Asset with name '#{name}' already exists. Replace it?")
+            #     return @
+            # @_createCodeAnnotation(editor, point, name, assetNamesForProject)
             return @
         console.log dialog
         return @
 
-    addCodeAnnotation: () ->
-
-    deleteCodeAnnotation: () ->
+    deleteCodeAnnotationAtLine: () ->
         return @
+
+    # addCodeAnnotation: () ->
+    #     line = null
+    #     @addCodeAnnotationAtLine(line)
+    #     return @
+    #
+    # deleteCodeAnnotation: () ->
+    #     line = null
+    #     @deleteCodeAnnotationAtLine(line)
+    #     return @
 
     # CODE-ANNOTATION: image-testasset.png
     # CODE-ANNOTATION: html-testasset.html
@@ -145,8 +160,12 @@ module.exports = CodeAnnotationManager =
         atom.workspace.observeActivePaneItem (editor) =>
             if editor instanceof TextEditor
                 # console.log 'observeActivePaneItem: ', editor
-                if not @initializedEditors[editor.getPath()]?
-                    @_initEditor editor
+                path = editor.getPath()
+                if not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor
+                    try
+                        @_initEditor editor
+                    catch error
+                        throw new Error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.")
             return @
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
@@ -180,6 +199,7 @@ module.exports = CodeAnnotationManager =
             # matchText = matchText.trim()
             console.log match, matchText, range.toString()
             assetData.push {
+                line: matchText
                 name: matchText.slice(matchText.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
             }
             ranges.push range
@@ -196,8 +216,9 @@ module.exports = CodeAnnotationManager =
             codeAnnotations.push codeAnnotation
 
         # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
+        # TODO: add editor:path‐changed hook to reinitialize
         @initializedEditors[editor.getPath()] =
-            instance: editor
+            editor: editor
             container: container
             gutter: gutter
             codeAnnotations: codeAnnotations
@@ -225,8 +246,7 @@ module.exports = CodeAnnotationManager =
             #     return @deleteCodeAnnotation()
             'code-annotations:add-code-annotation-at-line': () =>
                 # TODO: retrieve current line and pass it to addCodeAnnotation()
-                line = null
-                return @addCodeAnnotation(line)
+                return @addCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:delete-code-annotation-at-line': () =>
                 # TODO: retrieve current line and pass it to deleteCodeAnnotation()
                 line = null
@@ -252,9 +272,9 @@ module.exports = CodeAnnotationManager =
         return gutterIcon
 
     ###
-    # @param Object assetNames Equals this.assetNames[current editor's asset path].
+    # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
-    _createCodeAnnotation: (editor, lineNumber, name, assetNames) ->
+    _createCodeAnnotation: (editor, point, name, assetManager) ->
         # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st)
         paths = Utils.chooseFile("Now, choose an asset.")
         if not paths?
@@ -262,19 +282,56 @@ module.exports = CodeAnnotationManager =
             return @
         assetPath = paths[0]
         console.log name, assetPath
-        # assetsPath = @_getAssetDirectoryForEditor(editor).getPath()
-        # assetNames[name] = libpath.relative(assetsPath, assetPath)
-        # update asset name "database"
-        assetNames[name] = libpath.basename(assetPath)
-        CSON.writeFileSync(@_getAssetDirectoryForEditor(editor).getPath() + "/.names.cson", assetNames)
+
+        # update asset name "database" (this should not throw errors because the manager should never be null, name collisions were checked before and the manager should never have been initialized with a wrong path (so save should work))
+        assetManager
+            .set name, libpath.basename(assetPath)
+            .save()
 
         # if not paths.length > 1
         #     atom.notifications.addError("Can only choose 1 file for a code annotation.")
         #     return @
-        # TODO
-        # editor = atom.workspace.getActiveTextEditor()
-        # cursorPos = editor.getCursorBufferPosition()
-        # editor.insertText()
+        cursorPos = editor.getCursorBufferPosition()
+        console.log cursorPos
+        indentation = editor.indentationForBufferRow(point.row)
+        range = [[point.row, 0], [point.row, 0]]
+        line = "#{CodeAnnotations.CODE_KEYWORD.trim()} #{name}\n"
+        editor.setTextInBufferRange(range, line)
+        # make it a comment
+        editor.setSelectedBufferRange(range)
+        editor.toggleLineCommentsInSelection()
+        # editor.toggleLineCommentForBufferRow(point.row)
+        # make sure it's indented correctly
+        editor.setIndentationForBufferRow(point.row, indentation)
+        editor.setCursorBufferPosition([point.row, line.length - 1])
+
+    # ###
+    # # @param Object assetNames Equals this.assetNames[current editor's asset path].
+    # ###
+    # _createCodeAnnotation: (editor, lineNumber, name, assetNames) ->
+    #     # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st)
+    #     paths = Utils.chooseFile("Now, choose an asset.")
+    #     if not paths?
+    #         atom.notifications.addError("No asset chosen.")
+    #         return @
+    #     assetPath = paths[0]
+    #     console.log name, assetPath
+    #     # assetsPath = @_getAssetDirectoryForEditor(editor).getPath()
+    #     # assetNames[name] = libpath.relative(assetsPath, assetPath)
+    #
+    #     # update asset name "database"
+    #     assetNames[name] = libpath.basename(assetPath)
+    #     CSON.writeFileSync(@_getAssetDirectoryForEditor(editor).getPath() + "/.names.cson", assetNames)
+    #
+    #     # if not paths.length > 1
+    #     #     atom.notifications.addError("Can only choose 1 file for a code annotation.")
+    #     #     return @
+    #     # TODO
+    #     # editor = atom.workspace.getActiveTextEditor()
+    #     # cursorPos = editor.getCursorBufferPosition()
+    #     # editor.insertText()
+
+    _removeCodeAnnotation: () ->
 
     _getAnnotationRegex: (grammar) ->
         if @annotationRegexCache[grammar.name]?

@@ -1,20 +1,24 @@
+# TODO: pass atom required object to required files (by main) in order to save require overhead
 {Directory} = require 'atom'
 Utils = require './utils'
 # {Emitter, Disposable, CompositeDisposable} = require 'event-kit'
+
+CodeAnnotations = require "./constants"
+
+
 
 module.exports = class CodeAnnotation
 
     # CONSTRUCTOR
     constructor: (codeAnnotationManager, marker, decoration, icon, assetData) ->
         @asset = null
-        @assetData = assetData
+        {@line, @name} = assetData
         @codeAnnotationManager = codeAnnotationManager
         @createdAt = Date.now()
         @decoraion = decoration
         @element = null
         @icon = icon
         @marker = marker
-        # @name =
         @renderer = null
         @init()
 
@@ -34,7 +38,7 @@ module.exports = class CodeAnnotation
 
     _setAsset: () ->
         assets = @codeAnnotationManager.assetDirectory.getEntriesSync()
-        for asset in assets when asset.getBaseName() is @assetData.name
+        for asset in assets when asset.getBaseName() is @name
             @asset = asset
         if not @asset?
             throw new Error("No asset found...")
@@ -43,10 +47,10 @@ module.exports = class CodeAnnotation
 
     _setRenderer: () ->
         for rendererClass in @codeAnnotationManager.renderers
-            if Utils.fileHasType(@assetData.name, rendererClass.fileExtension)
+            if Utils.fileHasType(@name, rendererClass.fileExtension)
                 @renderer = new rendererClass(@asset)
         if not @renderer?
-            throw new Error("Could not find a renderer for asset '#{@assetData.name}'.")
+            throw new Error("Could not find a renderer for asset '#{@name}'.")
         return @
 
     _updateElement: () ->
@@ -110,4 +114,19 @@ module.exports = class CodeAnnotation
             @_updateElement()
             @_updateAssetNameInCode()
         # save changes
+        return @
+
+    delete: () ->
+        # confirm deletion
+        if not confirm "Sure?"
+            return @
+        # strip "CODE-ANNOTATION: " for comment so the name remains for comment semantics
+        atom.workspace.getActiveTextEditor().setTextInBufferRange(
+            @marker.getBufferRange()
+            @line.replace(CodeAnnotations.CODE_KEYWORD, " ")
+        )
+        # remove entry from names.cson
+        
+        # remove asset file from file system
+        # @codeAnnotationManager
         return @
