@@ -10,10 +10,14 @@ CodeAnnotations = require "./constants"
 module.exports = class CodeAnnotation
 
     # CONSTRUCTOR
-    constructor: (codeAnnotationManager, marker, decoration, icon, assetData) ->
+    # TODO: refactor this signature...
+    constructor: (codeAnnotationManager, editor, marker, decoration, icon, assetData, assetManager) ->
+        @codeAnnotationManager = codeAnnotationManager
+        @editor = editor
+
         @asset = null
         {@line, @name} = assetData
-        @codeAnnotationManager = codeAnnotationManager
+        @assetManager = assetManager
         @createdAt = Date.now()
         @decoraion = decoration
         @element = null
@@ -38,20 +42,20 @@ module.exports = class CodeAnnotation
 
     _setAsset: () ->
         assets = @codeAnnotationManager.assetDirectory.getEntriesSync()
-        for asset in assets when asset.getBaseName() is @name
+        # for asset in assets when asset.getBaseName() is @name
+        for asset in assets when asset.getBaseName() is @assetManager.get(@name)
             @asset = asset
         if not @asset?
-            throw new Error("No asset found...")
+            throw new Error("No asset found at '#{@codeAnnotationManager.assetDirectory}'.")
         console.log @asset
         return @
 
     _setRenderer: () ->
         for rendererClass in @codeAnnotationManager.renderers
-            if Utils.fileHasType(@name, rendererClass.fileExtension)
+            if Utils.fileHasType(@asset.getBaseName(), rendererClass.fileExtension)
                 @renderer = new rendererClass(@asset)
-        if not @renderer?
-            throw new Error("Could not find a renderer for asset '#{@name}'.")
-        return @
+                return @
+        throw new Error("Could not find a renderer for asset '#{@name}'.")
 
     _updateElement: () ->
         # Utils.removeChildNodes(@element)
@@ -126,7 +130,7 @@ module.exports = class CodeAnnotation
             @line.replace(CodeAnnotations.CODE_KEYWORD, " ")
         )
         # remove entry from names.cson
-        
+
         # remove asset file from file system
         # @codeAnnotationManager
         return @

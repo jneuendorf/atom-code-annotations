@@ -1,6 +1,7 @@
 {CompositeDisposable, Directory, Range, TextEditor} = require "atom"
 CSON = require "season"
 libpath = require "path"
+# fs = require "fs-plus"
 # $ = jQuery = require "jquery"
 # {$, jQuery, TextEditorView, View} = require "atom-space-pen-views"
 
@@ -32,6 +33,9 @@ module.exports = CodeAnnotationManager =
     annotationRegexCache: {}
     assetNames: {}
     assetManagers: {}
+    assetDirectories: []
+    assetDirectory: null
+    initializedEditors: {}
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -40,9 +44,9 @@ module.exports = CodeAnnotationManager =
         @subscriptions = new CompositeDisposable()
         # TODO: enable more than 1 directory
         # this.project.resolvePath(uri) ?
-        @assetDirectories = []
-        @assetDirectory = null
-        @initializedEditors = {}
+        # @assetDirectories = []
+        # @assetDirectory = null
+        # @initializedEditors = {}
         @_init()
 
     deactivate: () ->
@@ -54,18 +58,6 @@ module.exports = CodeAnnotationManager =
 
     #######################################################################################
     # PUBLIC
-
-    loadAssetNames: () ->
-        # assetNames = {}
-        for assetDirectory in @assetDirectories
-            path = assetDirectory.getPath()
-            # assetNames[path] = CSON.readFileSync(path + "/.names.cson")
-            @assetManagers[path] = new AssetManager(path)
-        # @assetNames = assetNames
-        # console.log @assetNames
-        console.log @assetManagers
-        return @
-
 
     # API method for plugin packages to register their own renderers for file types
     registerRenderer: (rendererClass) ->
@@ -150,7 +142,7 @@ module.exports = CodeAnnotationManager =
 
         @_registerCommands()
         @_registerElements()
-        @loadAssetNames()
+        @_loadAssetManagers()
 
         # add default renderers
         @registerRenderer(ImageRenderer)
@@ -190,14 +182,12 @@ module.exports = CodeAnnotationManager =
         editorView = atom.views.getView(editor)
         editorView.shadowRoot.appendChild container.getElement()
 
-        text = editor.getText()
-        lines = text.split(/\n/g)
         ranges = []
         assetData = []
 
         editor.scan regex, ({match, matchText, range}) ->
             # matchText = matchText.trim()
-            console.log match, matchText, range.toString()
+            # console.log match, matchText, range.toString()
             assetData.push {
                 line: matchText
                 name: matchText.slice(matchText.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
@@ -205,6 +195,7 @@ module.exports = CodeAnnotationManager =
             ranges.push range
             return true
 
+        assetDirectoryPath = @_getAssetDirectoryForEditor(editor)
         codeAnnotations = []
         for range, i in ranges
             marker = editor.markBufferRange(range)
@@ -212,7 +203,16 @@ module.exports = CodeAnnotationManager =
             decoration = gutter.decorateMarker(marker, {
                 item: icon
             })
-            codeAnnotation = new CodeAnnotation(@, marker, decoration, icon, assetData[i])
+            codeAnnotation = new CodeAnnotation(
+                @
+                editor
+                marker
+                decoration
+                icon
+                assetData[i]
+                @assetManagers[assetDirectoryPath.getPath()]
+            )
+            # console.log "assetDirectoryPath", assetDirectoryPath, @assetManagers
             codeAnnotations.push codeAnnotation
 
         # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
@@ -222,8 +222,19 @@ module.exports = CodeAnnotationManager =
             container: container
             gutter: gutter
             codeAnnotations: codeAnnotations
-            assetDirectory: @_getAssetDirectoryForEditor(editor)
-            # grammar: editor.getGrammar()
+            assetDirectory: assetDirectoryPath
+            assetManager: @assetManagers[assetDirectoryPath]
+        return @
+
+    _loadAssetManagers: () ->
+        # assetNames = {}
+        for assetDirectory in @assetDirectories
+            path = assetDirectory.getPath()
+            # assetNames[path] = CSON.readFileSync(path + "/.names.cson")
+            @assetManagers[path] = new AssetManager(path)
+        # @assetNames = assetNames
+        # console.log @assetNames
+        console.log "assetManagers", @assetManagers
         return @
 
     _getAssetDirectoryForEditor: (editor) ->
@@ -237,6 +248,14 @@ module.exports = CodeAnnotationManager =
             if projectRoot.contains(editorPath)
                 return assetDirectory
         throw new Error("Cannot add a code annotation to files outside of the current projects.")
+
+    _getEditorData: (editor) ->
+        return @initializedEditors[editor.getPath()]
+        # dataList = @initializedEditors[editor.getPath()]
+        # if dataList?
+        #     for data in dataList when data.editor is editor
+        #         return data
+        # return {}
 
     _registerCommands: () ->
         @subscriptions.add atom.commands.add 'atom-workspace', {
@@ -272,6 +291,7 @@ module.exports = CodeAnnotationManager =
         return gutterIcon
 
     ###
+    # Creates an entirely new code annotation.
     # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
     _createCodeAnnotation: (editor, point, name, assetManager) ->
@@ -285,7 +305,7 @@ module.exports = CodeAnnotationManager =
 
         # update asset name "database" (this should not throw errors because the manager should never be null, name collisions were checked before and the manager should never have been initialized with a wrong path (so save should work))
         assetManager
-            .set name, libpath.basename(assetPath)
+            .set name, assetPath
             .save()
 
         # if not paths.length > 1

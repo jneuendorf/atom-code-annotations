@@ -1,8 +1,15 @@
 CSON = require "season"
+fs = require "fs-plus"
+path = require "path"
 
 CodeAnnotations = require "./constants"
+Utils = require "./utils"
 
-
+###
+# This class represents the assets belonging to a project folder.
+# That means the contents of the .names.cson file as well as the asset files themselves.
+# @class AssetManager
+###
 module.exports = class AssetManager
 
     _assetManagers = []
@@ -40,9 +47,14 @@ module.exports = class AssetManager
 
 
     constructor: (path) ->
-        @path = "#{path}/#{CodeAnnotations.ASSET_NAMES_FILE}"
-        @data = CSON.readFileSync(@path)
+        @dir = path
+        @file = "#{path}/#{CodeAnnotations.ASSET_NAMES_FILE}"
+        @data = CSON.readFileSync(@file)
         _assetManagers.push(@)
+        # CSON.readFile @file, (data) =>
+        #     @data = data
+        #     _assetManagers.push(@)
+        #     return @
 
     has: (name) ->
         return @data[name]?
@@ -69,10 +81,20 @@ module.exports = class AssetManager
         throw new Error("code-annotations: There is no entry with name '#{name}'.")
 
     # == upsert: does not throw errors...just overwrites ()
-    set: (name, asset) ->
-        @data[name] = asset
+    set: (codeAnnotationName, asset) ->
+        # basename = path.basename(asset)
+        assetName = "#{@_asciiFilename(codeAnnotationName)}#{path.extname(asset)}"
+        @data[codeAnnotationName] = assetName
+        # copy asset to local .code-annotations directory
+        # fs.copyFileSync()
+        console.log asset
+        fs.copyFileSync asset, path.join(@dir, assetName)
+        # @save()
         return @
 
     save: () ->
-        CSON.writeFileSync(@path, @data)
+        CSON.writeFileSync(@file, @data)
         return @
+
+    _asciiFilename: (string) ->
+        return Utils.escapeNonAscii(string).slice(0, 20)

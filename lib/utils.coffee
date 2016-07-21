@@ -46,3 +46,14 @@ module.exports = class Utils
         # readStream.pipe(writeStream)
         fs.writeFileSync(destination, buffer)
         return @
+
+    @escapeNonAscii: (string) ->
+        # asciiChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+        # char code range: [32, 126]
+        res = ""
+        for char, i in string
+            if 32 <= string.charCodeAt(i) <= 126
+                res += char
+            else
+                res += "_"
+        return res
