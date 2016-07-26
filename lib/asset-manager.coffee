@@ -68,11 +68,12 @@ module.exports = class AssetManager
             return @
         throw new Error("code-annotations: Entry with name '#{name}' already exists.")
 
-    delete: (name) ->
-        if @data[name]?
-            delete @data[name]
+    delete: (codeAnnotationName) ->
+        if @data[codeAnnotationName]?
+            fs.removeSync(path.join(@dir, @data[codeAnnotationName]))
+            delete @data[codeAnnotationName]
             return @
-        throw new Error("code-annotations: There is no entry with name '#{name}'.")
+        throw new Error("code-annotations: There is no entry with name '#{codeAnnotationName}'.")
 
     update: (name, asset) ->
         if @data[name]?

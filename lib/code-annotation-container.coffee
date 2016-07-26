@@ -35,9 +35,12 @@ module.exports = class CodeAnnotationContainer
         @element.appendChild @editBtn
         @element.appendChild @closeBtn
 
-
     getElement: () ->
         return @element
+
+    destroy: () ->
+        @element.parentNode.removeChild @element
+        return @
 
     show: () ->
         @element.style.display = "block"

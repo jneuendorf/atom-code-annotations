@@ -129,8 +129,10 @@ module.exports = class CodeAnnotation
             @marker.getBufferRange()
             @line.replace(CodeAnnotations.CODE_KEYWORD, " ")
         )
-        # remove entry from names.cson
-
-        # remove asset file from file system
-        # @codeAnnotationManager
+        # remove entry from names.cson + remove asset file from file system
+        @assetManager
+            .delete @name
+            .save()
+        # remove gutter marker
+        @marker.destroy()
         return @
