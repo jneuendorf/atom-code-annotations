@@ -9,23 +9,15 @@
             "command": "code-annotations:delete-code-annotation-at-line"
         }
     ]
-# "menu": [{
-#     "label": "Packages"
-#     "submenu": [{
-#         "label": "Code Annotations"
-#         "submenu": [
-#             {
-#                 "label": "Toggle"
-#                 "command": "code-annotations:toggle"
-#             }
-#             {
-#                 "label": "Add code annotation"
-#                 "command": "code-annotations:add-code-annotation"
-#             }
-#             {
-#                 "label": "Delete code annotation"
-#                 "command": "code-annotations:delete-code-annotation"
-#             }
-#         ]
-#     }]
-# }]
+"menu": [{
+    "label": "Packages"
+    "submenu": [{
+        "label": "Code Annotations"
+        "submenu": [
+            {
+                "label": "Show all"
+                "command": "code-annotations:show-all"
+            }
+        ]
+    }]
+}]

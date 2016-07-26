@@ -23,6 +23,7 @@ CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
 Has a CodeAnnotationContainer which contains the output of an asset renderer.
 ###
 module.exports = CodeAnnotationManager =
+    # this is my awesome annotation
     config: settings
 
     # instance properties
@@ -72,6 +73,7 @@ module.exports = CodeAnnotationManager =
             if assetManager.has(name) and not confirm("Asset with name '#{name}' already exists. Replace it?")
                 return @
             @_createCodeAnnotation(editor, point, name, assetManager)
+            @_updateEditor(editor)
             return @
         return @
 
@@ -100,9 +102,9 @@ module.exports = CodeAnnotationManager =
     #     @deleteCodeAnnotationAtLine(line)
     #     return @
 
-    # CODE-ANNOTATION: image-testasset.png
-    # CODE-ANNOTATION: html-testasset.html
-    # CODE-ANNOTATION: text-testasset.txt
+    # CODE-ANNOTATION: image-testasset
+    # CODE-ANNOTATION: html-testasset
+    # CODE-ANNOTATION: text-testasset
 
     showContainer: (editor, renderedContent) ->
         {container} = @initializedEditors[editor.getPath()]
@@ -130,6 +132,10 @@ module.exports = CodeAnnotationManager =
     # get current renderer (associated with the CodeAnnotationContainer)
     getRenderer: () ->
         return @currentCodeAnnotation.getRenderer()
+
+    showAll: () ->
+        # TODO: create search window like cmd+shift+p
+        return @
 
     #######################################################################################
     # PRIVATE
@@ -172,6 +178,7 @@ module.exports = CodeAnnotationManager =
         # comments not supported => do not modify editor
         # TODO: keep list of unsupported editors so this method does not get called when switching to previously done but unsupported editors
         catch error
+            console.log "unsupported grammer (no comments available => thus no annotations)"
             return @
 
         console.log "initializing editor w/ path: #{editor.getPath()}"
@@ -202,16 +209,15 @@ module.exports = CodeAnnotationManager =
         codeAnnotations = []
         for range, i in ranges
             marker = editor.markBufferRange(range)
-            icon = @_createGutterIcon()
-            decoration = gutter.decorateMarker(marker, {
-                item: icon
-            })
+            # icon = @_createGutterIcon()
+            # decoration = gutter.decorateMarker(marker, {
+            #     item: icon
+            # })
             codeAnnotation = new CodeAnnotation(
                 @
                 editor
                 marker
-                decoration
-                icon
+                gutter
                 assetData[i]
                 @assetManagers[assetDirectoryPath.getPath()]
             )
@@ -221,19 +227,63 @@ module.exports = CodeAnnotationManager =
         # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
         # TODO: add editor:path‐changed hook to reinitialize
         @initializedEditors[editor.getPath()] =
-            editor: editor
-            container: container
-            gutter: gutter
-            codeAnnotations: codeAnnotations
             assetDirectory: assetDirectoryPath
             assetManager: @assetManagers[assetDirectoryPath]
+            codeAnnotations: codeAnnotations
+            container: container
+            editor: editor
+            gutter: gutter
         return @
 
-    # this method is called when the code-annotations gutter changes (i.e. after adding/removing code annotations)
-    # so it's like _initEditor() but with creating a gutter and stuff...
-    _updateEditor: (editor) ->
-
-        return @
+    # # this method is called when the code-annotations gutter changes (i.e. after adding/removing code annotations)
+    # # so it's like _initEditor() but with creating a gutter and stuff...
+    # _updateEditor: (editor) ->
+    #     for codeAnnotation in @initializedEditors[editor.getPath()].codeAnnotations
+    #         codeAnnotation.--delete()
+    #
+    #     ranges = []
+    #     assetData = []
+    #
+    #     editor.scan regex, ({match, matchText, range}) ->
+    #         # matchText = matchText.trim()
+    #         # console.log match, matchText, range.toString()
+    #         assetData.push {
+    #             line: matchText
+    #             name: matchText.slice(matchText.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
+    #         }
+    #         ranges.push range
+    #         return true
+    #
+    #     assetDirectoryPath = @_getAssetDirectoryForEditor(editor)
+    #     codeAnnotations = []
+    #     for range, i in ranges
+    #         marker = editor.markBufferRange(range)
+    #         icon = @_createGutterIcon()
+    #         decoration = gutter.decorateMarker(marker, {
+    #             item: icon
+    #         })
+    #         codeAnnotation = new CodeAnnotation(
+    #             @
+    #             editor
+    #             marker
+    #             decoration
+    #             icon
+    #             assetData[i]
+    #             @assetManagers[assetDirectoryPath.getPath()]
+    #         )
+    #         # console.log "assetDirectoryPath", assetDirectoryPath, @assetManagers
+    #         codeAnnotations.push codeAnnotation
+    #
+    #     # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
+    #     # TODO: add editor:path‐changed hook to reinitialize
+    #     @initializedEditors[editor.getPath()] =
+    #         assetDirectory: assetDirectoryPath
+    #         assetManager: @assetManagers[assetDirectoryPath]
+    #         codeAnnotations: codeAnnotations
+    #         container: container
+    #         editor: editor
+    #         gutter: gutter
+    #     return @
 
     # get the name of the codeAnnotation at the given point
     _getCodeAnnotationAtPoint: (editor, point) ->
@@ -295,6 +345,8 @@ module.exports = CodeAnnotationManager =
                 return @deleteCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:hide-container': () =>
                 return @hideContainer()
+            'code-annotations:show-all': () =>
+                return @showAll()
         }
         return @
 
@@ -308,10 +360,6 @@ module.exports = CodeAnnotationManager =
             extends: "div"
         })
         return @
-
-    _createGutterIcon: () ->
-        gutterIcon = document.createElement("code-annotation-gutter-icon")
-        return gutterIcon
 
     ###
     # Creates an entirely new code annotation.
@@ -331,9 +379,6 @@ module.exports = CodeAnnotationManager =
             .set name, assetPath
             .save()
 
-        # if not paths.length > 1
-        #     atom.notifications.addError("Can only choose 1 file for a code annotation.")
-        #     return @
         indentation = editor.indentationForBufferRow(point.row)
         range = [[point.row, 0], [point.row, 0]]
         line = "#{CodeAnnotations.CODE_KEYWORD.trim()} #{name}\n"

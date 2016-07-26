@@ -11,7 +11,7 @@ module.exports = class CodeAnnotation
 
     # CONSTRUCTOR
     # TODO: refactor this signature...
-    constructor: (codeAnnotationManager, editor, marker, decoration, icon, assetData, assetManager) ->
+    constructor: (codeAnnotationManager, editor, marker, gutter, assetData, assetManager) ->
         @codeAnnotationManager = codeAnnotationManager
         @editor = editor
 
@@ -19,18 +19,29 @@ module.exports = class CodeAnnotation
         {@line, @name} = assetData
         @assetManager = assetManager
         @createdAt = Date.now()
-        @decoraion = decoration
+
         @element = null
-        @icon = icon
+        @gutter = gutter
         @marker = marker
+        @decoration = null
+        @icon = null
         @renderer = null
+
         @init()
 
     init: () ->
+        @_createGutterIcon()
         @_bindEventHandlers()
         return @
 
     # PRIVATE
+    _createGutterIcon: () ->
+        @icon = document.createElement("code-annotation-gutter-icon")
+        @decoration = @gutter.decorateMarker(@marker, {
+            item: @icon
+        })
+        return @
+
     _bindEventHandlers: () ->
         @icon.addEventListener "click", (event) =>
             @codeAnnotationManager.setCurrentCodeAnnotation(@)
@@ -46,7 +57,7 @@ module.exports = class CodeAnnotation
         for asset in assets when asset.getBaseName() is @assetManager.get(@name)
             @asset = asset
         if not @asset?
-            throw new Error("No asset found at '#{@codeAnnotationManager.assetDirectory}'.")
+            throw new Error("No asset found at '#{@codeAnnotationManager.assetDirectory.getPath()}'.")
         console.log @asset
         return @
 
@@ -66,6 +77,7 @@ module.exports = class CodeAnnotation
         return @
 
     _updateAssetNameInCode: () ->
+        # TODO
         range = @marker.getBufferRange()
         return @
 
@@ -121,9 +133,9 @@ module.exports = class CodeAnnotation
         return @
 
     delete: () ->
-        # confirm deletion
-        if not confirm "Sure?"
-            return @
+        # # confirm deletion
+        # if not confirm "Sure?"
+        #     return @
         # strip "CODE-ANNOTATION: " for comment so the name remains for comment semantics
         atom.workspace.getActiveTextEditor().setTextInBufferRange(
             @marker.getBufferRange()
