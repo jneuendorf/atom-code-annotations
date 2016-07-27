@@ -1,9 +1,5 @@
 {CompositeDisposable, Directory, Range, TextEditor} = require "atom"
 CSON = require "season"
-libpath = require "path"
-# fs = require "fs-plus"
-# $ = jQuery = require "jquery"
-# {$, jQuery, TextEditorView, View} = require "atom-space-pen-views"
 
 CodeAnnotations = require "./constants"
 settings = require "./settings"
@@ -230,56 +226,6 @@ module.exports = CodeAnnotationManager =
             gutter: gutter
         return @
 
-    # # this method is called when the code-annotations gutter changes (i.e. after adding/removing code annotations)
-    # # so it's like _initEditor() but with creating a gutter and stuff...
-    # _updateEditor: (editor) ->
-    #     for codeAnnotation in @initializedEditors[editor.getPath()].codeAnnotations
-    #         codeAnnotation.--delete()
-    #
-    #     ranges = []
-    #     assetData = []
-    #
-    #     editor.scan regex, ({match, matchText, range}) ->
-    #         # matchText = matchText.trim()
-    #         # console.log match, matchText, range.toString()
-    #         assetData.push {
-    #             line: matchText
-    #             name: matchText.slice(matchText.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
-    #         }
-    #         ranges.push range
-    #         return true
-    #
-    #     assetDirectoryPath = @_getAssetDirectoryForEditor(editor)
-    #     codeAnnotations = []
-    #     for range, i in ranges
-    #         marker = editor.markBufferRange(range)
-    #         icon = @_createGutterIcon()
-    #         decoration = gutter.decorateMarker(marker, {
-    #             item: icon
-    #         })
-    #         codeAnnotation = new CodeAnnotation(
-    #             @
-    #             editor
-    #             marker
-    #             decoration
-    #             icon
-    #             assetData[i]
-    #             @assetManagers[assetDirectoryPath.getPath()]
-    #         )
-    #         # console.log "assetDirectoryPath", assetDirectoryPath, @assetManagers
-    #         codeAnnotations.push codeAnnotation
-    #
-    #     # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
-    #     # TODO: add editor:path‐changed hook to reinitialize
-    #     @initializedEditors[editor.getPath()] =
-    #         assetDirectory: assetDirectoryPath
-    #         assetManager: @assetManagers[assetDirectoryPath]
-    #         codeAnnotations: codeAnnotations
-    #         container: container
-    #         editor: editor
-    #         gutter: gutter
-    #     return @
-
     # get the name of the codeAnnotation at the given point
     _getCodeAnnotationAtPoint: (editor, point) ->
         editorPath = editor.getPath()
@@ -331,12 +277,8 @@ module.exports = CodeAnnotationManager =
             # 'code-annotations:delete-code-annotation': () =>
             #     return @deleteCodeAnnotation()
             'code-annotations:add-code-annotation-at-line': () =>
-                # TODO: retrieve current line and pass it to addCodeAnnotationAtLine()
                 return @addCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:delete-code-annotation-at-line': () =>
-                # TODO: retrieve current line and pass it to deleteCodeAnnotation()
-                # line = null
-                # return @deleteCodeAnnotation(line)
                 return @deleteCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:hide-container': () =>
                 return @hideContainer()
