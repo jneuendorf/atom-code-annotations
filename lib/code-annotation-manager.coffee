@@ -72,8 +72,7 @@ module.exports = CodeAnnotationManager =
             assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
             if assetManager.has(name) and not confirm("Asset with name '#{name}' already exists. Replace it?")
                 return @
-            @_createCodeAnnotation(editor, point, name, assetManager)
-            @_updateEditor(editor)
+            @_createNewCodeAnnotation(editor, point, name, assetManager)
             return @
         return @
 
@@ -184,7 +183,7 @@ module.exports = CodeAnnotationManager =
         console.log "initializing editor w/ path: #{editor.getPath()}"
         gutter = editor.addGutter({
             name: "code-annotations"
-            priority: 100
+            priority: CodeAnnotations.GUTTER_PRIO
             visible: true
         })
 
@@ -209,10 +208,6 @@ module.exports = CodeAnnotationManager =
         codeAnnotations = []
         for range, i in ranges
             marker = editor.markBufferRange(range)
-            # icon = @_createGutterIcon()
-            # decoration = gutter.decorateMarker(marker, {
-            #     item: icon
-            # })
             codeAnnotation = new CodeAnnotation(
                 @
                 editor
@@ -363,9 +358,10 @@ module.exports = CodeAnnotationManager =
 
     ###
     # Creates an entirely new code annotation.
+    # Therefore, an asset is copied and the .names.cson is updated.
     # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
-    _createCodeAnnotation: (editor, point, name, assetManager) ->
+    _createNewCodeAnnotation: (editor, point, name, assetManager) ->
         # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st)
         paths = Utils.chooseFile("Now, choose an asset.")
         if not paths?
@@ -390,6 +386,19 @@ module.exports = CodeAnnotationManager =
         # make sure it's indented correctly
         editor.setIndentationForBufferRow(point.row, indentation)
         editor.setCursorBufferPosition([point.row, line.length - 1])
+
+        editorData = @_getEditorData(editor)
+
+        marker = editor.markBufferRange(range)
+        codeAnnotation = new CodeAnnotation(
+            @
+            editor
+            marker
+            editorData.gutter
+            {name, line}
+            assetManager
+        )
+        editorData.codeAnnotations.push codeAnnotation
         return @
 
     _getAnnotationRegex: (grammar) ->

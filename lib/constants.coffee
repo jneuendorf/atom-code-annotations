@@ -6,3 +6,4 @@ module.exports =
     WHITESPACE_REGEX_STR: "\\s*"
     #
     SINGLE_LINE_WHITESPACE_REGEX_STR: "( |\t)*"
+    GUTTER_PRIO: 500
