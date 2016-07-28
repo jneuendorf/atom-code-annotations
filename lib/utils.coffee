@@ -31,19 +31,10 @@ module.exports = class Utils
         return dialog.showOpenDialog({properties: ['openFile']})
 
     @copyFile: (source, destination) ->
-        # fs.copySync(source, destination)
         try
-            # readStream = fs.createReadStream(source)
             buffer = fs.readFileSync(source)
         catch error
-            # atom.notifications.addError("Error creating write stream for '#{destination}'.")
             throw new Error("Could not read '#{source}'.")
-        # try
-        #     # writeStream = fs.createWriteStream(destination)
-        # catch error
-        #     throw new Error("Error creating write stream for '#{destination}'.")
-        # copy file
-        # readStream.pipe(writeStream)
         fs.writeFileSync(destination, buffer)
         return @
 

@@ -2,13 +2,6 @@ Utils = require './utils'
 
 
 
-document.registerElement("code-annotation-container", {
-    prototype: Object.create(HTMLDivElement.prototype)
-    extends: "div"
-})
-
-
-
 module.exports = class CodeAnnotationContainer
 
     # CONSTRUCTOR

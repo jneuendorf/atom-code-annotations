@@ -1,7 +1,6 @@
 # TODO: pass atom required object to required files (by main) in order to save require overhead
 {Directory} = require 'atom'
 Utils = require './utils'
-# {Emitter, Disposable, CompositeDisposable} = require 'event-kit'
 
 CodeAnnotations = require "./constants"
 

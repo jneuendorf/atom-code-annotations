@@ -51,10 +51,6 @@ module.exports = class AssetManager
         @file = "#{path}/#{CodeAnnotations.ASSET_NAMES_FILE}"
         @data = CSON.readFileSync(@file)
         _assetManagers.push(@)
-        # CSON.readFile @file, (data) =>
-        #     @data = data
-        #     _assetManagers.push(@)
-        #     return @
 
     has: (name) ->
         return @data[name]?

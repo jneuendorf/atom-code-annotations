@@ -102,7 +102,7 @@ module.exports = CodeAnnotationManager =
     # CODE-ANNOTATION: text-testasset
 
     showContainer: (editor, renderedContent) ->
-        {container} = @initializedEditors[editor.getPath()]
+        {container} = @_getEditorData(editor)
         if container?
             container.empty()
                 .append(renderedContent)
@@ -111,7 +111,7 @@ module.exports = CodeAnnotationManager =
         throw new Error("No container found")
 
     hideContainer: (editor) ->
-        {container} = @initializedEditors[editor.getPath()]
+        {container} = @_getEditorData(editor)
         if container?
             container.hide()
             return @
@@ -155,13 +155,13 @@ module.exports = CodeAnnotationManager =
 
         atom.workspace.observeActivePaneItem (editor) =>
             if editor instanceof TextEditor
-                # console.log 'observeActivePaneItem: ', editor
                 path = editor.getPath()
                 if not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor
                     try
                         @_initEditor editor
                     catch error
-                        throw new Error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.")
+                        # must not throw error here because otherwise the editor switch will be interrupted
+                        console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message)
             return @
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
@@ -169,7 +169,6 @@ module.exports = CodeAnnotationManager =
         grammar = editor.getGrammar()
         try
             regex = @_getAnnotationRegex(grammar)
-            console.log regex
         # comments not supported => do not modify editor
         # TODO: keep list of unsupported editors so this method does not get called when switching to previously done but unsupported editors
         catch error
@@ -179,7 +178,8 @@ module.exports = CodeAnnotationManager =
         console.log "initializing editor w/ path: #{editor.getPath()}"
         gutter = editor.addGutter({
             name: "code-annotations"
-            priority: CodeAnnotations.GUTTER_PRIO
+            # priority: CodeAnnotations.GUTTER_PRIO
+            priority: @config.gutterPriority
             visible: true
         })
 
@@ -191,8 +191,6 @@ module.exports = CodeAnnotationManager =
         assetData = []
 
         editor.scan regex, ({match, matchText, range}) ->
-            # matchText = matchText.trim()
-            # console.log match, matchText, range.toString()
             assetData.push {
                 line: matchText
                 name: matchText.slice(matchText.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
@@ -212,7 +210,6 @@ module.exports = CodeAnnotationManager =
                 assetData[i]
                 @assetManagers[assetDirectoryPath.getPath()]
             )
-            # console.log "assetDirectoryPath", assetDirectoryPath, @assetManagers
             codeAnnotations.push codeAnnotation
 
         # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
@@ -228,10 +225,7 @@ module.exports = CodeAnnotationManager =
 
     # get the name of the codeAnnotation at the given point
     _getCodeAnnotationAtPoint: (editor, point) ->
-        editorPath = editor.getPath()
-        editorData = @initializedEditors[editorPath]
-
-        for codeAnnotation in editorData.codeAnnotations when codeAnnotation.marker.getBufferRange().start.row is point.row
+        for codeAnnotation in @_getEditorData(editor).codeAnnotations when codeAnnotation.marker.getBufferRange().start.row is point.row
             return codeAnnotation
         return null
 
@@ -247,7 +241,6 @@ module.exports = CodeAnnotationManager =
         for assetDirectory in @assetDirectories
             path = assetDirectory.getPath()
             @assetManagers[path] = new AssetManager(path)
-        console.log "assetManagers", @assetManagers
         return @
 
     _getAssetDirectoryForEditor: (editor) ->
@@ -263,7 +256,7 @@ module.exports = CodeAnnotationManager =
         throw new Error("Cannot add a code annotation to files outside of the current projects.")
 
     _getEditorData: (editor) ->
-        return @initializedEditors[editor.getPath()]
+        return @initializedEditors[editor.getPath()] or null
         # dataList = @initializedEditors[editor.getPath()]
         # if dataList?
         #     for data in dataList when data.editor is editor
@@ -288,14 +281,18 @@ module.exports = CodeAnnotationManager =
         return @
 
     _registerElements: () ->
-        document.registerElement("code-annotation-gutter-icon", {
+        document.registerElement "code-annotation", {
             prototype: Object.create(HTMLDivElement.prototype)
             extends: "div"
-        })
-        document.registerElement("code-annotation", {
+        }
+        document.registerElement "code-annotation-gutter-icon", {
             prototype: Object.create(HTMLDivElement.prototype)
             extends: "div"
-        })
+        }
+        document.registerElement "code-annotation-container", {
+            prototype: Object.create(HTMLDivElement.prototype)
+            extends: "div"
+        }
         return @
 
     ###
