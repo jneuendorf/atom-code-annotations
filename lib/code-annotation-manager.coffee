@@ -172,7 +172,7 @@ module.exports = CodeAnnotationManager =
         # comments not supported => do not modify editor
         # TODO: keep list of unsupported editors so this method does not get called when switching to previously done but unsupported editors
         catch error
-            console.log "unsupported grammer (no comments available => thus no annotations)"
+            console.log "unsupported grammer (no comments available => thus no annotations)", editor
             return @
 
         console.log "initializing editor w/ path: #{editor.getPath()}"
@@ -225,14 +225,16 @@ module.exports = CodeAnnotationManager =
 
     # get the name of the codeAnnotation at the given point
     _getCodeAnnotationAtPoint: (editor, point) ->
-        for codeAnnotation in @_getEditorData(editor).codeAnnotations when codeAnnotation.marker.getBufferRange().start.row is point.row
-            return codeAnnotation
+        for codeAnnotation in @_getEditorData(editor).codeAnnotations
+            if codeAnnotation.marker.getBufferRange().start.row is point.row
+                return codeAnnotation
         return null
 
     # takes care of removing the unnecessary stuff (i.e. dom nodes)
     # i guess all refs to this singleton are also disposed so everything else will be cleared from memory as well
     _destroyEditors: () ->
         for editorData in @initializedEditors
+            # TODO: put gutter name into constants
             editorData.editor.getGutterWithName("code-annotations").destroy()
             editorData.container.destroy()
         return @
@@ -327,6 +329,10 @@ module.exports = CodeAnnotationManager =
         editor.setCursorBufferPosition([point.row, line.length - 1])
 
         editorData = @_getEditorData(editor)
+
+        # correct range to end of line
+        lineLength = editor.getTextInBufferRange([[point.row, 0], [point.row + 1, 0]]).length - 1
+        range = range[0].concat([point.row, lineLength])
 
         marker = editor.markBufferRange(range)
         codeAnnotation = new CodeAnnotation(

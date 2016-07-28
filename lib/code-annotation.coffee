@@ -75,11 +75,6 @@ module.exports = class CodeAnnotation
         @show()
         return @
 
-    _updateAssetNameInCode: () ->
-        # TODO
-        range = @marker.getBufferRange()
-        return @
-
     # PUBLIC
     # needed for being used as a key in an object
     toString: () ->
@@ -127,14 +122,10 @@ module.exports = class CodeAnnotation
             destPath = destParts.join(".")
             Utils.copyFile(sourcePath, destPath)
             @_updateElement()
-            @_updateAssetNameInCode()
         # save changes
         return @
 
     delete: () ->
-        # # confirm deletion
-        # if not confirm "Sure?"
-        #     return @
         # strip "CODE-ANNOTATION: " for comment so the name remains for comment semantics
         atom.workspace.getActiveTextEditor().setTextInBufferRange(
             @marker.getBufferRange()
