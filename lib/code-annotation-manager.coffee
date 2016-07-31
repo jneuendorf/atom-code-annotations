@@ -74,13 +74,12 @@ module.exports = CodeAnnotationManager =
 
     deleteCodeAnnotationAtLine: (point) ->
         # TODO: check if annotation actually exists for the line (show notification otherwise)
+        # TODO: use atom.confirm(options)
         if not confirm("Really delete?")
             return @
 
         editor = atom.workspace.getActiveTextEditor()
         assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
-        # @_removeCodeAnnotation(editor, point, @_getCodeAnnotationAtPoint(editor, point))
-        # del test
         try
             @_getCodeAnnotationAtPoint(editor, point).delete()
         catch error
@@ -172,7 +171,7 @@ module.exports = CodeAnnotationManager =
         # comments not supported => do not modify editor
         # TODO: keep list of unsupported editors so this method does not get called when switching to previously done but unsupported editors
         catch error
-            console.log "unsupported grammer (no comments available => thus no annotations)", editor
+            console.log "unsupported grammer (no comments available => thus no annotations). error: #{error.message}", editor
             return @
 
         console.log "initializing editor w/ path: #{editor.getPath()}"
@@ -323,7 +322,6 @@ module.exports = CodeAnnotationManager =
         # make it a comment
         editor.setSelectedBufferRange(range)
         editor.toggleLineCommentsInSelection()
-        # editor.toggleLineCommentForBufferRow(point.row)
         # make sure it's indented correctly
         editor.setIndentationForBufferRow(point.row, indentation)
         editor.setCursorBufferPosition([point.row, line.length - 1])
@@ -335,7 +333,7 @@ module.exports = CodeAnnotationManager =
         range = range[0].concat([point.row, lineLength])
 
         marker = editor.markBufferRange(range)
-        codeAnnotation = new CodeAnnotation(
+        editorData.codeAnnotations.push new CodeAnnotation(
             @
             editor
             marker
@@ -343,7 +341,6 @@ module.exports = CodeAnnotationManager =
             {name, line}
             assetManager
         )
-        editorData.codeAnnotations.push codeAnnotation
         return @
 
     _getAnnotationRegex: (grammar) ->
