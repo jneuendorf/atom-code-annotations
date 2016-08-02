@@ -48,3 +48,8 @@ module.exports = class Utils
             else
                 res += "_"
         return res
+
+    @confirm: (options) ->
+        buttons = ["OK", "Cancel"]
+        options.buttons = buttons
+        return buttons[atom.confirm(options)] is "OK"

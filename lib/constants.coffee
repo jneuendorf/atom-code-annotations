@@ -4,6 +4,8 @@ module.exports =
     CODE_KEYWORD: " CODE-ANNOTATION: "
     WHITESPACE_ONLY_REGEX: /^\s*$/
     WHITESPACE_REGEX_STR: "\\s*"
-    #
-    SINGLE_LINE_WHITESPACE_REGEX_STR: "( |\t)*"
-    GUTTER_PRIO: 500
+    SINGLE_LINE_WHITESPACE_REGEX_STR: "( |\\t)*"
+
+    DELETE_CONFIRM_MESSAGE: "Really delete?"
+    REPLACE_CONFIRM_MESSAGE: (name) ->
+        return "Asset with name '#{name}' already exists. Replace it?"

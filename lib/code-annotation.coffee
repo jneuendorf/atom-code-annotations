@@ -30,7 +30,7 @@ module.exports = class CodeAnnotation
 
     init: () ->
         @_createGutterIcon()
-        @_bindEventHandlers()
+        @_addEventListeners()
         return @
 
     # PRIVATE
@@ -41,7 +41,7 @@ module.exports = class CodeAnnotation
         })
         return @
 
-    _bindEventHandlers: () ->
+    _addEventListeners: () ->
         @icon.addEventListener "click", (event) =>
             @codeAnnotationManager.setCurrentCodeAnnotation(@)
             return @show()

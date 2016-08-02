@@ -1,8 +1,9 @@
 {CompositeDisposable, Directory, Range, TextEditor} = require "atom"
 CSON = require "season"
 
+CommentCharacters = require "./comment-characters"
 CodeAnnotations = require "./constants"
-settings = require "./settings"
+Settings = require "./settings"
 Utils = require "./utils"
 
 AssetManager = require "./asset-manager"
@@ -20,7 +21,7 @@ Has a CodeAnnotationContainer which contains the output of an asset renderer.
 ###
 module.exports = CodeAnnotationManager =
     # this is my awesome annotation
-    config: settings
+    config: Settings
 
     # instance properties
     subscriptions: null
@@ -66,16 +67,18 @@ module.exports = CodeAnnotationManager =
         dialog.attach().onSubmit (name) =>
             editor = atom.workspace.getActiveTextEditor()
             assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
-            if assetManager.has(name) and not confirm("Asset with name '#{name}' already exists. Replace it?")
-                return @
+            if assetManager.has(name)
+                if Settings.showReplaceConfirmDialog and not Utils.confirm({
+                    message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)
+                })
+                    return @
             @_createNewCodeAnnotation(editor, point, name, assetManager)
             return @
         return @
 
     deleteCodeAnnotationAtLine: (point) ->
         # TODO: check if annotation actually exists for the line (show notification otherwise)
-        # TODO: use atom.confirm(options)
-        if not confirm("Really delete?")
+        if Settings.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
             return @
 
         editor = atom.workspace.getActiveTextEditor()
@@ -120,6 +123,7 @@ module.exports = CodeAnnotationManager =
         @currentCodeAnnotation = codeAnnotation
         return @
 
+    # TODO: pass editor because code annotations can be open in multiple editor views
     getCurrentCodeAnnotation: () ->
         return @currentCodeAnnotation
 
@@ -177,7 +181,6 @@ module.exports = CodeAnnotationManager =
         console.log "initializing editor w/ path: #{editor.getPath()}"
         gutter = editor.addGutter({
             name: "code-annotations"
-            # priority: CodeAnnotations.GUTTER_PRIO
             priority: @config.gutterPriority
             visible: true
         })
@@ -347,20 +350,35 @@ module.exports = CodeAnnotationManager =
         if @annotationRegexCache[grammar.name]?
             return @annotationRegexCache[grammar.name]
 
-        patternData = null
-        for pattern in grammar.rawPatterns
-            {name, begin, end} = pattern
-            if name? and begin? and end?
-                if pattern.name.indexOf("comment") >= 0 and pattern.name.indexOf("line") >= 0
-                    # TODO: maybe this last line is annotated. in that case a trailing newline (e.g. coffeescript's pattern.end) should not be part of the regex (or optional) so the last line will be matched
-                    @annotationRegexCache[grammar.name] =  new RegExp(
-                        CodeAnnotations.SINGLE_LINE_WHITESPACE_REGEX_STR +
-                        pattern.begin +
-                        CodeAnnotations.CODE_KEYWORD +
-                        ".*?" +
-                        pattern.end,
-                        "g"
-                    )
-                    return @annotationRegexCache[grammar.name]
+        patternData = CommentCharacters.format(CommentCharacters[grammar.name])
+        if patternData?
+            @annotationRegexCache[grammar.name] = new RegExp(
+                CodeAnnotations.SINGLE_LINE_WHITESPACE_REGEX_STR +
+                patternData.begin +
+                CodeAnnotations.CODE_KEYWORD +
+                # must begin with word character (like most common identifiers)
+                "\\w+.*" +
+                patternData.end,
+                "g"
+            )
+            return @annotationRegexCache[grammar.name]
         # ...some grammars don't have comments (e.g. JSON)
         throw new Error("Could not find a regular expression for grammar '#{grammar.name}'.")
+
+        # patternData = null
+        # for pattern in grammar.rawPatterns
+        #     {name, begin, end} = pattern
+        #     if name? and begin? and end?
+        #         if pattern.name.indexOf("comment") >= 0 and pattern.name.indexOf("line") >= 0
+        #             # TODO: maybe this last line is annotated. in that case a trailing newline (e.g. coffeescript's pattern.end) should not be part of the regex (or optional) so the last line will be matched
+        #             @annotationRegexCache[grammar.name] =  new RegExp(
+        #                 CodeAnnotations.SINGLE_LINE_WHITESPACE_REGEX_STR +
+        #                 pattern.begin +
+        #                 CodeAnnotations.CODE_KEYWORD +
+        #                 ".*?" +
+        #                 pattern.end,
+        #                 "g"
+        #             )
+        #             return @annotationRegexCache[grammar.name]
+        # # ...some grammars don't have comments (e.g. JSON)
+        # throw new Error("Could not find a regular expression for grammar '#{grammar.name}'.")
