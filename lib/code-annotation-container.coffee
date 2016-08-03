@@ -29,13 +29,23 @@ module.exports = class CodeAnnotationContainer
         </code-annotation-container>"""
 
     # CONSTRUCTOR
-    constructor: (visible = false) ->
-        @element = @_createElement()
+    constructor: () ->
         @codeAnnotation = null
-        if visible
-            @show()
+        @nameElement = null
+        @content = null
+        @textEditorView = null
+
+        @element = @_addEventListeners(@_createElement())
+        @textEditorView.hide()
 
     _addEventListeners: (element) ->
+        # TODO: escape on container
+        # element.keyup (evt) =>
+        #     # on escape
+        #     if evt.which is 27
+        #         @hide()
+        #     return true
+        # buttons
         element.find(".btn.delete").click (event) =>
             if Settings.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
                 return @
@@ -45,27 +55,31 @@ module.exports = class CodeAnnotationContainer
             return @codeAnnotation?.edit()
         element.find(".btn.disappear").click (event) =>
             return @hide()
-        return element
-
-    _createElement: () ->
-        element = @_addEventListeners(@constructor.element.clone())
-        @content = element.find(".content")
-        @nameElement = element.find(".code-annotation-name").dblclick () =>
+        # asset name elements' events
+        @nameElement.dblclick () =>
             @toggleMiniTextEditor()
+            @textEditorView.focus()
             return @
-        @textEditorView = new TextEditorView({mini: true})
-        element.find(".left-col").append(@textEditorView)
-        @textEditorView.hide().keyup (evt) =>
+        @textEditorView.keyup (evt) =>
+            # on escape
+            if evt.which is 27
+                @toggleMiniTextEditor()
+                return false
             # on enter
             if evt.which is 13
                 newName = @textEditorView.getText()
                 @codeAnnotation.updateName(newName)
                 @nameElement.text(newName)
                 @toggleMiniTextEditor()
-            # on escape
-            else if evt.which is 27
-                @toggleMiniTextEditor()
             return true
+        return element
+
+    _createElement: () ->
+        element = @constructor.element.clone()
+        @content = element.find(".content")
+        @nameElement = element.find(".code-annotation-name")
+        @textEditorView = new TextEditorView({mini: true})
+        element.find(".left-col").append(@textEditorView)
         return element
 
     getElement: () ->

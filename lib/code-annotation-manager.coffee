@@ -246,8 +246,8 @@ module.exports = CodeAnnotationManager =
                 return @addCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:delete-code-annotation-at-line': () =>
                 return @deleteCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
-            'code-annotations:hide-container': () =>
-                return @hideContainer()
+            # 'code-annotations:hide-container': () =>
+            #     return @hideContainer()
             'code-annotations:show-all': () =>
                 return @showAll()
         }
