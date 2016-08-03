@@ -1,6 +1,5 @@
 Utils = require './utils'
-# {$, $$, View} = require 'atom-space-pen-views'
-{$} = require 'atom-space-pen-views'
+{$, TextEditorView} = require 'atom-space-pen-views'
 
 CodeAnnotations = require "./constants"
 Settings = require "./settings"
@@ -14,7 +13,7 @@ module.exports = class CodeAnnotationContainer
         return $ """<code-annotation-container>
             <div class='block'>
                 <div class='row'>
-                    <div class='col-xs-5'>
+                    <div class='col-xs-5 left-col'>
                         <h4 class='code-annotation-name'></h4>
                     </div>
                     <div class='col-xs-7'>
@@ -48,9 +47,20 @@ module.exports = class CodeAnnotationContainer
         return element
 
     _createElement: () ->
-        element = @_addEventListeners(@constructor.element.clone(true, true))
+        element = @_addEventListeners(@constructor.element.clone())
         @content = element.find(".content")
-        @nameElement = element.find(".code-annotation-name")
+        @nameElement = element.find(".code-annotation-name").dblclick () =>
+            @toggleMiniTextEditor()
+            return @
+        @textEditorView = new TextEditorView({mini: true})
+        element.find(".left-col").append(@textEditorView)
+        @textEditorView.hide().keyup (evt) =>
+            if evt.which is 13
+                newName = @textEditorView.getText()
+                @codeAnnotation.updateName(newName)
+                @nameElement.text(newName)
+                @toggleMiniTextEditor()
+            return true
         return element
 
     getElement: () ->
@@ -83,4 +93,11 @@ module.exports = class CodeAnnotationContainer
     setContent: (content) ->
         @content.empty().append(content)
         @nameElement.text(@codeAnnotation.name)
+        @textEditorView.getModel().setText(@codeAnnotation.name)
+        return @
+
+    # for editing the asset name
+    toggleMiniTextEditor: () ->
+        @nameElement.toggle()
+        @textEditorView.toggle()
         return @

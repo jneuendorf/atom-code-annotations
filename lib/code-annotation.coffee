@@ -96,6 +96,17 @@ module.exports = class CodeAnnotation
     getRenderer: () ->
         return @renderer
 
+    updateName: (newName) ->
+        oldName = @name
+        @assetManager.updateName(oldName, newName)
+            .save()
+        @name = newName
+        @editor.setTextInBufferRange(
+            @marker.getBufferRange()
+            @line.replace(oldName, newName)
+        )
+        return @
+
     edit: () ->
         console.log "editing code annotation...."
         if not @renderer
@@ -127,7 +138,7 @@ module.exports = class CodeAnnotation
 
     delete: () ->
         # strip "CODE-ANNOTATION: " for comment so the name remains for comment semantics
-        atom.workspace.getActiveTextEditor().setTextInBufferRange(
+        @editor.setTextInBufferRange(
             @marker.getBufferRange()
             @line.replace(CodeAnnotations.CODE_KEYWORD, " ")
         )

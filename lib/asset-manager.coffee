@@ -77,6 +77,12 @@ module.exports = class AssetManager
             return @
         throw new Error("code-annotations: There is no entry with name '#{name}'.")
 
+    updateName: (oldName, newName) ->
+        if @has(oldName)
+            @data[newName] = @data[oldName]
+            delete @data[oldName]
+        return @
+
     # == upsert: does not throw errors...just overwrites ()
     set: (codeAnnotationName, asset) ->
         # basename = path.basename(asset)

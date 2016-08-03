@@ -290,10 +290,6 @@ module.exports = CodeAnnotationManager =
             prototype: Object.create(HTMLDivElement.prototype)
             extends: "div"
         }
-        document.registerElement "code-annotation-container-overlay", {
-            prototype: Object.create(HTMLDivElement.prototype)
-            extends: "div"
-        }
         document.registerElement "code-annotation-container", {
             prototype: Object.create(HTMLDivElement.prototype)
             extends: "div"
