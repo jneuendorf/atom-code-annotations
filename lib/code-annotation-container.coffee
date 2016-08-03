@@ -14,12 +14,12 @@ module.exports = class CodeAnnotationContainer
             <div class='block'>
                 <div class='row'>
                     <div class='col-xs-5 left-col'>
-                        <h4 class='code-annotation-name'></h4>
+                        <h4 class='code-annotation-name' title="double click to edit"></h4>
                     </div>
                     <div class='col-xs-7'>
                         <button class='inline-block btn icon icon-trashcan delete'>Delete</button>
                         <button class='inline-block btn icon icon-x disappear'>Close</button>
-                        <button class='inline-block btn icon icon-pencil edit'>Edit</button>
+                        <button class='inline-block btn icon icon-pencil edit'>Edit content</button>
                     </div>
                 </div>
             </div>

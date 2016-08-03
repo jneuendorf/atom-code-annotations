@@ -27,7 +27,7 @@ module.exports = CodeAnnotationManager =
     subscriptions: null
     renderers: []
     codeAnnotations: []
-    currentCodeAnnotation: null
+    # currentCodeAnnotation: null
     annotationRegexCache: {}
     assetNames: {}
     assetManagers: {}
@@ -105,20 +105,21 @@ module.exports = CodeAnnotationManager =
         @codeAnnotationContainer.hide()
         return @
 
-    setCurrentCodeAnnotation: (codeAnnotation) ->
-        @currentCodeAnnotation = codeAnnotation
-        return @
+    # setCurrentCodeAnnotation: (codeAnnotation) ->
+    #     @currentCodeAnnotation = codeAnnotation
+    #     return @
 
-    # TODO: pass editor because code annotations can be open in multiple editor views
-    getCurrentCodeAnnotation: () ->
-        return @currentCodeAnnotation
+    # # TODO: pass editor because code annotations can be open in multiple editor views
+    # getCurrentCodeAnnotation: () ->
+    #     return @currentCodeAnnotation
 
-    # get current renderer (associated with the CodeAnnotationContainer)
-    getRenderer: () ->
-        return @currentCodeAnnotation.getRenderer()
+    # # get current renderer (associated with the CodeAnnotationContainer)
+    # getRenderer: () ->
+    #     return @currentCodeAnnotation.getRenderer()
 
     showAll: () ->
         # TODO: create search window like cmd+shift+p
+        # -> SelectListView
         return @
 
     #######################################################################################

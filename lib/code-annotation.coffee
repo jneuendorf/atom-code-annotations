@@ -17,7 +17,6 @@ module.exports = class CodeAnnotation
         @asset = null
         {@line, @name} = assetData
         @assetManager = assetManager
-        @createdAt = Date.now()
 
         @element = null
         @gutter = gutter
@@ -26,26 +25,25 @@ module.exports = class CodeAnnotation
         @icon = null
         @renderer = null
 
-        @init()
+        @_init()
 
-    init: () ->
-        @_createGutterIcon()
-        @_addEventListeners()
+    _init: () ->
+        gutterIcon = @_createGutterIcon()
+        @decoration = @gutter.decorateMarker(@marker, {
+            item: gutterIcon
+        })
+        @_addEventListenersToGutterIcon(gutterIcon)
+        @icon = gutterIcon
         return @
 
     # PRIVATE
     _createGutterIcon: () ->
-        @icon = document.createElement("code-annotation-gutter-icon")
-        @decoration = @gutter.decorateMarker(@marker, {
-            item: @icon
-        })
-        return @
+        return document.createElement("code-annotation-gutter-icon")
 
-    _addEventListeners: () ->
-        @icon.addEventListener "click", (event) =>
-            @codeAnnotationManager.setCurrentCodeAnnotation(@)
+    _addEventListenersToGutterIcon: (gutterIcon) ->
+        gutterIcon.addEventListener "click", (event) =>
             return @show()
-        return @
+        return gutterIcon
 
     _createWrapper: () ->
         return document.createElement("code-annotation")
@@ -75,10 +73,8 @@ module.exports = class CodeAnnotation
         @show()
         return @
 
+    #######################################################################################
     # PUBLIC
-    # needed for being used as a key in an object
-    toString: () ->
-        return "code-annotation-#{@createdAt}"
 
     show: () ->
         if not @element?
@@ -98,13 +94,14 @@ module.exports = class CodeAnnotation
 
     updateName: (newName) ->
         oldName = @name
-        @assetManager.updateName(oldName, newName)
-            .save()
-        @name = newName
-        @editor.setTextInBufferRange(
-            @marker.getBufferRange()
-            @line.replace(oldName, newName)
-        )
+        if oldName isnt newName
+            @assetManager.updateName(oldName, newName)
+                .save()
+            @name = newName
+            @editor.setTextInBufferRange(
+                @marker.getBufferRange()
+                @line.replace(oldName, newName)
+            )
         return @
 
     edit: () ->
