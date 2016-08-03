@@ -25,16 +25,28 @@ code-annotation-container {
     //     overflow: auto;
     // }
 
+    .line {
+        border-top: 2px solid @text-color-subtle;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    .code-annotation-name {
+        color: @text-color-info;
+    }
+
     .btn {
         &.disappear, &.edit {
             float: right;
+            margin: 0 10px;
         }
 
         &.delete {
             background-color: @background-color-error;
             color: @text-color-error;
             &:hover {
-                text-decoration: underline;
+                color: lighten(@text-color-error, 10%);
+                // text-decoration: underline;
             }
         }
     }

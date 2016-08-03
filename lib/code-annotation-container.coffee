@@ -23,6 +23,7 @@ module.exports = class CodeAnnotationContainer
                     </div>
                 </div>
             </div>
+            <hr class="line">
             <div class="block content">
             </div>
         </code-annotation-container>"""
@@ -55,10 +56,14 @@ module.exports = class CodeAnnotationContainer
         @textEditorView = new TextEditorView({mini: true})
         element.find(".left-col").append(@textEditorView)
         @textEditorView.hide().keyup (evt) =>
+            # on enter
             if evt.which is 13
                 newName = @textEditorView.getText()
                 @codeAnnotation.updateName(newName)
                 @nameElement.text(newName)
+                @toggleMiniTextEditor()
+            # on escape
+            else if evt.which is 27
                 @toggleMiniTextEditor()
             return true
         return element
@@ -75,6 +80,8 @@ module.exports = class CodeAnnotationContainer
         return @
 
     hide: () ->
+        if @textEditorView.is(":visible")
+            @toggleMiniTextEditor()
         @element.hide()
         return @
 

@@ -91,16 +91,6 @@ module.exports = CodeAnnotationManager =
             throw new Error("code-annotations: Could not find a code annotation at the current cursor.")
         return @
 
-    # addCodeAnnotation: () ->
-    #     line = null
-    #     @addCodeAnnotationAtLine(line)
-    #     return @
-    #
-    # deleteCodeAnnotation: () ->
-    #     line = null
-    #     @deleteCodeAnnotationAtLine(line)
-    #     return @
-
     # CODE-ANNOTATION: image-testasset
     # CODE-ANNOTATION: html-testasset
     # CODE-ANNOTATION: text-testasset
@@ -361,21 +351,3 @@ module.exports = CodeAnnotationManager =
             return @annotationRegexCache[grammar.name]
         # ...some grammars don't have comments (e.g. JSON)
         throw new Error("Could not find a regular expression for grammar '#{grammar.name}'.")
-
-        # patternData = null
-        # for pattern in grammar.rawPatterns
-        #     {name, begin, end} = pattern
-        #     if name? and begin? and end?
-        #         if pattern.name.indexOf("comment") >= 0 and pattern.name.indexOf("line") >= 0
-        #             # TODO: maybe this last line is annotated. in that case a trailing newline (e.g. coffeescript's pattern.end) should not be part of the regex (or optional) so the last line will be matched
-        #             @annotationRegexCache[grammar.name] =  new RegExp(
-        #                 CodeAnnotations.SINGLE_LINE_WHITESPACE_REGEX_STR +
-        #                 pattern.begin +
-        #                 CodeAnnotations.CODE_KEYWORD +
-        #                 ".*?" +
-        #                 pattern.end,
-        #                 "g"
-        #             )
-        #             return @annotationRegexCache[grammar.name]
-        # # ...some grammars don't have comments (e.g. JSON)
-        # throw new Error("Could not find a regular expression for grammar '#{grammar.name}'.")
