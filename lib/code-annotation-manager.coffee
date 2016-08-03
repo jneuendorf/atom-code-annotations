@@ -34,6 +34,7 @@ module.exports = CodeAnnotationManager =
     assetDirectories: []
     assetDirectory: null
     initializedEditors: {}
+    codeAnnotationContainer: null
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -41,6 +42,7 @@ module.exports = CodeAnnotationManager =
     activate: (state) ->
         @subscriptions = new CompositeDisposable()
         @_init()
+        return @
 
     deactivate: () ->
         @subscriptions.dispose()
@@ -103,21 +105,15 @@ module.exports = CodeAnnotationManager =
     # CODE-ANNOTATION: html-testasset
     # CODE-ANNOTATION: text-testasset
 
-    showContainer: (editor, renderedContent) ->
-        {container} = @_getEditorData(editor)
-        if container?
-            container.empty()
-                .append(renderedContent)
-                .show()
-            return @
-        throw new Error("No container found")
+    showContainer: (codeAnnotation, renderedContent) ->
+        @codeAnnotationContainer.setCodeAnnotation(codeAnnotation)
+            .setContent(renderedContent)
+            .show()
+        return @
 
-    hideContainer: (editor) ->
-        {container} = @_getEditorData(editor)
-        if container?
-            container.hide()
-            return @
-        throw new Error("No container found")
+    hideContainer: () ->
+        @codeAnnotationContainer.hide()
+        return @
 
     setCurrentCodeAnnotation: (codeAnnotation) ->
         @currentCodeAnnotation = codeAnnotation
@@ -147,6 +143,10 @@ module.exports = CodeAnnotationManager =
         @assetDirectory = @assetDirectories[0]
         console.log @assetDirectories
 
+        @codeAnnotationContainer = new CodeAnnotationContainer()
+        pane = atom.views.getView(atom.workspace.getActivePane())
+        pane.appendChild @codeAnnotationContainer.getElement()
+
         @_registerCommands()
         @_registerElements()
         @_loadAssetManagers()
@@ -157,6 +157,7 @@ module.exports = CodeAnnotationManager =
         @registerRenderer(TextRenderer)
 
         atom.workspace.observeActivePaneItem (editor) =>
+            @codeAnnotationContainer.hide()
             if editor instanceof TextEditor
                 path = editor.getPath()
                 if not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor
@@ -184,10 +185,6 @@ module.exports = CodeAnnotationManager =
             priority: @config.gutterPriority
             visible: true
         })
-
-        container = new CodeAnnotationContainer(@)
-        editorView = atom.views.getView(editor)
-        editorView.shadowRoot.appendChild container.getElement()
 
         ranges = []
         assetData = []
@@ -220,7 +217,7 @@ module.exports = CodeAnnotationManager =
             assetDirectory: assetDirectoryPath
             assetManager: @assetManagers[assetDirectoryPath]
             codeAnnotations: codeAnnotations
-            container: container
+            # container: container
             editor: editor
             gutter: gutter
         return @
@@ -290,6 +287,10 @@ module.exports = CodeAnnotationManager =
             extends: "div"
         }
         document.registerElement "code-annotation-gutter-icon", {
+            prototype: Object.create(HTMLDivElement.prototype)
+            extends: "div"
+        }
+        document.registerElement "code-annotation-container-overlay", {
             prototype: Object.create(HTMLDivElement.prototype)
             extends: "div"
         }

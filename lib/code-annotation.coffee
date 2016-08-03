@@ -86,7 +86,7 @@ module.exports = class CodeAnnotation
             @_setRenderer()
             @element = @_createWrapper()
             @element.appendChild @renderer.render()
-        @codeAnnotationManager.showContainer(atom.workspace.getActiveTextEditor(), @element)
+        @codeAnnotationManager.showContainer(@, @element)
         return @
 
     hide: () ->

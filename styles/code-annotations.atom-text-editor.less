@@ -5,66 +5,48 @@
 @import "ui-variables";
 @import "octicon-mixins";
 
-@code-annotation-button-size: 13px;
+
 
 code-annotation-container {
     background-color: @app-background-color;
     border: 2px solid @base-border-color;
-    box-shadow: 0 0 10px 0 @base-background-color;
+    bottom: 10%;
+    box-shadow: 0 0 12px 6px @app-background-color;
     box-sizing: border-box;
-    left: 20%;
-    max-height: 60%;
-    min-height: 30%;
-    overflow: auto;
-    padding: 10px;
+    left: 10%;
+    overflow: hidden;
+    padding: 6px;
     position: absolute;
-    top: 0;
-    width: 60%;
+    right: 10%;
+    top: 10%;
+    z-index: 100;
 
-    .code-annotation-button {
-        background-color: @button-background-color;
-        border-radius: 50%;
-        cursor: pointer;
-        height: 18px;
-        padding: 0 0 2px 0;
-        position: absolute;
-        text-align: center;
-        top: 7px;
-        width: 20px;
-        &.close {
-            .octicon(remove-close);
-            right: 7px;
-            &::before {
-                font-size: @code-annotation-button-size;
-            }
+    // .content {
+    //     overflow: auto;
+    // }
+
+    .btn {
+        &.disappear, &.edit {
+            float: right;
         }
-        &.edit {
-            .octicon(pencil);
-            right: 30px;
-            &::before {
-                font-size: @code-annotation-button-size - 1;
-            }
-        }
+
         &.delete {
-            .octicon(trashcan);
-            right: 60px;
-            &::before {
-                font-size: @code-annotation-button-size - 1;
+            background-color: @background-color-error;
+            color: @text-color-error;
+            &:hover {
+                text-decoration: underline;
             }
         }
     }
 
-    .content code-annotation {
-        position: relative;
-        width: 100%;
-        height: 100%;
+    .content {
+        .rendered.image-renderer {
+            width: 100%;
+        }
     }
 
 }
 
-.rendered.image-renderer {
-    width: 100%;
-}
 
 code-annotation-gutter-icon {
     .octicon(pin);

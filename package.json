@@ -5,7 +5,7 @@
     "description": "An atom package for creating inline code annotations",
     "keywords": [],
     "activationCommands": {},
-    "repository": "https://github.com/atom/code-annotations",
+    "repository": "https://github.com/jneuendorf/code-annotations",
     "license": "MIT",
     "engines": {
         "atom": ">=1.0.0 <2.0.0"
