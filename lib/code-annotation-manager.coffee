@@ -26,10 +26,7 @@ module.exports = CodeAnnotationManager =
     # instance properties
     subscriptions: null
     renderers: []
-    codeAnnotations: []
-    # currentCodeAnnotation: null
     annotationRegexCache: {}
-    assetNames: {}
     assetManagers: {}
     assetDirectories: []
     assetDirectory: null
@@ -104,18 +101,6 @@ module.exports = CodeAnnotationManager =
     hideContainer: () ->
         @codeAnnotationContainer.hide()
         return @
-
-    # setCurrentCodeAnnotation: (codeAnnotation) ->
-    #     @currentCodeAnnotation = codeAnnotation
-    #     return @
-
-    # # TODO: pass editor because code annotations can be open in multiple editor views
-    # getCurrentCodeAnnotation: () ->
-    #     return @currentCodeAnnotation
-
-    # # get current renderer (associated with the CodeAnnotationContainer)
-    # getRenderer: () ->
-    #     return @currentCodeAnnotation.getRenderer()
 
     showAll: () ->
         # TODO: create search window like cmd+shift+p
@@ -257,10 +242,6 @@ module.exports = CodeAnnotationManager =
 
     _registerCommands: () ->
         @subscriptions.add atom.commands.add 'atom-workspace', {
-            # 'code-annotations:add-code-annotation': () =>
-            #     return @addCodeAnnotation()
-            # 'code-annotations:delete-code-annotation': () =>
-            #     return @deleteCodeAnnotation()
             'code-annotations:add-code-annotation-at-line': () =>
                 return @addCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:delete-code-annotation-at-line': () =>
