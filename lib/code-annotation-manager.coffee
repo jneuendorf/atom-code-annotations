@@ -3,13 +3,14 @@ CSON = require "season"
 
 CommentCharacters = require "./comment-characters"
 CodeAnnotations = require "./constants"
-Settings = require "./settings"
+Config = require "./config"
 Utils = require "./utils"
 
 AssetManager = require "./asset-manager"
 CodeAnnotation = require "./code-annotation"
 CodeAnnotationContainer = require "./code-annotation-container"
-{AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
+# {AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
+Renderers = {AssetRenderer} = require "./asset-renderers/all-renderers"
 Dialog = require "./dialog.coffee"
 CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
 
@@ -21,7 +22,7 @@ Has a CodeAnnotationContainer which contains the output of an asset renderer.
 ###
 module.exports = CodeAnnotationManager =
     # this is my awesome annotation
-    config: Settings
+    config: Config.configData
 
     # instance properties
     subscriptions: null
@@ -67,7 +68,7 @@ module.exports = CodeAnnotationManager =
             editor = atom.workspace.getActiveTextEditor()
             assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
             if assetManager.has(name)
-                if Settings.showReplaceConfirmDialog and not Utils.confirm({
+                if Config.showReplaceConfirmDialog and not Utils.confirm({
                     message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)
                 })
                     return @
@@ -77,7 +78,7 @@ module.exports = CodeAnnotationManager =
 
     deleteCodeAnnotationAtLine: (point) ->
         # TODO: check if annotation actually exists for the line (show notification otherwise)
-        if Settings.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
+        if Config.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
             return @
 
         editor = atom.workspace.getActiveTextEditor()
@@ -128,9 +129,10 @@ module.exports = CodeAnnotationManager =
         @_loadAssetManagers()
 
         # add default renderers
-        @registerRenderer(ImageRenderer)
-        @registerRenderer(HtmlRenderer)
-        @registerRenderer(TextRenderer)
+        @_registerRenderers()
+        # @registerRenderer(ImageRenderer)
+        # @registerRenderer(HtmlRenderer)
+        # @registerRenderer(TextRenderer)
 
         atom.workspace.observeActivePaneItem (editor) =>
             @codeAnnotationContainer.hide()
@@ -143,6 +145,13 @@ module.exports = CodeAnnotationManager =
                         # must not throw error here because otherwise the editor switch will be interrupted
                         console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message)
             return @
+        return @
+
+    _registerRenderers: () ->
+        for name, config of Config.configData.renderers.properties when Config[name] is true
+            @registerRenderer(Renderers[name.slice(4)])
+        # {AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
+        return @
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
     _initEditor: (editor) ->

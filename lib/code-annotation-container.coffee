@@ -2,7 +2,7 @@ Utils = require './utils'
 {$, TextEditorView} = require 'atom-space-pen-views'
 
 CodeAnnotations = require "./constants"
-Settings = require "./settings"
+Config = require "./config"
 Utils = require "./utils"
 
 

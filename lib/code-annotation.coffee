@@ -42,7 +42,10 @@ module.exports = class CodeAnnotation
 
     _addEventListenersToGutterIcon: (gutterIcon) ->
         gutterIcon.addEventListener "click", (event) =>
-            return @show()
+            try
+                @show()
+            catch error
+                atom.notifications.addError(error.message)
         return gutterIcon
 
     _createWrapper: () ->
