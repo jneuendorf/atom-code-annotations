@@ -17,21 +17,6 @@ module.exports = class AssetManager
     @findManagersForAsset: (name) ->
         return (instance for instance in _assetManagers when instance.has(name))
 
-    # tries to set an entry to the correct AssetManager instance assuming that duplicate names are improbable
-    # @set: (name, asset) ->
-    #     managers = @findManagersForAsset(name)
-    #     if managers.length is 1
-    #         managers[0].set(name, asset)
-    #         return @
-    #     throw new Error("code-annotations: No managers were found for name '#{name}'.")
-    #
-    # @delete: (name) ->
-    #     managers = @findManagersForAsset(name)
-    #     if managers.length is 1
-    #         managers[0].delete(name)
-    #         return @
-    #     throw new Error("code-annotations: No managers were found for name '#{name}'.")
-
     @_delegate: (funName, args...) ->
         [name] = args
         managers = @findManagersForAsset(name)

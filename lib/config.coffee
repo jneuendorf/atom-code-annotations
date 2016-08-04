@@ -9,6 +9,7 @@ class Config
         showDeleteConfirmDialog:
             type: "boolean"
             default: true
+        # those must be "load" + RendererClassName
         renderers:
             type: "object"
             properties:

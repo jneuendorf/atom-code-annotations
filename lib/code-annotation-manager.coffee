@@ -127,12 +127,7 @@ module.exports = CodeAnnotationManager =
         @_registerCommands()
         @_registerElements()
         @_loadAssetManagers()
-
-        # add default renderers
         @_registerRenderers()
-        # @registerRenderer(ImageRenderer)
-        # @registerRenderer(HtmlRenderer)
-        # @registerRenderer(TextRenderer)
 
         atom.workspace.observeActivePaneItem (editor) =>
             @codeAnnotationContainer.hide()
@@ -150,7 +145,6 @@ module.exports = CodeAnnotationManager =
     _registerRenderers: () ->
         for name, config of Config.configData.renderers.properties when Config[name] is true
             @registerRenderer(Renderers[name.slice(4)])
-        # {AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
         return @
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor

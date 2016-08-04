@@ -19,21 +19,17 @@ module.exports = class CodeAnnotation
         @assetManager = assetManager
 
         @element = null
-        @gutter = gutter
         @marker = marker
-        @decoration = null
-        @icon = null
         @renderer = null
 
-        @_init()
+        @_init(gutter)
 
-    _init: () ->
+    _init: (gutter) ->
         gutterIcon = @_createGutterIcon()
-        @decoration = @gutter.decorateMarker(@marker, {
+        gutter.decorateMarker(@marker, {
             item: gutterIcon
         })
         @_addEventListenersToGutterIcon(gutterIcon)
-        @icon = gutterIcon
         return @
 
     # PRIVATE
@@ -146,6 +142,6 @@ module.exports = class CodeAnnotation
         @assetManager
             .delete @name
             .save()
-        # remove gutter marker
+        # remove gutter marker + decoration
         @marker.destroy()
         return @
