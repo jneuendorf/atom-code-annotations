@@ -1,3 +1,5 @@
+Renderers = require "./asset-renderers/all-renderers"
+
 class Config
     @configData:
         gutterPriority:
@@ -9,19 +11,21 @@ class Config
         showDeleteConfirmDialog:
             type: "boolean"
             default: true
-        # those must be "load" + RendererClassName
         renderers:
             type: "object"
-            properties:
-                loadImageRenderer:
-                    type: "boolean"
-                    default: true
-                loadHtmlRenderer:
-                    type: "boolean"
-                    default: true
-                loadTextRenderer:
-                    type: "boolean"
-                    default: true
+            description: "Annotations can only be displayed if the according renderer is loaded"
+            properties: do () ->
+                renderers = {}
+                for name, clss of Renderers when name isnt "AssetRenderer"
+                    renderers["load#{name}"] =
+                        type: "boolean"
+                        default: true
+                        title: "load #{name}"
+                return renderers
+        # TODO: implement this behavior
+        fallbackToTextRenderer:
+            type: "boolean"
+            default: false
 
     @get: (key) ->
         return atom.config.get("code-annotations.#{key}")

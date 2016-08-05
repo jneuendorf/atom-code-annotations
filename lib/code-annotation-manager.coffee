@@ -24,29 +24,21 @@ module.exports = CodeAnnotationManager =
     # this is my awesome annotation
     config: Config.configData
 
-    # instance properties
-    subscriptions: null
-    renderers: []
-    annotationRegexCache: {}
-    assetManagers: {}
-    assetDirectories: []
-    assetDirectory: null
-    initializedEditors: {}
-    codeAnnotationContainer: null
+    # INSTANCE PROPERTIES
+    # subscriptions:            CompositeDisposable
+    # renderers:                Array of AssetRenderer
+    # annotationRegexCache:     Dict(String, RegExp)
+    # assetManagers: {}
+    # assetDirectories: []
+    # assetDirectory: null
+    # initializedEditors: {}
+    # codeAnnotationContainer:  CodeAnnotationContainer
 
     #######################################################################################
     # PUBLIC (ATOM API)
 
     activate: (state) ->
         @subscriptions = new CompositeDisposable()
-        @_init()
-        return @
-
-    deactivate: () ->
-        @subscriptions.dispose()
-        @_destroyGutters()
-
-        @subscriptions = null
         @renderers = []
         @annotationRegexCache = {}
         @assetManagers = {}
@@ -54,10 +46,19 @@ module.exports = CodeAnnotationManager =
         @assetDirectory = null
         @initializedEditors = {}
         @codeAnnotationContainer = null
+        @_init()
+        return @
+
+    deactivate: () ->
+        @subscriptions.dispose()
+        @_destroyGutters()
+        @_destroyContainer()
         return @
 
     serialize: () ->
-        # TODO: return asset manager data for better preformance
+        # NOTE: could return asset manager data for better performance
+        # NOTE: after git pull the passed data could then be invalid
+        #       -> user must have the possibility to manually reload the asset files
         return {}
 
     #######################################################################################
@@ -65,6 +66,7 @@ module.exports = CodeAnnotationManager =
 
     # CODE-ANNOTATION: image-testasset
     # CODE-ANNOTATION: html-testasset
+    # CODE-ANNOTATION: framed-html-testasset
     # CODE-ANNOTATION: text-testasset
 
     addCodeAnnotationAtLine: (point) ->

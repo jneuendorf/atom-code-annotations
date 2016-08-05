@@ -1,29 +1,15 @@
 remote = require "remote"
 dialog = remote.dialog
-# fs = require "fs-plus"
 fs = require "fs"
+path = require "path"
 
 module.exports = class Utils
-
-    @fileHasType: (filename, fileExtension) ->
-        if typeof fileExtension is "string"
-            # TODO
-            return filename.endsWith(fileExtension)
-        if fileExtension instanceof RegExp
-            # console.log filename, fileExtension, fileExtension.test(filename)
-            return fileExtension.test(filename)
-        return false
 
     @createElement: (tag, classes = "", callback) ->
         element = document.createElement(tag)
         element.className = classes
         callback?(element)
         return element
-
-    # @removeChildNodes: (parentNode) ->
-    #     while parentNode.firstChild?
-    #         parentNode.removeChild(parentNode.firstChild)
-    #     return parentNode
 
     @chooseFile: (alertMessage) ->
         if alertMessage
@@ -58,3 +44,7 @@ module.exports = class Utils
         for gutter in editor.getGutters() when gutter.name is gutterName
             return gutter
         return null
+
+    @camelToKebab: (str) ->
+        return str[0].toLowerCase() + str.slice(1).replace /([A-Z])/g, (upperCaseChar) ->
+            return '-' + upperCaseChar.toLowerCase()

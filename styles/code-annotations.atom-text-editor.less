@@ -5,7 +5,9 @@
 @import "ui-variables";
 @import "octicon-mixins";
 
-
+@container-min-height: 400px;
+// subtract overall height of top row and height of horizontal line
+@content-min-height: @container-min-height - (44 + 8 + 2 + 2*10);
 
 code-annotation-container {
     background-color: @app-background-color;
@@ -14,6 +16,7 @@ code-annotation-container {
     box-shadow: 0 0 12px 6px @app-background-color;
     box-sizing: border-box;
     left: 10%;
+    min-height: @container-min-height;
     overflow: hidden;
     padding: 6px;
     position: absolute;
@@ -52,6 +55,12 @@ code-annotation-container {
 
     .content {
         .rendered.image-renderer {
+            width: 100%;
+        }
+        .rendered.standalone-html-renderer {
+            border: none;
+            // height: 100%;
+            min-height: @content-min-height;
             width: 100%;
         }
     }

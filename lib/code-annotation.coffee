@@ -62,9 +62,17 @@ module.exports = class CodeAnnotation
 
     _getRenderer: (assetFile) ->
         filename = assetFile.getBaseName()
+        renderer = null
+        maxLength = -1
         for rendererClass in @codeAnnotationManager.renderers
-            if Utils.fileHasType(filename, rendererClass.fileExtension)
-                return new rendererClass(assetFile)
+            # if Utils.fileHasType(filename, rendererClass.fileExtension)
+                # return new rendererClass(assetFile)
+            {result, length} = rendererClass.supports(filename)
+            if result is true and length > maxLength
+                renderer = rendererClass
+                maxLength = length
+        if renderer?
+            return new renderer(assetFile)
         throw new Error("Found no renderer for asset '#{filename}'.")
 
     _updateElement: () ->
@@ -105,10 +113,9 @@ module.exports = class CodeAnnotation
         return @
 
     edit: () ->
-        console.log "editing code annotation...."
-        if not @renderer
-            throw new Error("Cannot edit a code annotation without a renderer. If you see this message please report a bug.")
-
+        # console.log "editing code annotation...."
+        # if not @renderer
+        #     throw new Error("Cannot edit a code annotation without a renderer. If you see this message please report a bug.")
         if @renderer.isTextBased()
             # load asset contents into new tab
             atom.workspace.open(@assetFile.getPath())
@@ -118,18 +125,20 @@ module.exports = class CodeAnnotation
                 atom.notifications.addInfo("No new asset chosen.")
                 return @
             sourcePath = paths[0]
-            if not Utils.fileHasType(sourcePath, @renderer.getFileExtension())
-                atom.notifications.addError("Chosen asset '#{sourcePath}' is not supported by #{@renderer.constructor.name}.")
-                return @
-            console.log "updating asset to #{sourcePath}..."
-            destPath = @assetFile.getPath()
-            sourceParts = sourcePath.split(".")
-            destParts = destinationPath.split(".")
-            destParts[destParts.length - 1] = sourceParts[sourceParts.length - 1]
-            sourcePath = sourceParts.join(".")
-            destPath = destParts.join(".")
-            Utils.copyFile(sourcePath, destPath)
-            @_updateElement()
+            # TODO: make that better!
+            throw new Error("fix me!")
+            # if not Utils.fileHasType(sourcePath, @renderer.getFileExtension())
+            #     atom.notifications.addError("Chosen asset '#{sourcePath}' is not supported by #{@renderer.constructor.name}.")
+            #     return @
+            # console.log "updating asset to #{sourcePath}..."
+            # destPath = @assetFile.getPath()
+            # sourceParts = sourcePath.split(".")
+            # destParts = destinationPath.split(".")
+            # destParts[destParts.length - 1] = sourceParts[sourceParts.length - 1]
+            # sourcePath = sourceParts.join(".")
+            # destPath = destParts.join(".")
+            # Utils.copyFile(sourcePath, destPath)
+            # @_updateElement()
         # save changes
         return @
 
