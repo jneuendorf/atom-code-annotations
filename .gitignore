@@ -1,4 +1,6 @@
 .DS_Store
-npm-debug.log
-node_modules
 .imdone
+compiled_source
+main-built.js
+node_modules
+npm-debug.log

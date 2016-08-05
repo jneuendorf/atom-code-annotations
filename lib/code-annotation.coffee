@@ -49,7 +49,6 @@ module.exports = class CodeAnnotation
 
     _setAsset: () ->
         assets = @codeAnnotationManager.assetDirectory.getEntriesSync()
-        # for asset in assets when asset.getBaseName() is @name
         for asset in assets when asset.getBaseName() is @assetManager.get(@name)
             @asset = asset
         if not @asset?
