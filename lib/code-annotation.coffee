@@ -14,22 +14,28 @@ module.exports = class CodeAnnotation
         @codeAnnotationManager = codeAnnotationManager
         @editor = editor
 
-        @asset = null
         {@line, @name} = assetData
         @assetManager = assetManager
-
         @element = null
         @marker = marker
+
+        @assetFile = null
         @renderer = null
 
         @_init(gutter)
 
     _init: (gutter) ->
-        gutterIcon = @_createGutterIcon()
-        gutter.decorateMarker(@marker, {
-            item: gutterIcon
-        })
-        @_addEventListenersToGutterIcon(gutterIcon)
+        try
+            @assetFile = @_getAssetFile()
+            @renderer = @_getRenderer(@assetFile)
+
+            gutterIcon = @_createGutterIcon()
+            gutter.decorateMarker(@marker, {item: gutterIcon})
+            @_addEventListenersToGutterIcon(gutterIcon)
+        catch error
+            atom.notifications.addError("Could not load code annotation '#{@name}'.", {
+                detail: error.message
+            })
         return @
 
     # PRIVATE
@@ -47,25 +53,23 @@ module.exports = class CodeAnnotation
     _createWrapper: () ->
         return document.createElement("code-annotation")
 
-    _setAsset: () ->
+    _getAssetFile: () ->
         assets = @codeAnnotationManager.assetDirectory.getEntriesSync()
-        for asset in assets when asset.getBaseName() is @assetManager.get(@name)
-            @asset = asset
-        if not @asset?
-            throw new Error("No asset found at '#{@codeAnnotationManager.assetDirectory.getPath()}'.")
-        console.log @asset
-        return @
+        name = @assetManager.get(@name)
+        for asset in assets when asset.getBaseName() is name
+            return asset
+        throw new Error("Found no asset for name '#{@name}' at '#{@codeAnnotationManager.assetDirectory.getPath()}'.")
 
-    _setRenderer: () ->
+    _getRenderer: (assetFile) ->
+        filename = assetFile.getBaseName()
         for rendererClass in @codeAnnotationManager.renderers
-            if Utils.fileHasType(@asset.getBaseName(), rendererClass.fileExtension)
-                @renderer = new rendererClass(@asset)
-                return @
-        throw new Error("Could not find a renderer for asset '#{@name}'.")
+            if Utils.fileHasType(filename, rendererClass.fileExtension)
+                return new rendererClass(assetFile)
+        throw new Error("Found no renderer for asset '#{filename}'.")
 
     _updateElement: () ->
         # Utils.removeChildNodes(@element)
-        # @renderer.setAsset(@asset)
+        # @renderer.setAsset(@assetFile)
         # @element.appendChild @renderer.render()
         @element = null
         @show()
@@ -109,7 +113,7 @@ module.exports = class CodeAnnotation
 
         if @renderer.isTextBased()
             # load asset contents into new tab
-            atom.workspace.open(@asset.getPath())
+            atom.workspace.open(@assetFile.getPath())
         else
             paths = Utils.chooseFile()
             if not paths?
@@ -120,7 +124,7 @@ module.exports = class CodeAnnotation
                 atom.notifications.addError("Chosen asset '#{sourcePath}' is not supported by #{@renderer.constructor.name}.")
                 return @
             console.log "updating asset to #{sourcePath}..."
-            destPath = @asset.getPath()
+            destPath = @assetFile.getPath()
             sourceParts = sourcePath.split(".")
             destParts = destinationPath.split(".")
             destParts[destParts.length - 1] = sourceParts[sourceParts.length - 1]
