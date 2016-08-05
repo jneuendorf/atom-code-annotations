@@ -80,8 +80,6 @@ module.exports = class CodeAnnotation
 
     show: () ->
         if not @element?
-            @_setAsset()
-            @_setRenderer()
             @element = @_createWrapper()
             @element.appendChild @renderer.render()
         @codeAnnotationManager.showContainer(@, @element)

@@ -44,23 +44,28 @@ module.exports = CodeAnnotationManager =
 
     deactivate: () ->
         @subscriptions.dispose()
-        @_destroyEditors()
+        @_destroyGutters()
+
+        @subscriptions = null
+        @renderers = []
+        @annotationRegexCache = {}
+        @assetManagers = {}
+        @assetDirectories = []
+        @assetDirectory = null
+        @initializedEditors = {}
+        @codeAnnotationContainer = null
         return @
 
     serialize: () ->
+        # TODO: return asset manager data for better preformance
         return {}
 
     #######################################################################################
-    # PUBLIC
+    # PUBLIC (associated with commands)
 
-    # API method for plugin packages to register their own renderers for file types
-    registerRenderer: (rendererClass) ->
-        if rendererClass in @renderers
-            throw new Error("The AssetRenderer is already defined to file type '#{rendererClass.fileExtension}'.")
-        if not rendererClass.isSubclassOf AssetRenderer
-            throw new Error("Invalid asset renderer. Expected a subclass of AssetRenderer.")
-        @renderers.push rendererClass
-        return @
+    # CODE-ANNOTATION: image-testasset
+    # CODE-ANNOTATION: html-testasset
+    # CODE-ANNOTATION: text-testasset
 
     addCodeAnnotationAtLine: (point) ->
         dialog = new CodeAnnotationNameDialog()
@@ -89,9 +94,27 @@ module.exports = CodeAnnotationManager =
             throw new Error("code-annotations: Could not find a code annotation at the current cursor.")
         return @
 
-    # CODE-ANNOTATION: image-testasset
-    # CODE-ANNOTATION: html-testasset
-    # CODE-ANNOTATION: text-testasset
+
+    showAll: () ->
+        # TODO: create search window like cmd+shift+p
+        # -> SelectListView
+        return @
+
+    reload: () ->
+        @deactivate()
+        @activate(@serialize)
+
+    #######################################################################################
+    # PUBLIC
+
+    # API method for plugin packages to register their own renderers for file types
+    registerRenderer: (rendererClass) ->
+        if rendererClass in @renderers
+            throw new Error("The AssetRenderer is already defined to file type '#{rendererClass.fileExtension}'.")
+        if not rendererClass.isSubclassOf AssetRenderer
+            throw new Error("Invalid asset renderer. Expected a subclass of AssetRenderer.")
+        @renderers.push rendererClass
+        return @
 
     showContainer: (codeAnnotation, renderedContent) ->
         @codeAnnotationContainer.setCodeAnnotation(codeAnnotation)
@@ -101,11 +124,6 @@ module.exports = CodeAnnotationManager =
 
     hideContainer: () ->
         @codeAnnotationContainer.hide()
-        return @
-
-    showAll: () ->
-        # TODO: create search window like cmd+shift+p
-        # -> SelectListView
         return @
 
     #######################################################################################
@@ -124,8 +142,12 @@ module.exports = CodeAnnotationManager =
         pane = atom.views.getView(atom.workspace.getActivePane())
         pane.appendChild @codeAnnotationContainer.getElement()
 
+        try
+            @_registerElements()
+        catch error
+            atom.notifications.addInfo("Custom DOM elements already registered")
+
         @_registerCommands()
-        @_registerElements()
         @_loadAssetManagers()
         @_registerRenderers()
 
@@ -161,7 +183,7 @@ module.exports = CodeAnnotationManager =
         console.log "initializing editor w/ path: #{editor.getPath()}"
         gutter = editor.addGutter({
             name: "code-annotations"
-            priority: @config.gutterPriority
+            priority: Config.gutterPriority
             visible: true
         })
 
@@ -210,11 +232,12 @@ module.exports = CodeAnnotationManager =
 
     # takes care of removing the unnecessary stuff (i.e. dom nodes)
     # i guess all refs to this singleton are also disposed so everything else will be cleared from memory as well
-    _destroyEditors: () ->
-        for editorData in @initializedEditors
+    _destroyGutters: () ->
+        for editorPath, editorData of @initializedEditors
             # TODO: put gutter name into constants
-            editorData.editor.getGutterWithName("code-annotations").destroy()
-            editorData.container.destroy()
+            Utils.getGutterWithName(editorData.editor, "code-annotations").destroy()
+            # editorData.container.destroy()
+            # editorData.codeAnnotations = []
         return @
 
     _loadAssetManagers: () ->
@@ -253,6 +276,8 @@ module.exports = CodeAnnotationManager =
             #     return @hideContainer()
             'code-annotations:show-all': () =>
                 return @showAll()
+            'code-annotations:reload': () =>
+                return @reload()
         }
         return @
 

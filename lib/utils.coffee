@@ -20,10 +20,10 @@ module.exports = class Utils
         callback?(element)
         return element
 
-    @removeChildNodes: (parentNode) ->
-        while parentNode.firstChild?
-            parentNode.removeChild(parentNode.firstChild)
-        return parentNode
+    # @removeChildNodes: (parentNode) ->
+    #     while parentNode.firstChild?
+    #         parentNode.removeChild(parentNode.firstChild)
+    #     return parentNode
 
     @chooseFile: (alertMessage) ->
         if alertMessage
@@ -53,3 +53,8 @@ module.exports = class Utils
         buttons = ["OK", "Cancel"]
         options.buttons = buttons
         return buttons[atom.confirm(options)] is "OK"
+
+    @getGutterWithName: (editor, gutterName) ->
+        for gutter in editor.getGutters() when gutter.name is gutterName
+            return gutter
+        return null

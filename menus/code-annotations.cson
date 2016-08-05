@@ -18,6 +18,10 @@
                 "label": "Show all"
                 "command": "code-annotations:show-all"
             }
+            {
+                "label": "Reload"
+                "command": "code-annotations:reload"
+            }
         ]
     }]
 }]
