@@ -31,8 +31,9 @@ module.exports = CodeAnnotationManager =
     # assetManagers: {}
     # assetDirectories: []
     # assetDirectory: null
-    # initializedEditors: {}
+    # initializedEditors: {}    Dict(String, TextEditor
     # codeAnnotationContainer:  CodeAnnotationContainer
+    # ignoredEditors: {}        Dict(String, TextEditor)
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -45,7 +46,9 @@ module.exports = CodeAnnotationManager =
         @assetDirectories = []
         @assetDirectory = null
         @initializedEditors = {}
+        @ignoredEditors = {}
         @codeAnnotationContainer = null
+
         @_init()
         return @
 
@@ -84,18 +87,21 @@ module.exports = CodeAnnotationManager =
         return @
 
     deleteCodeAnnotationAtLine: (point) ->
-        # TODO: check if annotation actually exists for the line (show notification otherwise)
+        editor = atom.workspace.getActiveTextEditor()
+        codeAnnotation = @_getCodeAnnotationAtPoint(editor, point)
+
+        if not codeAnnotation?
+            atom.notifications.addInfo("There is no code annotation to remove.")
+            return @
+
         if Config.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
             return @
 
-        editor = atom.workspace.getActiveTextEditor()
-        assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
         try
-            @_getCodeAnnotationAtPoint(editor, point).delete()
+            codeAnnotation.delete()
         catch error
             throw new Error("code-annotations: Could not find a code annotation at the current cursor.")
         return @
-
 
     showAll: () ->
         # TODO: create search window like cmd+shift+p
@@ -157,9 +163,10 @@ module.exports = CodeAnnotationManager =
             @codeAnnotationContainer.hide()
             if editor instanceof TextEditor
                 path = editor.getPath()
-                if not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor
+                # initialize if not already done so AND if the editor's grammar has support for code annotations
+                if (not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor) and not @ignoredEditors[path]?
                     try
-                        @_initEditor editor
+                        @_initEditor editor, path
                     catch error
                         # must not throw error here because otherwise the editor switch will be interrupted
                         console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message)
@@ -172,19 +179,19 @@ module.exports = CodeAnnotationManager =
         return @
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
-    _initEditor: (editor) ->
+    _initEditor: (editor, editorPath) ->
         grammar = editor.getGrammar()
         try
             regex = @_getAnnotationRegex(grammar)
         # comments not supported => do not modify editor
-        # TODO: keep list of unsupported editors so this method does not get called when switching to previously done but unsupported editors
         catch error
+            @ignoredEditors[editorPath] = editor
             console.log "unsupported grammer (no comments available => thus no annotations). error: #{error.message}", editor
             return @
 
-        console.log "initializing editor w/ path: #{editor.getPath()}"
+        console.log "initializing editor w/ path: #{editorPath}"
         gutter = editor.addGutter({
-            name: "code-annotations"
+            name: CodeAnnotations.GUTTER_NAME
             priority: Config.gutterPriority
             visible: true
         })
@@ -216,7 +223,7 @@ module.exports = CodeAnnotationManager =
 
         # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
         # TODO: add editor:path‐changed hook to reinitialize
-        @initializedEditors[editor.getPath()] =
+        @initializedEditors[editorPath] =
             assetDirectory: assetDirectoryPath
             assetManager: @assetManagers[assetDirectoryPath]
             codeAnnotations: codeAnnotations
@@ -236,10 +243,7 @@ module.exports = CodeAnnotationManager =
     # i guess all refs to this singleton are also disposed so everything else will be cleared from memory as well
     _destroyGutters: () ->
         for editorPath, editorData of @initializedEditors
-            # TODO: put gutter name into constants
-            Utils.getGutterWithName(editorData.editor, "code-annotations").destroy()
-            # editorData.container.destroy()
-            # editorData.codeAnnotations = []
+            Utils.getGutterWithName(editorData.editor, CodeAnnotations.GUTTER_NAME).destroy()
         return @
 
     _loadAssetManagers: () ->
