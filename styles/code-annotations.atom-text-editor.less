@@ -5,9 +5,12 @@
 @import "ui-variables";
 @import "octicon-mixins";
 
-@container-min-height: 400px;
-// subtract overall height of top row and height of horizontal line
-@content-min-height: @container-min-height - (44 + 8 + 2 + 2*10);
+@top-block-height: 52px;
+@top-block-margin: 8px;
+@middle-line-height: 22px;
+@top-block-top: 0px;
+@middle-line-top: @top-block-height;
+@bottom-block-top: @middle-line-top + @middle-line-height;
 
 code-annotation-container {
     background-color: @app-background-color;
@@ -16,7 +19,6 @@ code-annotation-container {
     box-shadow: 0 0 12px 6px @app-background-color;
     box-sizing: border-box;
     left: 10%;
-    min-height: @container-min-height;
     overflow: hidden;
     padding: 6px;
     position: absolute;
@@ -28,10 +30,26 @@ code-annotation-container {
     //     overflow: auto;
     // }
 
-    .line {
+    .top.block {
+        height: @top-block-height - @top-block-margin;
+        position: absolute;
+        width: 100%;
+    }
+
+    .middle.line {
         border-top: 2px solid @text-color-subtle;
         margin-bottom: 10px;
         margin-top: 10px;
+        position: absolute;
+        top: @middle-line-top;
+        width: 100%;
+    }
+
+    .bottom.block {
+        position: absolute;
+        top: @bottom-block-top;
+        bottom: 0;
+        width: 100%;
     }
 
     .code-annotation-name {
@@ -59,8 +77,7 @@ code-annotation-container {
         }
         .rendered.standalone-html-renderer {
             border: none;
-            // height: 100%;
-            min-height: @content-min-height;
+            height: 100%;
             width: 100%;
         }
     }

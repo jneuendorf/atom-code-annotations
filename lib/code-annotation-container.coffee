@@ -11,20 +11,20 @@ module.exports = class CodeAnnotationContainer
     # DEFINE MARKUP
     @element: do () ->
         return $ """<code-annotation-container>
-            <div class='block'>
-                <div class='row'>
-                    <div class='col-xs-5 left-col'>
-                        <h4 class='code-annotation-name' title="double click to edit"></h4>
+            <div class="top block">
+                <div class="row">
+                    <div class="col-xs-5 left-col">
+                        <h4 class="code-annotation-name" title="double click to edit"></h4>
                     </div>
-                    <div class='col-xs-7'>
-                        <button class='inline-block btn icon icon-trashcan delete'>Delete</button>
-                        <button class='inline-block btn icon icon-x disappear'>Close</button>
-                        <button class='inline-block btn icon icon-pencil edit'>Edit content</button>
+                    <div class="col-xs-7">
+                        <button class="inline-block btn icon icon-trashcan delete">Delete</button>
+                        <button class="inline-block btn icon icon-x disappear">Close</button>
+                        <button class="inline-block btn icon icon-pencil edit">Edit content</button>
                     </div>
                 </div>
             </div>
-            <hr class="line">
-            <div class="block content">
+            <hr class="middle line">
+            <div class="bottom block content">
             </div>
         </code-annotation-container>"""
 
