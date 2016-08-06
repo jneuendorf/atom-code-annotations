@@ -18,7 +18,7 @@ class Config
             order: 2
             type: "boolean"
             default: false
-            description: "Requires reloading the package"
+            description: "Changes require reloading the package"
         renderers:
             order: 3
             type: "object"
@@ -32,11 +32,12 @@ class Config
                         title: "load #{name}"
                         description: clss.description
                 return renderers
-        # TODO: implement this behavior
-        fallbackToTextRenderer:
+        fallbackRenderer:
             order: 4
-            type: "boolean"
-            default: false
+            type: "string"
+            default: "TextRenderer"
+            enum: ["none"].concat((name for name, clss of Renderers).sort())
+            description: "How to render unsupported assets"
         gutterPriority:
             order: 5
             type: "integer"

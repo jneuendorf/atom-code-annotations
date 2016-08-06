@@ -9,7 +9,6 @@ Utils = require "./utils"
 AssetManager = require "./asset-manager"
 CodeAnnotation = require "./code-annotation"
 CodeAnnotationContainer = require "./code-annotation-container"
-# {AssetRenderer, HtmlRenderer, ImageRenderer, TextRenderer} = require "./asset-renderers/all-renderers"
 Renderers = {AssetRenderer} = require "./asset-renderers/all-renderers"
 Dialog = require "./dialog.coffee"
 CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
@@ -31,9 +30,10 @@ module.exports = CodeAnnotationManager =
     # assetManagers: {}
     # assetDirectories: []
     # assetDirectory: null
-    # initializedEditors: {}    Dict(String, TextEditor
+    # initializedEditors:       Dict(String, TextEditor
     # codeAnnotationContainer:  CodeAnnotationContainer
-    # ignoredEditors: {}        Dict(String, TextEditor)
+    # ignoredEditors:           Dict(String, TextEditor)
+    # fallbackRenderer:         AssetRenderer
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -48,6 +48,8 @@ module.exports = CodeAnnotationManager =
         @initializedEditors = {}
         @ignoredEditors = {}
         @codeAnnotationContainer = null
+
+        @fallbackRenderer = Renderers[Config.fallbackRenderer] or null
 
         @_init()
         return @
@@ -224,15 +226,23 @@ module.exports = CodeAnnotationManager =
         codeAnnotations = []
         for range, i in ranges
             marker = editor.markBufferRange(range)
-            codeAnnotation = new CodeAnnotation(
-                @
-                editor
-                marker
-                gutter
-                assetData[i]
-                @assetManagers[assetDirectoryPath.getPath()]
-            )
-            codeAnnotations.push codeAnnotation
+            try
+                codeAnnotation = new CodeAnnotation(
+                    @
+                    {editor, marker, gutter}
+                    {
+                        assetManager: @assetManagers[assetDirectoryPath.getPath()]
+                        name: assetData[i].name
+                        line: assetData[i].line
+                    }
+                    @fallbackRenderer
+                )
+                codeAnnotations.push codeAnnotation
+            catch error
+                atom.notifications.addError("Could not load code annotation.", {
+                    detail: error.message
+                })
+
 
         # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
         # TODO: add editor:path‐changed hook to reinitialize
@@ -323,7 +333,7 @@ module.exports = CodeAnnotationManager =
     # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
     _createNewCodeAnnotation: (editor, point, name, assetManager) ->
-        # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st)
+        # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st) => pass assetPath to this method
         paths = Utils.chooseFile("Now, choose an asset.")
         if not paths?
             atom.notifications.addError("No asset chosen.")
@@ -354,14 +364,17 @@ module.exports = CodeAnnotationManager =
         range = range[0].concat([point.row, lineLength])
 
         marker = editor.markBufferRange(range)
-        editorData.codeAnnotations.push new CodeAnnotation(
-            @
-            editor
-            marker
-            editorData.gutter
-            {name, line}
-            assetManager
-        )
+        try
+            editorData.codeAnnotations.push new CodeAnnotation(
+                @
+                {editor, marker, gutter: editorData.gutter}
+                {assetManager, name, line}
+                @fallbackRenderer
+            )
+        catch error
+            atom.notifications.addError("Could not load code annotation.", {
+                detail: error.message
+            })
         return @
 
     _getAnnotationRegex: (grammar) ->

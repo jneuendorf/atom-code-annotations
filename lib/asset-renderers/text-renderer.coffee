@@ -8,7 +8,9 @@ module.exports = class TextRenderer extends AssetRenderer
     @description: "Render plain text"
 
     _render: () ->
-        div = document.createElement("div")
-        div.innerHTML = @asset.readSync(false).replace(/\n/g, "<br>")
-        # div.className = "rendered text-renderer"
-        return div
+        pre = document.createElement("pre")
+        # pre.innerHTML = @asset.readSync(false).replace(/\n/g, "<br>")
+        pre.innerHTML = @asset.readSync(false).replace(/>/g, "&gt;")
+            .replace(/</g, "&lt;")
+            .replace(/"/g, "&quot;")
+        return pre

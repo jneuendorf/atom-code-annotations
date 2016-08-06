@@ -8,34 +8,39 @@ CodeAnnotations = require "./constants"
 
 module.exports = class CodeAnnotation
 
-    # CONSTRUCTOR
-    # TODO: refactor this signature...
-    constructor: (codeAnnotationManager, editor, marker, gutter, assetData, assetManager) ->
+    constructor: (codeAnnotationManager, editorData, assetData, fallbackRenderer) ->
         @codeAnnotationManager = codeAnnotationManager
-        @editor = editor
 
-        {@line, @name} = assetData
-        @assetManager = assetManager
-        @element = null
+        {editor, marker, gutter} = editorData
+        @editor = editor
         @marker = marker
+
+        {@assetManager, @line, @name} = assetData
+        @element = null
 
         @assetFile = null
         @renderer = null
 
-        @_init(gutter)
+        @_init(gutter, fallbackRenderer)
 
-    _init: (gutter) ->
-        try
-            @assetFile = @_getAssetFile()
-            @renderer = @_getRenderer(@assetFile)
+    _init: (gutter, fallbackRenderer) ->
+        @assetFile = @_getAssetFile()
+        @renderer = @_getRenderer(@assetFile, fallbackRenderer)
 
-            gutterIcon = @_createGutterIcon()
-            gutter.decorateMarker(@marker, {item: gutterIcon})
-            @_addEventListenersToGutterIcon(gutterIcon)
-        catch error
-            atom.notifications.addError("Could not load code annotation '#{@name}'.", {
-                detail: error.message
-            })
+        gutterIcon = @_createGutterIcon()
+        gutter.decorateMarker(@marker, {item: gutterIcon})
+        @_addEventListenersToGutterIcon(gutterIcon)
+        # try
+        #     @assetFile = @_getAssetFile()
+        #     @renderer = @_getRenderer(@assetFile)
+        #
+        #     gutterIcon = @_createGutterIcon()
+        #     gutter.decorateMarker(@marker, {item: gutterIcon})
+        #     @_addEventListenersToGutterIcon(gutterIcon)
+        # catch error
+        #     atom.notifications.addError("Could not load code annotation '#{@name}'.", {
+        #         detail: error.message
+        #     })
         return @
 
     # PRIVATE
@@ -60,9 +65,9 @@ module.exports = class CodeAnnotation
             return asset
         throw new Error("Found no asset for name '#{@name}' at '#{@codeAnnotationManager.assetDirectory.getPath()}'.")
 
-    _getRenderer: (assetFile) ->
+    _getRenderer: (assetFile, fallbackRenderer) ->
         filename = assetFile.getBaseName()
-        renderer = null
+        renderer = fallbackRenderer
         maxLength = -1
         for rendererClass in @codeAnnotationManager.renderers
             # if Utils.fileHasType(filename, rendererClass.fileExtension)
@@ -73,7 +78,7 @@ module.exports = class CodeAnnotation
                 maxLength = length
         if renderer?
             return new renderer(assetFile)
-        throw new Error("Found no renderer for asset '#{filename}'.")
+        throw new Error("Found no renderer for asset '#{filename}' of code annotation '#{@name}'.")
 
     _updateElement: () ->
         # Utils.removeChildNodes(@element)
@@ -122,7 +127,7 @@ module.exports = class CodeAnnotation
         else
             paths = Utils.chooseFile()
             if not paths?
-                atom.notifications.addInfo("No new asset chosen.")
+                # atom.notifications.addInfo("No new asset chosen.")
                 return @
             sourcePath = paths[0]
             # TODO: make that better!

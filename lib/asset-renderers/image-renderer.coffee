@@ -7,14 +7,9 @@ module.exports = class ImageRenderer extends AssetRenderer
     @parent: AssetRenderer
     @fileExtension: ["png", "gif", "jpg", "jpeg", "bmp"]
     @isTextBased: false
-    @description: "Render images as <img> tags (currently supports png, gif, jpg, jpeg and bmp)"
+    @description: "Render images as &lt;img&gt; tags (currently supports png, gif, jpg, jpeg and bmp)"
 
     _render: () ->
         img = document.createElement("img")
         img.src = @asset.getPath()
-        # img.className = "rendered image-renderer"
         return img
-        # div = document.createElement("div")
-        # div.style.backgroundImage = "url(#{@asset.getPath()})"
-        # div.className = "rendered image-renderer"
-        # return div
