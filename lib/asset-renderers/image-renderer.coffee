@@ -7,6 +7,7 @@ module.exports = class ImageRenderer extends AssetRenderer
     @parent: AssetRenderer
     @fileExtension: ["png", "gif", "jpg", "jpeg", "bmp"]
     @isTextBased: false
+    @description: "Render images as <img> tags (currently supports png, gif, jpg, jpeg and bmp)"
 
     _render: () ->
         img = document.createElement("img")

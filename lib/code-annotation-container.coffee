@@ -37,6 +37,7 @@ module.exports = class CodeAnnotationContainer
 
         @element = @_addEventListeners(@_createElement())
         @textEditorView.hide()
+        @element.hide()
 
     _addEventListeners: (element) ->
         # TODO: escape on container

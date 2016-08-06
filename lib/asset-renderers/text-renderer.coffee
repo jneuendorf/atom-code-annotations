@@ -5,6 +5,7 @@ module.exports = class TextRenderer extends AssetRenderer
     @parent: AssetRenderer
     @fileExtension: "txt"
     @isTextBased: true
+    @description: "Render plain text"
 
     _render: () ->
         div = document.createElement("div")

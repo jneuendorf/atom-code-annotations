@@ -2,16 +2,25 @@ Renderers = require "./asset-renderers/all-renderers"
 
 class Config
     @configData:
-        gutterPriority:
-            type: "integer"
-            default: 500
-        showReplaceConfirmDialog:
+        dialogs:
+            order: 1
+            type: "object"
+            properties:
+                showReplaceConfirmDialog:
+                    type: "boolean"
+                    default: true
+                    title: "before replacing an existing asset"
+                showDeleteConfirmDialog:
+                    type: "boolean"
+                    default: true
+                    title: "before deleting a code annotation"
+        manuallyLoadCodeAnnotations:
+            order: 2
             type: "boolean"
-            default: true
-        showDeleteConfirmDialog:
-            type: "boolean"
-            default: true
+            default: false
+            description: "Requires reloading the package"
         renderers:
+            order: 3
             type: "object"
             description: "Annotations can only be displayed if the according renderer is loaded"
             properties: do () ->
@@ -21,11 +30,17 @@ class Config
                         type: "boolean"
                         default: true
                         title: "load #{name}"
+                        description: clss.description
                 return renderers
         # TODO: implement this behavior
         fallbackToTextRenderer:
+            order: 4
             type: "boolean"
             default: false
+        gutterPriority:
+            order: 5
+            type: "integer"
+            default: 500
 
     @get: (key) ->
         return atom.config.get("code-annotations.#{key}")

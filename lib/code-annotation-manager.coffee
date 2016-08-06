@@ -134,6 +134,18 @@ module.exports = CodeAnnotationManager =
         @codeAnnotationContainer.hide()
         return @
 
+    loadCurrentEditor: () ->
+        editor = atom.workspace.getActiveTextEditor()
+        path = editor.getPath()
+        # initialize if not already done so AND if the editor's grammar has support for code annotations
+        if (not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor) and not @ignoredEditors[path]?
+            try
+                @_initEditor editor, path
+            catch error
+                # NOTE: must not throw error here because otherwise the editor switch will be interrupted
+                console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message)
+        return @
+
     #######################################################################################
     # PRIVATE
 
@@ -159,18 +171,19 @@ module.exports = CodeAnnotationManager =
         @_loadAssetManagers()
         @_registerRenderers()
 
-        atom.workspace.observeActivePaneItem (editor) =>
-            @codeAnnotationContainer.hide()
-            if editor instanceof TextEditor
-                path = editor.getPath()
-                # initialize if not already done so AND if the editor's grammar has support for code annotations
-                if (not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor) and not @ignoredEditors[path]?
-                    try
-                        @_initEditor editor, path
-                    catch error
-                        # must not throw error here because otherwise the editor switch will be interrupted
-                        console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message)
-            return @
+        if not Config.manuallyLoadCodeAnnotations
+            atom.workspace.observeActivePaneItem (editor) =>
+                @codeAnnotationContainer.hide()
+                if editor instanceof TextEditor
+                    path = editor.getPath()
+                    # initialize if not already done so AND if the editor's grammar has support for code annotations
+                    if (not @initializedEditors[path]? or @initializedEditors[path].editor isnt editor) and not @ignoredEditors[path]?
+                        try
+                            @_initEditor editor, path
+                        catch error
+                            # must not throw error here because otherwise the editor switch will be interrupted
+                            console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message)
+                return @
         return @
 
     _registerRenderers: () ->
@@ -284,6 +297,8 @@ module.exports = CodeAnnotationManager =
                 return @showAll()
             'code-annotations:reload': () =>
                 return @reload()
+            'code-annotations:load-current-editor': () =>
+                return @loadCurrentEditor()
         }
         return @
 
