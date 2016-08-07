@@ -10,11 +10,9 @@ AssetManager = require "./asset-manager"
 CodeAnnotation = require "./code-annotation"
 Renderers = {AssetRenderer} = require "./asset-renderers/all-renderers"
 
-CodeAnnotationsSelectListView = require "./views/code-annotations-select-list"
+ShowAllView = require "./views/show-all-view"
 CodeAnnotationContainer = require "./views/code-annotation-container"
-# Dialog = require "./views/dialog.coffee"
 CodeAnnotationNameDialog = require "./views/asset-name-dialog.coffee"
-
 
 
 ###
@@ -35,7 +33,7 @@ module.exports =
     # codeAnnotationContainer:  CodeAnnotationContainer
     # ignoredEditors:           Dict(String, TextEditor)
     # fallbackRenderer:         AssetRenderer
-    # selectListView            CodeAnnotationsSelectListView
+    # selectListView            ShowAllView
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -51,7 +49,7 @@ module.exports =
         @initializedEditors = {}
         @ignoredEditors = {}
         @codeAnnotationContainer = new CodeAnnotationContainer()
-        @selectListView = new CodeAnnotationsSelectListView()
+        @selectListView = new ShowAllView()
         @fallbackRenderer = Renderers[Config.fallbackRenderer] or null
         @_init()
         return @
@@ -108,12 +106,7 @@ module.exports =
         return @
 
     showAll: () ->
-        # TODO: create search window like cmd+shift+p
-        # codeAnnotationNames = []
-        # for p, editorData of @initializedEditors
-        #     codeAnnotationNames = codeAnnotationNames.concat(annotation.name for annotation in editorData.codeAnnotations)
         @selectListView.show(@getAllCodeAnnotations())
-        console.log @selectListView
         return @
 
     reload: () ->
@@ -177,7 +170,7 @@ module.exports =
         # attach CodeAnnotationContainer
         pane = atom.views.getView(atom.workspace.getActivePane())
         pane.appendChild @codeAnnotationContainer.getElement()
-        # attach CodeAnnotationsSelectListView
+        # attach ShowAllView
         # pane.appendChild @selectListView[0]
 
         try

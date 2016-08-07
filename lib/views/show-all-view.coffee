@@ -2,7 +2,7 @@
 path = require "path"
 CodeAnnotationManager = require "../code-annotation-manager"
 
-module.exports = class CodeAnnotationsSelectListView extends SelectListView
+module.exports = class ShowAllView extends SelectListView
 
     initialize: () ->
         super()
