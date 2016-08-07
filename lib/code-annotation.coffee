@@ -11,9 +11,7 @@ module.exports = class CodeAnnotation
     constructor: (codeAnnotationManager, editorData, assetData, fallbackRenderer) ->
         @codeAnnotationManager = codeAnnotationManager
 
-        {editor, marker, gutter} = editorData
-        @editor = editor
-        @marker = marker
+        {@editor, @marker, gutter} = editorData
 
         {@assetManager, @line, @name} = assetData
         @element = null
@@ -122,7 +120,7 @@ module.exports = class CodeAnnotation
         # if not @renderer
         #     throw new Error("Cannot edit a code annotation without a renderer. If you see this message please report a bug.")
         if @renderer.isTextBased()
-            # load asset contents into new tab
+            # load asset contents into a TextEditor
             atom.workspace.open(@assetFile.getPath())
         else
             paths = Utils.chooseFile()

@@ -1,9 +1,8 @@
-Utils = require './utils'
 {$, TextEditorView} = require 'atom-space-pen-views'
 
-CodeAnnotations = require "./constants"
-Config = require "./config"
-Utils = require "./utils"
+CodeAnnotations = require "../constants"
+Config = require "../config"
+Utils = require "../utils"
 
 
 module.exports = class CodeAnnotationContainer

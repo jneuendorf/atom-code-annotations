@@ -8,10 +8,12 @@ Utils = require "./utils"
 
 AssetManager = require "./asset-manager"
 CodeAnnotation = require "./code-annotation"
-CodeAnnotationContainer = require "./code-annotation-container"
 Renderers = {AssetRenderer} = require "./asset-renderers/all-renderers"
-Dialog = require "./dialog.coffee"
-CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
+
+CodeAnnotationsSelectListView = require "./views/code-annotations-select-list"
+CodeAnnotationContainer = require "./views/code-annotation-container"
+# Dialog = require "./views/dialog.coffee"
+CodeAnnotationNameDialog = require "./views/asset-name-dialog.coffee"
 
 
 
@@ -19,8 +21,7 @@ CodeAnnotationNameDialog = require "./asset-name-dialog.coffee"
 @class CodeAnnotationManager
 Has a CodeAnnotationContainer which contains the output of an asset renderer.
 ###
-module.exports = CodeAnnotationManager =
-    # this is my awesome annotation
+module.exports =
     config: Config.configData
 
     # INSTANCE PROPERTIES
@@ -34,11 +35,13 @@ module.exports = CodeAnnotationManager =
     # codeAnnotationContainer:  CodeAnnotationContainer
     # ignoredEditors:           Dict(String, TextEditor)
     # fallbackRenderer:         AssetRenderer
+    # selectListView            CodeAnnotationsSelectListView
 
     #######################################################################################
     # PUBLIC (ATOM API)
 
     activate: (state) ->
+        console.log "could deserialize:", state
         @subscriptions = new CompositeDisposable()
         @renderers = []
         @annotationRegexCache = {}
@@ -47,10 +50,9 @@ module.exports = CodeAnnotationManager =
         @assetDirectory = null
         @initializedEditors = {}
         @ignoredEditors = {}
-        @codeAnnotationContainer = null
-
+        @codeAnnotationContainer = new CodeAnnotationContainer()
+        @selectListView = new CodeAnnotationsSelectListView()
         @fallbackRenderer = Renderers[Config.fallbackRenderer] or null
-
         @_init()
         return @
 
@@ -64,7 +66,7 @@ module.exports = CodeAnnotationManager =
         # NOTE: could return asset manager data for better performance
         # NOTE: after git pull the passed data could then be invalid
         #       -> user must have the possibility to manually reload the asset files
-        return {}
+        return {a: 10}
 
     #######################################################################################
     # PUBLIC (associated with commands)
@@ -107,15 +109,27 @@ module.exports = CodeAnnotationManager =
 
     showAll: () ->
         # TODO: create search window like cmd+shift+p
-        # -> SelectListView
+        # codeAnnotationNames = []
+        # for p, editorData of @initializedEditors
+        #     codeAnnotationNames = codeAnnotationNames.concat(annotation.name for annotation in editorData.codeAnnotations)
+        @selectListView.show(@getAllCodeAnnotations())
+        console.log @selectListView
         return @
 
     reload: () ->
         @deactivate()
         @activate(@serialize)
+        return @
 
     #######################################################################################
     # PUBLIC
+
+    # grouped by editor paths
+    getAllCodeAnnotations: () ->
+        annotations = {}
+        for editorPath, editorData of @initializedEditors
+            annotations[editorPath] = editorData.codeAnnotations
+        return annotations
 
     # API method for plugin packages to register their own renderers for file types
     registerRenderer: (rendererClass) ->
@@ -160,9 +174,11 @@ module.exports = CodeAnnotationManager =
         @assetDirectory = @assetDirectories[0]
         console.log @assetDirectories
 
-        @codeAnnotationContainer = new CodeAnnotationContainer()
+        # attach CodeAnnotationContainer
         pane = atom.views.getView(atom.workspace.getActivePane())
         pane.appendChild @codeAnnotationContainer.getElement()
+        # attach CodeAnnotationsSelectListView
+        # pane.appendChild @selectListView[0]
 
         try
             @_registerElements()
