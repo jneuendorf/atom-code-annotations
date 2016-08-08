@@ -9,6 +9,6 @@ module.exports = class StandaloneHtmlRenderer extends AssetRenderer
 
     _render: () ->
         iframe = document.createElement("iframe")
-        # TODO: pass e.g. text color as get parameter
+        # TODO: pass e.g. text color as get parameter + container dimensions
         iframe.src = @asset.getPath()
         return iframe

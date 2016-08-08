@@ -163,15 +163,11 @@ module.exports =
             subdir = dir.getSubdirectory(CodeAnnotations.ASSET_DIR_NAME)
             if subdir.existsSync()
                 @assetDirectories.push subdir
-        # @assetDirectory = atom.project.getDirectories()[0].getSubdirectory(".code-annotations")
         @assetDirectory = @assetDirectories[0]
-        console.log @assetDirectories
 
         # attach CodeAnnotationContainer
         pane = atom.views.getView(atom.workspace.getActivePane())
         pane.appendChild @codeAnnotationContainer.getElement()
-        # attach ShowAllView
-        # pane.appendChild @selectListView[0]
 
         try
             @_registerElements()
@@ -252,14 +248,20 @@ module.exports =
                     detail: error.message
                 })
 
+        # TODO: what happens if a TextEditor's file is moved into another project (with another code-annotations folder)??
+        # when an editor is renamed the data must be associated with the editor's new path
+        editor.onDidChangePath () =>
+            newEditorPath = editor.getPath()
+            @initializedEditors[newEditorPath] = @initializedEditors[editorPath]
+            delete @initializedEditors[editorPath]
+            editorPath = newEditorPath
+            return @
 
-        # TODO: there is not necessarily only 1 editor for 1 path. (e.g. split panes). so for each path there should be a list of unique editors (like a hashmap with editor.getPath() as the hash of the editor)
-        # TODO: add editor:path‐changed hook to reinitialize
+
         @initializedEditors[editorPath] =
             assetDirectory: assetDirectoryPath
             assetManager: @assetManagers[assetDirectoryPath]
             codeAnnotations: codeAnnotations
-            # container: container
             editor: editor
             gutter: gutter
         return @
