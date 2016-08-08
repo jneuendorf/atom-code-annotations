@@ -14,21 +14,21 @@ module.exports = class AssetManager
 
     _assetManagers = []
 
-    @findManagersForAsset: (name) ->
-        return (instance for instance in _assetManagers when instance.has(name))
-
-    @_delegate: (funName, args...) ->
-        [name] = args
-        managers = @findManagersForAsset(name)
-        if managers.length is 1
-            managers[0][funName](args...)
-            return @
-        throw new Error("code-annotations: No managers were found for name '#{name}'.")
-
-    for funName in ["set", "delete"]
-        @[funName] = do (funName) =>
-            return (args...) =>
-                return @_delegate(funName, args...)
+    # @findManagersForAsset: (name) ->
+    #     return (instance for instance in _assetManagers when instance.has(name))
+    #
+    # @_delegate: (funName, args...) ->
+    #     [name] = args
+    #     managers = @findManagersForAsset(name)
+    #     if managers.length is 1
+    #         managers[0][funName](args...)
+    #         return @
+    #     throw new Error("code-annotations: No managers were found for name '#{name}'.")
+    #
+    # for funName in ["set", "delete"]
+    #     @[funName] = do (funName) =>
+    #         return (args...) =>
+    #             return @_delegate(funName, args...)
 
 
     constructor: (path) ->
@@ -56,11 +56,18 @@ module.exports = class AssetManager
             return @
         throw new Error("code-annotations: There is no entry with name '#{codeAnnotationName}'.")
 
-    update: (name, asset) ->
-        if @data[name]?
-            @data[name] = asset
-            return @
-        throw new Error("code-annotations: There is no entry with name '#{name}'.")
+    # replace: (codeAnnotationName, aset) ->
+    #     if @data[codeAnnotationName]?
+    #         fs.removeSync(path.join(@dir, @data[codeAnnotationName]))
+    #         @data[codeAnnotationName] = asset
+    #     throw new Error("code-annotations: There is no entry with name '#{codeAnnotationName}'.")
+
+    # update: (name, asset) ->
+    #     if @data[name]?
+    #         # @set()
+    #         @data[name] = asset
+    #         return @
+    #     throw new Error("code-annotations: There is no entry with name '#{name}'.")
 
     updateName: (oldName, newName) ->
         if @has(oldName)
@@ -68,16 +75,13 @@ module.exports = class AssetManager
             delete @data[oldName]
         return @
 
-    # == upsert: does not throw errors...just overwrites ()
+    # set data and copy file
     set: (codeAnnotationName, asset) ->
-        # basename = path.basename(asset)
-        assetName = "#{@_asciiFilename(codeAnnotationName)}#{path.extname(asset)}"
+        assetName = "#{@_asciiFilename(codeAnnotationName)}#{path.extname(asset)}".toLowerCase()
         @data[codeAnnotationName] = assetName
         # copy asset to local .code-annotations directory
-        # fs.copyFileSync()
         console.log asset
-        fs.copyFileSync asset, path.join(@dir, assetName)
-        # @save()
+        fs.copyFileSync(asset, path.join(@dir, assetName))
         return @
 
     save: () ->

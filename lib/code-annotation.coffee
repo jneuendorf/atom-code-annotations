@@ -1,7 +1,8 @@
 # TODO: pass atom required object to required files (by main) in order to save require overhead
+path = require "path"
+
 {Directory} = require 'atom'
 Utils = require './utils'
-
 CodeAnnotations = require "./constants"
 
 
@@ -18,6 +19,7 @@ module.exports = class CodeAnnotation
 
         @assetFile = null
         @renderer = null
+        @fallbackRenderer = fallbackRenderer or null
 
         @_init(gutter, fallbackRenderer)
 
@@ -116,20 +118,32 @@ module.exports = class CodeAnnotation
         return @
 
     edit: () ->
-        # console.log "editing code annotation...."
-        # if not @renderer
-        #     throw new Error("Cannot edit a code annotation without a renderer. If you see this message please report a bug.")
+        # load asset contents into a TextEditor
         if @renderer.isTextBased()
-            # load asset contents into a TextEditor
             atom.workspace.open(@assetFile.getPath())
+        # choose new file as asset
         else
             paths = Utils.chooseFile()
             if not paths?
                 # atom.notifications.addInfo("No new asset chosen.")
                 return @
-            sourcePath = paths[0]
-            # TODO: make that better!
-            throw new Error("fix me!")
+
+            newAssetPath = paths[0]
+
+            # remove old file if it's of a new type
+            if path.extname(newAssetPath).toLowerCase() isnt path.extname(@assetFile.getBaseName())
+                @assetManager.delete(@name)
+
+            @assetManager.set(@name, newAssetPath)
+                .save()
+
+            @assetFile = @_getAssetFile()
+            @renderer = @_getRenderer(@assetFile, @fallbackRenderer)
+
+            @_updateElement()
+
+            # sourcePath = paths[0]
+            # Utils.copyFile(sourcePath, destPath)
             # if not Utils.fileHasType(sourcePath, @renderer.getFileExtension())
             #     atom.notifications.addError("Chosen asset '#{sourcePath}' is not supported by #{@renderer.constructor.name}.")
             #     return @
