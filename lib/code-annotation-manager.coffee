@@ -33,13 +33,17 @@ module.exports =
     # codeAnnotationContainer:  CodeAnnotationContainer
     # ignoredEditors:           Dict(String, TextEditor)
     # fallbackRenderer:         AssetRenderer
-    # selectListView            ShowAllView
+    # showAllView            ShowAllView
 
     #######################################################################################
     # PUBLIC (ATOM API)
 
     activate: (state) ->
         console.log "could deserialize:", state
+        # those are set in the constructor of the CodeAnnotationContainer
+        @textColor = null
+        @backgroundColor = null
+
         @subscriptions = new CompositeDisposable()
         @renderers = []
         @annotationRegexCache = {}
@@ -48,16 +52,16 @@ module.exports =
         @assetDirectory = null
         @initializedEditors = {}
         @ignoredEditors = {}
-        @codeAnnotationContainer = new CodeAnnotationContainer()
-        @selectListView = new ShowAllView()
+        @codeAnnotationContainer = new CodeAnnotationContainer(@)
+        @showAllView = new ShowAllView()
         @fallbackRenderer = Renderers[Config.fallbackRenderer] or null
         @_init()
         return @
 
     deactivate: () ->
         @subscriptions.dispose()
+        @codeAnnotationContainer.destroy()
         @_destroyGutters()
-        @_destroyContainer()
         return @
 
     serialize: () ->
@@ -106,7 +110,7 @@ module.exports =
         return @
 
     showAll: () ->
-        @selectListView.show(@getAllCodeAnnotations())
+        @showAllView.show(@getAllCodeAnnotations())
         return @
 
     reload: () ->
@@ -164,10 +168,6 @@ module.exports =
             if subdir.existsSync()
                 @assetDirectories.push subdir
         @assetDirectory = @assetDirectories[0]
-
-        # attach CodeAnnotationContainer
-        pane = atom.views.getView(atom.workspace.getActivePane())
-        pane.appendChild @codeAnnotationContainer.getElement()
 
         try
             @_registerElements()
@@ -256,7 +256,6 @@ module.exports =
             delete @initializedEditors[editorPath]
             editorPath = newEditorPath
             return @
-
 
         @initializedEditors[editorPath] =
             assetDirectory: assetDirectoryPath

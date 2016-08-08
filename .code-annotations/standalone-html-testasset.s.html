@@ -33,10 +33,21 @@
     </style>
 </head>
 <body>
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script>
-        var width = 700,
-            height = 310;
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <script type="text/javascript">
+        var passedAttributes = (function() {
+            var result = {};
+            var search = location.search.slice(1).split("&");
+            var pair;
+            for (var i = 0; i < search.length; i++) {
+                pair = search[i].split("=");
+                result[pair[0]] = pair[1];
+            }
+            return result;
+        })();
+
+        var width = parseInt(passedAttributes.width, 10) - 12,
+            height = parseInt(passedAttributes.height, 10) - 110;
 
         var fill = d3.scale.category20();
 
@@ -133,6 +144,13 @@
 
             force.start();
         }
+    </script>
+    <script type="text/javascript">
+        d3.select("body").append("br");
+        d3.select("body").append("span")
+            .text(location.search)
+            .style("color", passedAttributes.textColor)
+            .style("background-color", passedAttributes.backgroundColor);
     </script>
 </body>
 </html>

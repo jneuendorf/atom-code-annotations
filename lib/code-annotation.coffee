@@ -94,7 +94,7 @@ module.exports = class CodeAnnotation
     show: () ->
         if not @element?
             @element = @_createWrapper()
-            @element.appendChild @renderer.render()
+            @element.appendChild @renderer.render(@codeAnnotationManager)
         @codeAnnotationManager.showContainer(@, @element)
         return @
 

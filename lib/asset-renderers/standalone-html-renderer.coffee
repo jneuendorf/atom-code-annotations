@@ -7,8 +7,12 @@ module.exports = class StandaloneHtmlRenderer extends AssetRenderer
     @isTextBased: true
     @description: "Render HTML in an iframe (this enables complete capsulation of CSS and JavaScript)"
 
-    _render: () ->
+    _render: (codeAnnotationManager) ->
         iframe = document.createElement("iframe")
-        # TODO: pass e.g. text color as get parameter + container dimensions
-        iframe.src = @asset.getPath()
+        container = codeAnnotationManager.codeAnnotationContainer
+        iframe.src = """#{@asset.getPath()}
+            ?width=#{container.width}
+            &height=#{container.height}
+            &textColor=#{codeAnnotationManager.textColor}
+            &backgroundColor=#{codeAnnotationManager.backgroundColor}""".replace(/\s/g, "")
         return iframe

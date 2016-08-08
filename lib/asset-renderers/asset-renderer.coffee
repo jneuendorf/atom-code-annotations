@@ -38,12 +38,12 @@ module.exports = class AssetRenderer
             result: false
         }
 
-    render: () ->
-        element = @_render()
+    render: (codeAnnotationManager) ->
+        element = @_render(codeAnnotationManager)
         element.className = "#{element.className} rendered #{Utils.camelToKebab(@constructor.name)}"
         return element
 
-    _render: () ->
+    _render: (codeAnnotationManager) ->
         throw new Error("_render() method must be implemented by '#{@constructor.name}'.")
 
     isTextBased: () ->

@@ -10,6 +10,7 @@ module.exports = class CodeAnnotationContainer
     # DEFINE MARKUP
     @element: do () ->
         return $ """<code-annotation-container>
+            <div class="hidden"></div>
             <div class="top block">
                 <div class="row">
                     <div class="col-xs-5 left-col">
@@ -28,13 +29,23 @@ module.exports = class CodeAnnotationContainer
         </code-annotation-container>"""
 
     # CONSTRUCTOR
-    constructor: () ->
+    constructor: (codeAnnotationManager) ->
         @codeAnnotation = null
         @nameElement = null
         @content = null
         @textEditorView = null
 
         @element = @_addEventListeners(@_createElement())
+        pane = atom.views.getView(atom.workspace.getActivePane())
+        pane.appendChild(@getElement())
+
+        # get layout data for being passed onto asset renderers for optimized rendering
+        @width = @element.width()
+        @height = @element.height()
+        hiddenElement = @element.children(".hidden")
+        codeAnnotationManager.textColor = hiddenElement.css("color")
+        codeAnnotationManager.backgroundColor = hiddenElement.css("background-color")
+
         @textEditorView.hide()
         @element.hide()
 
