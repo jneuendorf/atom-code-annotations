@@ -38,6 +38,11 @@ module.exports = class AssetRenderer
             result: false
         }
 
+    @getFileExtension: () ->
+        if typeof @fileExtension is "string"
+            return @fileExtension
+        return @fileExtension[0]
+
     render: (codeAnnotationManager) ->
         element = @_render(codeAnnotationManager)
         element.className = "#{element.className} rendered #{Utils.camelToKebab(@constructor.name)}"

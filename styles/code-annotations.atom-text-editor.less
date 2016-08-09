@@ -40,6 +40,11 @@ code-annotation-container {
         height: @top-block-height - @top-block-margin;
         position: absolute;
         width: 100%;
+        z-index: 110;
+
+        &.renderer-buttons {
+            z-index: 120;
+        }
     }
 
     .middle.line {
@@ -49,6 +54,7 @@ code-annotation-container {
         position: absolute;
         top: @middle-line-top;
         width: 100%;
+        z-index: 110;
     }
 
     .bottom.block {
@@ -56,6 +62,7 @@ code-annotation-container {
         top: @bottom-block-top;
         bottom: 0;
         width: 100%;
+        z-index: 105;
     }
 
     .code-annotation-name {
@@ -63,9 +70,9 @@ code-annotation-container {
     }
 
     .btn {
-        &.disappear, &.edit {
+        &.disappear, &.edit, &.change-type {
             float: right;
-            margin: 0 10px;
+            margin: 0 6px;
         }
 
         &.delete {

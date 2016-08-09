@@ -78,21 +78,32 @@ module.exports =
     # CODE-ANNOTATION: framed-html-testasset
     # CODE-ANNOTATION: text-testasset
 
-    addCodeAnnotationAtLine: (point) ->
+    addCodeAnnotation: (callback, point) ->
         dialog = new CodeAnnotationNameDialog()
         dialog.attach().onSubmit (name) =>
             editor = atom.workspace.getActiveTextEditor()
             assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
-            if assetManager.has(name)
-                if Config.showReplaceConfirmDialog and not Utils.confirm({
-                    message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)
-                })
+            if assetManager.has(name) and Config.showReplaceConfirmDialog
+                if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
                     return @
-            @_createNewCodeAnnotation(editor, point, name, assetManager)
+            callback.call(@, editor, point, name, assetManager)
             return @
         return @
 
-    deleteCodeAnnotationAtLine: (point) ->
+    addCodeAnnotationWithFile: (editor, point, name, assetManager) ->
+        paths = Utils.chooseFile("Now, choose an asset.")
+        if not paths? or not paths.length
+            # atom.notifications.addError("No asset chosen.")
+            return @
+        @_createNewCodeAnnotation(editor, point, name, assetManager, paths[0])
+        return @
+
+    addCodeAnnotationWithContent: (editor, point, name, assetManager) ->
+        codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager, null)
+        codeAnnotation.edit()
+        return @
+
+    deleteCodeAnnotation: (point) ->
         editor = atom.workspace.getActiveTextEditor()
         codeAnnotation = @_getCodeAnnotationAtPoint(editor, point)
 
@@ -177,6 +188,7 @@ module.exports =
         @_registerCommands()
         @_loadAssetManagers()
         @_registerRenderers()
+        # @codeAnnotationContainer.addRendererButtons()
 
         if not Config.manuallyLoadCodeAnnotations
             atom.workspace.observeActivePaneItem (editor) =>
@@ -299,20 +311,21 @@ module.exports =
 
     _getEditorData: (editor) ->
         return @initializedEditors[editor.getPath()] or null
-        # dataList = @initializedEditors[editor.getPath()]
-        # if dataList?
-        #     for data in dataList when data.editor is editor
-        #         return data
-        # return {}
 
     _registerCommands: () ->
         @subscriptions.add atom.commands.add 'atom-workspace', {
-            'code-annotations:add-code-annotation-at-line': () =>
-                return @addCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
-            'code-annotations:delete-code-annotation-at-line': () =>
-                return @deleteCodeAnnotationAtLine(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
-            # 'code-annotations:hide-container': () =>
-            #     return @hideContainer()
+            'code-annotations:add-code-annotation-with-file': () =>
+                return @addCodeAnnotation(
+                    @addCodeAnnotationWithFile
+                    atom.workspace.getActiveTextEditor().getCursorBufferPosition()
+                )
+            'code-annotations:add-code-annotation-with-content': () =>
+                return @addCodeAnnotation(
+                    @addCodeAnnotationWithContent
+                    atom.workspace.getActiveTextEditor().getCursorBufferPosition()
+                )
+            'code-annotations:delete-code-annotation': () =>
+                return @deleteCodeAnnotation(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:show-all': () =>
                 return @showAll()
             'code-annotations:reload': () =>
@@ -342,19 +355,15 @@ module.exports =
     # Therefore, an asset is copied and the .names.cson is updated.
     # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
-    _createNewCodeAnnotation: (editor, point, name, assetManager) ->
-        # TODO: enable entering a content and an asset type (i.e. html content without having to create a file 1st) => pass assetPath to this method
-        paths = Utils.chooseFile("Now, choose an asset.")
-        if not paths?
-            atom.notifications.addError("No asset chosen.")
-            return @
-        assetPath = paths[0]
-        console.log name, assetPath
+    _createNewCodeAnnotation: (editor, point, name, assetManager, assetPath) ->
+        # console.log name, assetPath
 
         # update asset name "database" (this should not throw errors because the manager should never be null, name collisions were checked before and the manager should never have been initialized with a wrong path (so save should work))
-        assetManager
-            .set name, assetPath
-            .save()
+        if assetPath?
+            assetManager.set(name, assetPath)
+        else
+            assetManager.create(name)
+        assetManager.save()
 
         indentation = editor.indentationForBufferRow(point.row)
         range = [[point.row, 0], [point.row, 0]]
@@ -375,17 +384,20 @@ module.exports =
 
         marker = editor.markBufferRange(range)
         try
-            editorData.codeAnnotations.push new CodeAnnotation(
+            codeAnnotation = new CodeAnnotation(
                 @
                 {editor, marker, gutter: editorData.gutter}
                 {assetManager, name, line}
                 @fallbackRenderer
             )
+            editorData.codeAnnotations.push codeAnnotation
+            return codeAnnotation
         catch error
+            codeAnnotation = null
             atom.notifications.addError("Could not load code annotation.", {
                 detail: error.message
             })
-        return @
+        return codeAnnotation
 
     _getAnnotationRegex: (grammar) ->
         if @annotationRegexCache[grammar.name]?

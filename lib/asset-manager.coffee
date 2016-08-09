@@ -12,30 +12,10 @@ Utils = require "./utils"
 ###
 module.exports = class AssetManager
 
-    _assetManagers = []
-
-    # @findManagersForAsset: (name) ->
-    #     return (instance for instance in _assetManagers when instance.has(name))
-    #
-    # @_delegate: (funName, args...) ->
-    #     [name] = args
-    #     managers = @findManagersForAsset(name)
-    #     if managers.length is 1
-    #         managers[0][funName](args...)
-    #         return @
-    #     throw new Error("code-annotations: No managers were found for name '#{name}'.")
-    #
-    # for funName in ["set", "delete"]
-    #     @[funName] = do (funName) =>
-    #         return (args...) =>
-    #             return @_delegate(funName, args...)
-
-
     constructor: (path) ->
         @dir = path
         @file = "#{path}/#{CodeAnnotations.ASSET_NAMES_FILE}"
         @data = CSON.readFileSync(@file)
-        _assetManagers.push(@)
 
     has: (name) ->
         return @data[name]?
@@ -56,23 +36,16 @@ module.exports = class AssetManager
             return @
         throw new Error("code-annotations: There is no entry with name '#{codeAnnotationName}'.")
 
-    # replace: (codeAnnotationName, aset) ->
-    #     if @data[codeAnnotationName]?
-    #         fs.removeSync(path.join(@dir, @data[codeAnnotationName]))
-    #         @data[codeAnnotationName] = asset
-    #     throw new Error("code-annotations: There is no entry with name '#{codeAnnotationName}'.")
-
-    # update: (name, asset) ->
-    #     if @data[name]?
-    #         # @set()
-    #         @data[name] = asset
-    #         return @
-    #     throw new Error("code-annotations: There is no entry with name '#{name}'.")
-
     updateName: (oldName, newName) ->
         if @has(oldName)
             @data[newName] = @data[oldName]
             delete @data[oldName]
+        return @
+
+    renameAsset: (codeAnnotationName, newAssetName) ->
+        asset = @get(codeAnnotationName)
+        fs.moveSync(path.join(@dir, @data[codeAnnotationName]), path.join(@dir, newAssetName))
+        @data[codeAnnotationName] = newAssetName
         return @
 
     # set data and copy file
@@ -82,6 +55,15 @@ module.exports = class AssetManager
         # copy asset to local .code-annotations directory
         console.log asset
         fs.copyFileSync(asset, path.join(@dir, assetName))
+        return @
+
+    create: (codeAnnotationName) ->
+        assetName = "#{@_asciiFilename(codeAnnotationName)}#{path.extname(asset)}".toLowerCase()
+        @data[codeAnnotationName] = assetName
+        # copy asset to local .code-annotations directory
+        console.log asset
+        # TODO: create file: path.join(@dir, assetName)
+        # fs.copyFileSync(asset, path.join(@dir, assetName))
         return @
 
     save: () ->

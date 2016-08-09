@@ -1,6 +1,6 @@
 {SelectListView, $$} = require "atom-space-pen-views"
 path = require "path"
-CodeAnnotationManager = require "../code-annotation-manager"
+
 
 module.exports = class ShowAllView extends SelectListView
 

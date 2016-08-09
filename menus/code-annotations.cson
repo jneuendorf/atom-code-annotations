@@ -2,7 +2,11 @@
     "atom-text-editor": [
         {
             "label": "Add code annotation"
-            "command": "code-annotations:add-code-annotation-at-line"
+            "command": "code-annotations:add-code-annotation-with-file"
+        }
+        {
+            "label": "Add code annotation with content"
+            "command": "code-annotations:add-code-annotation-with-content"
         }
         {
             "label": "Delete code annotation"
@@ -17,6 +21,10 @@
             {
                 "label": "Show all"
                 "command": "code-annotations:show-all"
+            }
+            {
+                "label": "Load current editor"
+                "command": "code-annotations:load-current-editor"
             }
             {
                 "label": "Reload"

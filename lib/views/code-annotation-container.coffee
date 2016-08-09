@@ -4,6 +4,8 @@ CodeAnnotations = require "../constants"
 Config = require "../config"
 Utils = require "../utils"
 
+ChangeTypeView = require "./change-type-view"
+
 
 module.exports = class CodeAnnotationContainer
 
@@ -20,6 +22,7 @@ module.exports = class CodeAnnotationContainer
                         <button class="inline-block btn icon icon-trashcan delete">Delete</button>
                         <button class="inline-block btn icon icon-x disappear">Close</button>
                         <button class="inline-block btn icon icon-pencil edit">Edit content</button>
+                        <button class="inline-block btn icon icon-paintcan change-type">Change type</button>
                     </div>
                 </div>
             </div>
@@ -28,8 +31,16 @@ module.exports = class CodeAnnotationContainer
             </div>
         </code-annotation-container>"""
 
+    # rendererButton = $ """<button class="inline-block btn"></button>"""
+    # @rendererButton: (rendererName) ->
+    #     return rendererButton.clone()
+    #         .attr("data-renderer-name", rendererName)
+    #         .text(rendererName)
+
+
     # CONSTRUCTOR
     constructor: (codeAnnotationManager) ->
+        @codeAnnotationManager = codeAnnotationManager
         @codeAnnotation = null
         @nameElement = null
         @content = null
@@ -60,12 +71,14 @@ module.exports = class CodeAnnotationContainer
         element.find(".btn.delete").click (event) =>
             if Settings.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
                 return @
-            @codeAnnotation?.delete()
+            @codeAnnotation.delete()
             return @hide()
         element.find(".btn.edit").click (event) =>
-            return @codeAnnotation?.edit()
+            return @codeAnnotation.edit()
         element.find(".btn.disappear").click (event) =>
             return @hide()
+        element.find(".btn.change-type").click (event) =>
+            return @changeTypeView.show(@codeAnnotationManager.renderers)
         # asset name elements' events
         @nameElement.dblclick () =>
             @toggleMiniTextEditor()
@@ -91,6 +104,8 @@ module.exports = class CodeAnnotationContainer
         @nameElement = element.find(".code-annotation-name")
         @textEditorView = new TextEditorView({mini: true})
         element.find(".left-col").append(@textEditorView)
+        @changeTypeView = new ChangeTypeView()
+        @changeTypeView.codeAnnotationContainer = @
         return element
 
     getElement: () ->
@@ -132,4 +147,8 @@ module.exports = class CodeAnnotationContainer
     toggleMiniTextEditor: () ->
         @nameElement.toggle()
         @textEditorView.toggle()
+        return @
+
+    changeAnnotationType: (rendererClass) ->
+        @codeAnnotation.changeType(rendererClass)
         return @

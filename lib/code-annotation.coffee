@@ -21,11 +21,11 @@ module.exports = class CodeAnnotation
         @renderer = null
         @fallbackRenderer = fallbackRenderer or null
 
-        @_init(gutter, fallbackRenderer)
+        @_init(gutter)
 
-    _init: (gutter, fallbackRenderer) ->
+    _init: (gutter) ->
         @assetFile = @_getAssetFile()
-        @renderer = @_getRenderer(@assetFile, fallbackRenderer)
+        @renderer = @_getRenderer(@assetFile, @fallbackRenderer)
 
         gutterIcon = @_createGutterIcon()
         gutter.decorateMarker(@marker, {item: gutterIcon})
@@ -68,6 +68,7 @@ module.exports = class CodeAnnotation
     _getRenderer: (assetFile, fallbackRenderer) ->
         filename = assetFile.getBaseName()
         renderer = fallbackRenderer
+        # TODO: instead of length take the number of dots!
         maxLength = -1
         for rendererClass in @codeAnnotationManager.renderers
             # if Utils.fileHasType(filename, rendererClass.fileExtension)
@@ -81,9 +82,6 @@ module.exports = class CodeAnnotation
         throw new Error("Found no renderer for asset '#{filename}' of code annotation '#{@name}'.")
 
     _updateElement: () ->
-        # Utils.removeChildNodes(@element)
-        # @renderer.setAsset(@assetFile)
-        # @element.appendChild @renderer.render()
         @element = null
         @show()
         return @
@@ -129,7 +127,6 @@ module.exports = class CodeAnnotation
                 return @
 
             newAssetPath = paths[0]
-
             # remove old file if it's of a new type
             if path.extname(newAssetPath).toLowerCase() isnt path.extname(@assetFile.getBaseName())
                 @assetManager.delete(@name)
@@ -139,24 +136,17 @@ module.exports = class CodeAnnotation
 
             @assetFile = @_getAssetFile()
             @renderer = @_getRenderer(@assetFile, @fallbackRenderer)
-
             @_updateElement()
+        return @
 
-            # sourcePath = paths[0]
-            # Utils.copyFile(sourcePath, destPath)
-            # if not Utils.fileHasType(sourcePath, @renderer.getFileExtension())
-            #     atom.notifications.addError("Chosen asset '#{sourcePath}' is not supported by #{@renderer.constructor.name}.")
-            #     return @
-            # console.log "updating asset to #{sourcePath}..."
-            # destPath = @assetFile.getPath()
-            # sourceParts = sourcePath.split(".")
-            # destParts = destinationPath.split(".")
-            # destParts[destParts.length - 1] = sourceParts[sourceParts.length - 1]
-            # sourcePath = sourceParts.join(".")
-            # destPath = destParts.join(".")
-            # Utils.copyFile(sourcePath, destPath)
-            # @_updateElement()
-        # save changes
+    changeType: (rendererClass) ->
+        assetName = @assetFile.getBaseName()
+        assetName = assetName.replace(path.extname(assetName), ".#{rendererClass.getFileExtension()}")
+        @assetManager.renameAsset(@name, assetName)
+            .save()
+        @assetFile = @codeAnnotationManager.assetDirectory.getFile(assetName)
+        @renderer = new rendererClass(@assetFile)
+        @_updateElement()
         return @
 
     delete: () ->
