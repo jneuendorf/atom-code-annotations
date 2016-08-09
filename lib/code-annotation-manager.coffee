@@ -95,11 +95,15 @@ module.exports =
         if not paths? or not paths.length
             # atom.notifications.addError("No asset chosen.")
             return @
+        assetManager.set(name, paths[0])
+            .save()
         @_createNewCodeAnnotation(editor, point, name, assetManager, paths[0])
         return @
 
     addCodeAnnotationWithContent: (editor, point, name, assetManager) ->
-        codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager, null)
+        assetManager.create(name)
+            .save()
+        codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager)
         codeAnnotation.edit()
         return @
 
@@ -355,16 +359,7 @@ module.exports =
     # Therefore, an asset is copied and the .names.cson is updated.
     # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
-    _createNewCodeAnnotation: (editor, point, name, assetManager, assetPath) ->
-        # console.log name, assetPath
-
-        # update asset name "database" (this should not throw errors because the manager should never be null, name collisions were checked before and the manager should never have been initialized with a wrong path (so save should work))
-        if assetPath?
-            assetManager.set(name, assetPath)
-        else
-            assetManager.create(name)
-        assetManager.save()
-
+    _createNewCodeAnnotation: (editor, point, name, assetManager) ->
         indentation = editor.indentationForBufferRow(point.row)
         range = [[point.row, 0], [point.row, 0]]
         line = "#{CodeAnnotations.CODE_KEYWORD.trim()} #{name}\n"

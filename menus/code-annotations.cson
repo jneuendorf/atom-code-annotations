@@ -10,7 +10,7 @@
         }
         {
             "label": "Delete code annotation"
-            "command": "code-annotations:delete-code-annotation-at-line"
+            "command": "code-annotations:delete-code-annotation"
         }
     ]
 "menu": [{

@@ -52,18 +52,16 @@ module.exports = class AssetManager
     set: (codeAnnotationName, asset) ->
         assetName = "#{@_asciiFilename(codeAnnotationName)}#{path.extname(asset)}".toLowerCase()
         @data[codeAnnotationName] = assetName
-        # copy asset to local .code-annotations directory
         console.log asset
+        # copy asset to local .code-annotations directory
         fs.copyFileSync(asset, path.join(@dir, assetName))
         return @
 
     create: (codeAnnotationName) ->
-        assetName = "#{@_asciiFilename(codeAnnotationName)}#{path.extname(asset)}".toLowerCase()
+        assetName = "#{@_asciiFilename(codeAnnotationName)}.txt".toLowerCase()
         @data[codeAnnotationName] = assetName
-        # copy asset to local .code-annotations directory
-        console.log asset
-        # TODO: create file: path.join(@dir, assetName)
-        # fs.copyFileSync(asset, path.join(@dir, assetName))
+        # create asset in local .code-annotations directory
+        fs.writeFileSync(path.join(@dir, assetName), "")
         return @
 
     save: () ->
