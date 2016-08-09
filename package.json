@@ -1,7 +1,7 @@
 {
     "name": "code-annotations",
     "main": "./lib/code-annotation-manager",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "description": "An atom package for creating inline code annotations",
     "keywords": [],
     "activationCommands": {},
