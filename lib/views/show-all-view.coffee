@@ -1,30 +1,13 @@
-{SelectListView, $$} = require "atom-space-pen-views"
+SelectListView = require "./select-list-view"
 path = require "path"
 
 
 module.exports = class ShowAllView extends SelectListView
 
-    initialize: () ->
-        super()
-        @addClass('command-palette')
-
     getFilterKey: () ->
         return "annotationName"
 
-    cancelled: () ->
-        @restoreFocus()
-        return @hide()
-
-    toggle: () ->
-        if @panel?.isVisible()
-            @cancel()
-        else
-            @show()
-        return @
-
-    show: (groupedItems) ->
-        @storeFocusedElement()
-
+    beforeShow: (groupedItems) ->
         items = []
         for editorPath, annotations of groupedItems
             for annotation in annotations
@@ -34,20 +17,10 @@ module.exports = class ShowAllView extends SelectListView
                     annotationName: annotation.name
                     lineNumber: annotation.marker.getBufferRange().start.row
                 }
-
-        @setItems(items)
-        @panel ?= atom.workspace.addModalPanel(item: @)
-        @panel.show()
-        @focusFilterEditor()
-        return @
-
-    hide: () ->
-        @panel?.hide()
-        return @
+        return items
 
     viewForItem: ({annotationName, filename, lineNumber}) ->
-        return $$ () ->
-            # return @li("#{name} (#{editorPath})")
+        return @$$ () ->
             return @li class: 'event', 'data-event-name': annotationName, =>
                 @div class: 'pull-right', =>
                     @span "#{filename} @ #{lineNumber + 1}"
