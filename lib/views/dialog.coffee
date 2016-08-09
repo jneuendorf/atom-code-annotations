@@ -1,6 +1,6 @@
 # NOTE: adapted from tree-view package
 {$, TextEditorView, View} = require 'atom-space-pen-views'
-# path = require 'path'
+
 
 module.exports = class Dialog extends View
 

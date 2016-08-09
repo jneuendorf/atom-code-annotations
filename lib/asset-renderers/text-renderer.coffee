@@ -7,9 +7,8 @@ module.exports = class TextRenderer extends AssetRenderer
     @isTextBased: true
     @description: "Render plain text"
 
-    _render: () ->
+    _render: (codeAnnotationManager) ->
         pre = document.createElement("pre")
-        # pre.innerHTML = @asset.readSync(false).replace(/\n/g, "<br>")
         pre.innerHTML = @asset.readSync(false).replace(/>/g, "&gt;")
             .replace(/</g, "&lt;")
             .replace(/"/g, "&quot;")

@@ -48,6 +48,10 @@ module.exports = class AssetRenderer
         element.className = "#{element.className} rendered #{Utils.camelToKebab(@constructor.name)}"
         return element
 
+    # can be overriden by subclasses to get latest layout info
+    afterShow: (codeAnnotationManager) ->
+        return @
+
     _render: (codeAnnotationManager) ->
         throw new Error("_render() method must be implemented by '#{@constructor.name}'.")
 

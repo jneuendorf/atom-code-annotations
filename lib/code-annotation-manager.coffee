@@ -65,8 +65,8 @@ module.exports =
         return @
 
     serialize: () ->
-        # NOTE: could return asset manager data for better performance
-        # NOTE: after git pull the passed data could then be invalid
+        # TODO: could return asset manager data for better performance
+        #       after git pull the passed data could then be invalid
         #       -> user must have the possibility to manually reload the asset files
         return {a: 10}
 
@@ -101,7 +101,7 @@ module.exports =
         return @
 
     addCodeAnnotationWithContent: (editor, point, name, assetManager) ->
-        assetManager.create(name)
+        assetManager.createFromName(name)
             .save()
         codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager)
         codeAnnotation.edit()

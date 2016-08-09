@@ -31,12 +31,6 @@ module.exports = class CodeAnnotationContainer
             </div>
         </code-annotation-container>"""
 
-    # rendererButton = $ """<button class="inline-block btn"></button>"""
-    # @rendererButton: (rendererName) ->
-    #     return rendererButton.clone()
-    #         .attr("data-renderer-name", rendererName)
-    #         .text(rendererName)
-
 
     # CONSTRUCTOR
     constructor: (codeAnnotationManager) ->
@@ -116,13 +110,18 @@ module.exports = class CodeAnnotationContainer
         return @
 
     show: () ->
-        @element.show()
+        @element.css("display", "block")
+        @width = @element.width()
+        @height = @element.height()
+        # @element.show 0, () =>
+        #     @width = @element.width()
+        #     @height = @element.height()
         return @
 
     hide: () ->
         if @textEditorView.is(":visible")
             @toggleMiniTextEditor()
-        @element.hide()
+        @element.css("display", "none")
         return @
 
     empty: () ->
@@ -138,7 +137,8 @@ module.exports = class CodeAnnotationContainer
         return @
 
     setContent: (content) ->
-        @content.empty().append(content)
+        @content.children().detach()
+        @content.append(content)
         @nameElement.text(@codeAnnotation.name)
         @textEditorView.getModel().setText(@codeAnnotation.name)
         return @

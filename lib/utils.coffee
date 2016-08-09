@@ -1,7 +1,7 @@
-remote = require "remote"
-dialog = remote.dialog
+dialog = require("remote").dialog
 fs = require "fs"
 path = require "path"
+
 
 module.exports = class Utils
 

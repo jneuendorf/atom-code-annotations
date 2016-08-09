@@ -6,7 +6,6 @@ Utils = require './utils'
 CodeAnnotations = require "./constants"
 
 
-
 module.exports = class CodeAnnotation
 
     constructor: (codeAnnotationManager, editorData, assetData, fallbackRenderer) ->
@@ -94,6 +93,7 @@ module.exports = class CodeAnnotation
             @element = @_createWrapper()
             @element.appendChild @renderer.render(@codeAnnotationManager)
         @codeAnnotationManager.showContainer(@, @element)
+        @renderer.afterShow(@codeAnnotationManager)
         return @
 
     hide: () ->

@@ -57,7 +57,7 @@ module.exports = class AssetManager
         fs.copyFileSync(asset, path.join(@dir, assetName))
         return @
 
-    create: (codeAnnotationName) ->
+    createFromName: (codeAnnotationName) ->
         assetName = "#{@_asciiFilename(codeAnnotationName)}.txt".toLowerCase()
         @data[codeAnnotationName] = assetName
         # create asset in local .code-annotations directory

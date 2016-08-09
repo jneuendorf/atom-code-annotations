@@ -7,9 +7,9 @@ module.exports = class HtmlRenderer extends AssetRenderer
     @isTextBased: true
     @description: "Render HTML inline"
 
-    _render: () ->
+    _render: (codeAnnotationManager) ->
         # NOTE: wanted to use shadow dom. see http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom/
-        # NOTE: but javascript targeting inside shadow dom elements is weird...therefore there is the StandaloneHtmlRenderer
+        #       but javascript targeting inside shadow dom elements is weird...therefore there is the StandaloneHtmlRenderer
         div = document.createElement("div")
         div.innerHTML = @asset.readSync(false)
         return div

@@ -1,5 +1,6 @@
 Renderers = require "./asset-renderers/all-renderers"
 
+
 class Config
     @configData:
         dialogs:
