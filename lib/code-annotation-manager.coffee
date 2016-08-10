@@ -77,6 +77,8 @@ module.exports =
     # CODE-ANNOTATION: html-testasset
     # CODE-ANNOTATION: framed-html-testasset
     # CODE-ANNOTATION: text-testasset
+    # CODE-ANNOTATION: url-testasset
+
 
     addCodeAnnotation: (callback, point) ->
         dialog = new CodeAnnotationNameDialog()

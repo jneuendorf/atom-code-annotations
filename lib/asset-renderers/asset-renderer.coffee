@@ -46,7 +46,12 @@ module.exports = class AssetRenderer
 
     render: (codeAnnotationManager) ->
         element = @_render(codeAnnotationManager)
-        element.className = "#{element.className} rendered #{Utils.camelToKebab(@constructor.name)}"
+        classes = "#{element.className} rendered #{Utils.camelToKebab(@constructor.name)}"
+        parent = @constructor.parent
+        while parent?
+            classes += " #{Utils.camelToKebab(parent.name)}"
+            parent = parent.parent
+        element.className = classes
         return element
 
     # can be overriden by subclasses to get latest layout info
