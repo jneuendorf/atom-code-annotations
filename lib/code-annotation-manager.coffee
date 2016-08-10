@@ -336,6 +336,8 @@ module.exports =
                 return @reload()
             'code-annotations:load-current-editor': () =>
                 return @loadCurrentEditor()
+            'code-annotations:hide-container': () =>
+                return @hideContainer()
         }
         return @
 

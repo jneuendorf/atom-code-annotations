@@ -1,7 +1,6 @@
-# TODO: pass atom required object to required files (by main) in order to save require overhead
 path = require "path"
-
 {Directory} = require 'atom'
+
 Utils = require './utils'
 CodeAnnotations = require "./constants"
 

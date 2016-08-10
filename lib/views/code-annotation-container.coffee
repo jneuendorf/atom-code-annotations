@@ -55,12 +55,6 @@ module.exports = class CodeAnnotationContainer
         @element.hide()
 
     _addEventListeners: (element) ->
-        # TODO: escape on container
-        # element.keyup (evt) =>
-        #     # on escape
-        #     if evt.which is 27
-        #         @hide()
-        #     return true
         # buttons
         element.find(".btn.delete").click (event) =>
             if Settings.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
