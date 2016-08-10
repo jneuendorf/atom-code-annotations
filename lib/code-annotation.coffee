@@ -67,15 +67,12 @@ module.exports = class CodeAnnotation
     _getRenderer: (assetFile, fallbackRenderer) ->
         filename = assetFile.getBaseName()
         renderer = fallbackRenderer
-        # TODO: instead of length take the number of dots!
-        maxLength = -1
+        maxPriority = -1
         for rendererClass in @codeAnnotationManager.renderers
-            # if Utils.fileHasType(filename, rendererClass.fileExtension)
-                # return new rendererClass(assetFile)
-            {result, length} = rendererClass.supports(filename)
-            if result is true and length > maxLength
+            {result, priority} = rendererClass.supports(filename)
+            if result is true and priority > maxPriority
                 renderer = rendererClass
-                maxLength = length
+                maxPriority = priority
         if renderer?
             return new renderer(assetFile)
         throw new Error("Found no renderer for asset '#{filename}' of code annotation '#{@name}'.")
@@ -93,7 +90,7 @@ module.exports = class CodeAnnotation
             @element = @_createWrapper()
             @element.appendChild @renderer.render(@codeAnnotationManager)
         @codeAnnotationManager.showContainer(@, @element)
-        @renderer.afterShow(@codeAnnotationManager)
+        @renderer.afterShow?(@codeAnnotationManager)
         return @
 
     hide: () ->

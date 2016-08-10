@@ -24,17 +24,18 @@ module.exports = class AssetRenderer
         return false
 
     @supports: (filename) ->
+        regex = /\./g
         if typeof @fileExtension is "string"
             fileExtensions = [@fileExtension]
         else
             fileExtensions = @fileExtension
         for fileExtension in fileExtensions when filename.slice(-fileExtension.length - 1).toLowerCase() is ".#{fileExtension}"
             return {
-                length: fileExtension.length
+                priority: fileExtension.split(".").length
                 result: true
             }
         return {
-            length: 0
+            priority: 0
             result: false
         }
 
@@ -49,8 +50,8 @@ module.exports = class AssetRenderer
         return element
 
     # can be overriden by subclasses to get latest layout info
-    afterShow: (codeAnnotationManager) ->
-        return @
+    # afterShow: (codeAnnotationManager) ->
+    #     return @
 
     _render: (codeAnnotationManager) ->
         throw new Error("_render() method must be implemented by '#{@constructor.name}'.")
