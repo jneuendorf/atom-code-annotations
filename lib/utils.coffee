@@ -24,6 +24,16 @@ module.exports = class Utils
         fs.writeFileSync(destination, buffer)
         return @
 
+    @createDirectory: (dirPath) ->
+        fs.mkdirSync(dirPath)
+        return @
+
+    @createFile: (filePath, content = "") ->
+        if filePath instanceof Array
+            filePath = path.join.apply(path, filePath)
+        fs.writeFileSync(filePath, content)
+        return @
+
     @escapeNonAscii: (string) ->
         # asciiChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         # char code range: [32, 126]

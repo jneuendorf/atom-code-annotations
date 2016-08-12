@@ -12,7 +12,7 @@ module.exports = class CodeAnnotation
 
         {@editor, @marker, gutter} = editorData
 
-        {@assetManager, @line, @name} = assetData
+        {@assetManager, @assetDirectory, @line, @name} = assetData
         @element = null
 
         @assetFile = null
@@ -28,40 +28,30 @@ module.exports = class CodeAnnotation
         gutterIcon = @_createGutterIcon()
         gutter.decorateMarker(@marker, {item: gutterIcon})
         @_addEventListenersToGutterIcon(gutterIcon)
-        # try
-        #     @assetFile = @_getAssetFile()
-        #     @renderer = @_getRenderer(@assetFile)
-        #
-        #     gutterIcon = @_createGutterIcon()
-        #     gutter.decorateMarker(@marker, {item: gutterIcon})
-        #     @_addEventListenersToGutterIcon(gutterIcon)
-        # catch error
-        #     atom.notifications.addError("Could not load code annotation '#{@name}'.", {
-        #         detail: error.message
-        #     })
         return @
 
+    ###########################################################################################
     # PRIVATE
     _createGutterIcon: () ->
         return document.createElement("code-annotation-gutter-icon")
 
     _addEventListenersToGutterIcon: (gutterIcon) ->
         gutterIcon.addEventListener "click", (event) =>
-            try
-                @show()
-            catch error
-                atom.notifications.addError(error.message)
+            return @show()
+            # try
+            #     @show()
+            # catch error
+            #     atom.notifications.addError(error.message)
         return gutterIcon
 
     _createWrapper: () ->
         return document.createElement("code-annotation")
 
     _getAssetFile: () ->
-        assets = @codeAnnotationManager.assetDirectory.getEntriesSync()
         name = @assetManager.get(@name)
-        for asset in assets when asset.getBaseName() is name
+        for asset in @assetDirectory.getEntriesSync() when asset.getBaseName() is name
             return asset
-        throw new Error("Found no asset for name '#{@name}' at '#{@codeAnnotationManager.assetDirectory.getPath()}'.")
+        throw new Error("Found no asset for name '#{@name}' at '#{@assetDirectory.getPath()}'.")
 
     _getRenderer: (assetFile, fallbackRenderer) ->
         filename = assetFile.getBaseName()
@@ -81,7 +71,7 @@ module.exports = class CodeAnnotation
         @show()
         return @
 
-    #######################################################################################
+    ###########################################################################################
     # PUBLIC
 
     show: () ->

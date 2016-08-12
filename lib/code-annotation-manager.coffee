@@ -15,10 +15,6 @@ CodeAnnotationContainer = require "./views/code-annotation-container"
 CodeAnnotationNameDialog = require "./views/asset-name-dialog.coffee"
 
 
-###
-@class CodeAnnotationManager
-Has a CodeAnnotationContainer which contains the output of an asset renderer.
-###
 module.exports =
     config: Config.configData
 
@@ -28,7 +24,6 @@ module.exports =
     # annotationRegexCache:     Dict(String, RegExp)
     # assetManagers: {}
     # assetDirectories: []
-    # assetDirectory: null
     # initializedEditors:       Dict(String, TextEditor
     # codeAnnotationContainer:  CodeAnnotationContainer
     # ignoredEditors:           Dict(String, TextEditor)
@@ -49,7 +44,6 @@ module.exports =
         @annotationRegexCache = {}
         @assetManagers = {}
         @assetDirectories = []
-        @assetDirectory = null
         @initializedEditors = {}
         @ignoredEditors = {}
         @codeAnnotationContainer = new CodeAnnotationContainer(@)
@@ -79,12 +73,15 @@ module.exports =
     # CODE-ANNOTATION: text-testasset
     # CODE-ANNOTATION: url-testasset
 
-
     addCodeAnnotation: (callback, point) ->
+        editor = atom.workspace.getActiveTextEditor()
+        assetDirectory = @_getAssetDirectoryForEditor(editor)
+        if not assetDirectory?
+            assetDirectory = @_initAssetDirectory(editor)
+
         dialog = new CodeAnnotationNameDialog()
         dialog.attach().onSubmit (name) =>
-            editor = atom.workspace.getActiveTextEditor()
-            assetManager = @assetManagers[@_getAssetDirectoryForEditor(editor).getPath()]
+            assetManager = @assetManagers[assetDirectory.getPath()]
             if assetManager.has(name) and Config.showReplaceConfirmDialog
                 if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
                     return @
@@ -95,7 +92,6 @@ module.exports =
     addCodeAnnotationWithFile: (editor, point, name, assetManager) ->
         paths = Utils.chooseFile("Now, choose an asset.")
         if not paths? or not paths.length
-            # atom.notifications.addError("No asset chosen.")
             return @
         assetManager.set(name, paths[0])
             .save()
@@ -184,7 +180,6 @@ module.exports =
             subdir = dir.getSubdirectory(CodeAnnotations.ASSET_DIR_NAME)
             if subdir.existsSync()
                 @assetDirectories.push subdir
-        @assetDirectory = @assetDirectories[0]
 
         try
             @_registerElements()
@@ -207,17 +202,17 @@ module.exports =
                             @_initEditor editor, path
                         catch error
                             # must not throw error here because otherwise the editor switch will be interrupted
-                            console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message)
+                            console.error("code-annotations: Error while initializing the editor with path '#{editor.getPath()}'.", error.message, error.stack)
                 return @
-        return @
-
-    _registerRenderers: () ->
-        for name, config of Config.configData.renderers.properties when Config[name] is true
-            @registerRenderer(Renderers[name.slice(4)])
         return @
 
     # this method loads all the data necessary for displaying code annotations and displays the gutter icons for a certain TextEditor
     _initEditor: (editor, editorPath) ->
+        assetDirectory = @_getAssetDirectoryForEditor(editor)
+        # no asset directory => no .code-annotations folder => nothing to do anyways
+        if not assetDirectory?
+            return @
+
         grammar = editor.getGrammar()
         try
             regex = @_getAnnotationRegex(grammar)
@@ -245,7 +240,7 @@ module.exports =
             ranges.push range
             return true
 
-        assetDirectoryPath = @_getAssetDirectoryForEditor(editor)
+        assetManager = @assetManagers[assetDirectory.getPath()]
         codeAnnotations = []
         for range, i in ranges
             marker = editor.markBufferRange(range)
@@ -254,7 +249,8 @@ module.exports =
                     @
                     {editor, marker, gutter}
                     {
-                        assetManager: @assetManagers[assetDirectoryPath.getPath()]
+                        assetManager
+                        assetDirectory
                         name: assetData[i].name
                         line: assetData[i].line
                     }
@@ -265,6 +261,7 @@ module.exports =
                 atom.notifications.addError("Could not load code annotation.", {
                     detail: error.message
                 })
+                console.error error.message
 
         # TODO: what happens if a TextEditor's file is moved into another project (with another code-annotations folder)??
         # when an editor is renamed the data must be associated with the editor's new path
@@ -275,13 +272,31 @@ module.exports =
             editorPath = newEditorPath
             return @
 
-        @initializedEditors[editorPath] =
-            assetDirectory: assetDirectoryPath
-            assetManager: @assetManagers[assetDirectoryPath]
-            codeAnnotations: codeAnnotations
-            editor: editor
-            gutter: gutter
+        @initializedEditors[editorPath] = {
+            assetDirectory
+            assetManager
+            codeAnnotations
+            editor
+            gutter
+        }
         return @
+
+    _registerRenderers: () ->
+        for name, config of Config.configData.renderers.properties when Config[name] is true
+            @registerRenderer(Renderers[name.slice(4)])
+        return @
+
+    _initAssetDirectory: (editor) ->
+        editorPath = editor.getPath()
+        for directory in atom.project.getDirectories() when directory.contains(editorPath)
+            assetDirectory = directory.getSubdirectory(CodeAnnotations.ASSET_DIR_NAME)
+            assetDirectoryPath = assetDirectory.getPath()
+            Utils.createDirectory(assetDirectoryPath)
+            Utils.createFile([assetDirectoryPath, CodeAnnotations.ASSET_NAMES_FILE], "{}")
+            @assetDirectories.push(assetDirectory)
+            @assetManagers[assetDirectoryPath] = new AssetManager(assetDirectoryPath)
+            @_initEditor(editor)
+        return assetDirectory
 
     # get the name of the codeAnnotation at the given point
     _getCodeAnnotationAtPoint: (editor, point) ->
@@ -313,7 +328,9 @@ module.exports =
             projectRoot = assetDirectory.getParent()
             if projectRoot.contains(editorPath)
                 return assetDirectory
-        throw new Error("Cannot add a code annotation to files outside of the current projects.")
+        # # found no asset directory => maybe there is non yet => check in all projects
+        # throw new Error("Cannot add a code annotation to files outside of the current projects.")
+        return null
 
     _getEditorData: (editor) ->
         return @initializedEditors[editor.getPath()] or null
@@ -386,7 +403,7 @@ module.exports =
             codeAnnotation = new CodeAnnotation(
                 @
                 {editor, marker, gutter: editorData.gutter}
-                {assetManager, name, line}
+                {assetManager, assetDirectory: editorData.assetDirectory, name, line}
                 @fallbackRenderer
             )
             editorData.codeAnnotations.push codeAnnotation
@@ -396,6 +413,7 @@ module.exports =
             atom.notifications.addError("Could not load code annotation.", {
                 detail: error.message
             })
+            console.error error.message
         return codeAnnotation
 
     _getAnnotationRegex: (grammar) ->
