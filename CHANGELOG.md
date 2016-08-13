@@ -1,8 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/jneuendorf/code-annotations/tree/HEAD)
-
-[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.0.2...HEAD)
+## [v1.1.0](https://github.com/jneuendorf/code-annotations/tree/v1.1.0) (2016-08-13)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.0.2...v1.1.0)
 
 **Implemented enhancements:**
 
