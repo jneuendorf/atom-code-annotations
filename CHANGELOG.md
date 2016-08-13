@@ -1,5 +1,19 @@
 # Change Log
 
+## [Unreleased](https://github.com/jneuendorf/code-annotations/tree/HEAD)
+
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.0.2...HEAD)
+
+**Implemented enhancements:**
+
+- hide the container when pressing escape [\#4](https://github.com/jneuendorf/code-annotations/issues/4)
+- shortcuts for adding and deleting code annotations [\#3](https://github.com/jneuendorf/code-annotations/issues/3)
+
+**Fixed bugs:**
+
+- misplaced gutter icon when adding an annotation [\#5](https://github.com/jneuendorf/code-annotations/issues/5)
+- first new code annotation causes error [\#2](https://github.com/jneuendorf/code-annotations/issues/2)
+
 ## [v1.0.2](https://github.com/jneuendorf/code-annotations/tree/v1.0.2) (2016-08-12)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.0.1...v1.0.2)
 
