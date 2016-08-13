@@ -21,7 +21,7 @@ module.exports = class ShowAllView extends SelectListView
 
     viewForItem: ({annotationName, filename, lineNumber}) ->
         return @$$ () ->
-            return @li class: 'event', 'data-event-name': annotationName, =>
+            return @li class: 'event', =>
                 @div class: 'pull-right', =>
                     @span "#{filename} @ #{lineNumber + 1}"
                 @span title: annotationName, annotationName
@@ -33,5 +33,6 @@ module.exports = class ShowAllView extends SelectListView
             # initialColumn: 0
             pending: true
         })
+        # TODO: this is not working like that:
         # atom.workspace.getActiveTextEditor().getLastCursor().moveToFirstCharacterOfLine()
         return @

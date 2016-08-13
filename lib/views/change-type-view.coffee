@@ -31,7 +31,7 @@ module.exports = class ChangeTypeView extends SelectListView
 
     viewForItem: ({name, fileExtensionLabel}) ->
         return @$$ () ->
-            return @li class: 'event', 'data-event-name': name, =>
+            return @li class: 'event', =>
                 @div class: 'pull-right', =>
                     @span "(#{fileExtensionLabel})"
                 @span title: name, name

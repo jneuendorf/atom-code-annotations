@@ -10,6 +10,7 @@ CodeAnnotation = require "./code-annotation"
 Renderers = {AssetRenderer} = require "./asset-renderers/all-renderers"
 
 ShowAllView = require "./views/show-all-view"
+ShowCommandsView = require "./views/show-commands-view"
 CodeAnnotationContainer = require "./views/code-annotation-container"
 CodeAnnotationNameDialog = require "./views/asset-name-dialog.coffee"
 
@@ -18,16 +19,17 @@ module.exports =
     config: Config.configData
 
     # INSTANCE PROPERTIES
+    # commands:                 Object(String, Function)
     # subscriptions:            CompositeDisposable
     # renderers:                Array of AssetRenderer
-    # annotationRegexCache:     Dict(String, RegExp)
+    # annotationRegexCache:     Object(String, RegExp)
     # assetManagers: {}
     # assetDirectories: []
-    # initializedEditors:       Dict(String, TextEditor
+    # initializedEditors:       Object(String, TextEditor
     # codeAnnotationContainer:  CodeAnnotationContainer
-    # ignoredEditors:           Dict(String, TextEditor)
+    # ignoredEditors:           Object(String, TextEditor)
     # fallbackRenderer:         AssetRenderer
-    # showAllView            ShowAllView
+    # showAllView               ShowAllView
 
     #######################################################################################
     # PUBLIC (ATOM API)
@@ -38,6 +40,7 @@ module.exports =
         @textColor = null
         @backgroundColor = null
 
+        @commands = null
         @subscriptions = new CompositeDisposable()
         @renderers = []
         @annotationRegexCache = {}
@@ -47,6 +50,7 @@ module.exports =
         @ignoredEditors = {}
         @codeAnnotationContainer = new CodeAnnotationContainer(@)
         @showAllView = new ShowAllView()
+        @showCommandsView = new ShowCommandsView()
         @fallbackRenderer = Renderers[Config.fallbackRenderer] or null
         @_init()
         return @
@@ -123,6 +127,10 @@ module.exports =
 
     showAll: () ->
         @showAllView.show(@getAllCodeAnnotations())
+        return @
+
+    showCommands: () ->
+        @showCommandsView.show([arguments.callee.caller.commandName])
         return @
 
     reload: () ->
@@ -335,7 +343,7 @@ module.exports =
         return @initializedEditors[editor.getPath()] or null
 
     _registerCommands: () ->
-        @subscriptions.add atom.commands.add 'atom-workspace', {
+        @commands =
             'code-annotations:add-code-annotation-with-file': () =>
                 return @addCodeAnnotation(
                     @addCodeAnnotationWithFile
@@ -350,6 +358,8 @@ module.exports =
                 return @deleteCodeAnnotation(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:show-all': () =>
                 return @showAll()
+            'code-annotations:show-commands': () =>
+                return @showCommands()
             'code-annotations:reload': () =>
                 return @reload()
             'code-annotations:load-current-editor': () =>
@@ -358,7 +368,9 @@ module.exports =
                 # make the event continue bubbling upward
                 event.abortKeyBinding()
                 return @hideContainer()
-        }
+        for commandName, func of @commands
+            func.commandName = commandName
+        @subscriptions.add atom.commands.add('atom-workspace', @commands)
         return @
 
     _registerElements: () ->

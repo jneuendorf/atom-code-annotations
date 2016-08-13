@@ -1,4 +1,4 @@
-# Code Annotations (atom package)
+# Code Annotations ([Atom](http://atom.io) package)
 
 This is an atom package for creating code annotations.
 An annotation is a piece of content that has a name and can be displayed in atom.

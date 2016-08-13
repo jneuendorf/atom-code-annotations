@@ -1,5 +1,6 @@
 "atom-workspace.has-code-annotations-container":
     "escape": "code-annotations:hide-container"
-    # "ctrl-alt-a a d d": "code-annotations:add-code-annotation-with-file"
-    # "ctrl-alt-a a d d c": "code-annotations:add-code-annotation-with-content"
-    # "ctrl-alt-a d e l": "code-annotations:delete-code-annotation"
+    "ctrl-alt-c ctrl-alt-c": "code-annotations:show-commands"
+    # "ctrl-alt-a a": "code-annotations:add-code-annotation-with-file"
+    # "ctrl-alt-a a c": "code-annotations:add-code-annotation-with-content"
+    # "ctrl-alt-a d": "code-annotations:delete-code-annotation"
