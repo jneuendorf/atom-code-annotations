@@ -1,4 +1,5 @@
-# NOTE: bind on editor because it seems to stop the event bubbling for some reason
-#       when showing the container the focus is still on the editor
-# "atom-workspace atom-text-editor":
-#     "escape": "code-annotations:hide-container"
+"atom-workspace.has-code-annotations-container":
+    "escape": "code-annotations:hide-container"
+    # "ctrl-alt-a a d d": "code-annotations:add-code-annotation-with-file"
+    # "ctrl-alt-a a d d c": "code-annotations:add-code-annotation-with-content"
+    # "ctrl-alt-a d e l": "code-annotations:delete-code-annotation"

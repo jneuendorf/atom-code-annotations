@@ -1,5 +1,4 @@
 {CompositeDisposable, Directory, Range, TextEditor} = require "atom"
-CSON = require "season"
 
 CommentCharacters = require "./comment-characters"
 CodeAnnotations = require "./constants"
@@ -355,7 +354,9 @@ module.exports =
                 return @reload()
             'code-annotations:load-current-editor': () =>
                 return @loadCurrentEditor()
-            'code-annotations:hide-container': () =>
+            'code-annotations:hide-container': (event) =>
+                # make the event continue bubbling upward
+                event.abortKeyBinding()
                 return @hideContainer()
         }
         return @
@@ -395,8 +396,9 @@ module.exports =
         editorData = @_getEditorData(editor)
 
         # correct range to end of line
+        # (== (length of comment character + space) + line.length + indentation but indentation as spaces is unknown)
         lineLength = editor.getTextInBufferRange([[point.row, 0], [point.row + 1, 0]]).length - 1
-        range = range[0].concat([point.row, lineLength])
+        range = [range[0], [point.row, lineLength]]
 
         marker = editor.markBufferRange(range)
         try
@@ -413,7 +415,7 @@ module.exports =
             atom.notifications.addError("Could not load code annotation.", {
                 detail: error.message
             })
-            console.error error.message
+            console.error error.message, error.stack
         return codeAnnotation
 
     _getAnnotationRegex: (grammar) ->

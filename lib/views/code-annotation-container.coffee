@@ -39,6 +39,9 @@ module.exports = class CodeAnnotationContainer
         @nameElement = null
         @content = null
         @textEditorView = null
+        # add class to workspace for keymapping
+        @atomWorkspaceView = $(atom.views.getView(atom.workspace))
+        @atomWorkspaceView.addClass("has-code-annotations-container")
 
         @element = @_addEventListeners(@_createElement())
         pane = atom.views.getView(atom.workspace.getActivePane())

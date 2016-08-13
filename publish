@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+
+if [[ $# -eq 0 ]]; then
+    kind="patch"
+else
+    kind="$1"
+fi
+
+
+# generate CHANGELOG.md
+github_changelog_generator
+
+
+echo "Now, publish to atom.io? (ctrl-c for exit)"
+read var
+
+
+
+
+
+apm publish $kind
