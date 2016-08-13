@@ -4,7 +4,7 @@ module.exports =
     CODE_KEYWORD: " CODE-ANNOTATION: "
     GUTTER_NAME: "code-annotations"
     PACKAGE_NAME: "code-annotations"
-    SINGLE_LINE_WHITESPACE_REGEX_STR: "( |\\t)*"
+    SINGLE_LINE_WHITESPACE_REGEX_STR: "[ \\t]*"
     WHITESPACE_ONLY_REGEX: /^\s*$/
     WHITESPACE_REGEX_STR: "\\s*"
 

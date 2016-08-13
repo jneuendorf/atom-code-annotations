@@ -5,6 +5,9 @@ module.exports =
         begin: "/*"
         end: "/*"
     "C++": "//"
+    "GitHub Markdown":
+        begin: "<!--"
+        end: "-->"
     HTML:
         begin: "<!--"
         end: "-->"
@@ -23,6 +26,8 @@ module.exports =
 
     # creates the same kinf of object for all language data (independent of how it was written down)
     format: (value) ->
+        if not value?
+            return null
         # string => single line comment + no alternatives
         if typeof value is "string"
             return {

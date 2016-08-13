@@ -130,7 +130,7 @@ module.exports =
         return @
 
     showCommands: () ->
-        @showCommandsView.show([arguments.callee.caller.commandName])
+        @showCommandsView.show(["code-annotations:show-commands"])
         return @
 
     reload: () ->
@@ -223,6 +223,7 @@ module.exports =
         grammar = editor.getGrammar()
         try
             regex = @_getAnnotationRegex(grammar)
+            console.log regex
         # comments not supported => do not modify editor
         catch error
             @ignoredEditors[editorPath] = editor
@@ -235,14 +236,13 @@ module.exports =
             priority: Config.gutterPriority
             visible: true
         })
-
         ranges = []
         assetData = []
 
         editor.scan regex, ({match, matchText, range}) ->
             assetData.push {
-                line: matchText
-                name: matchText.slice(matchText.indexOf(CodeAnnotations.CODE_KEYWORD) + CodeAnnotations.CODE_KEYWORD.length).trim()
+                line: editor.lineTextForBufferRow(range.start.row)
+                name: match[2].trim()
             }
             ranges.push range
             return true
@@ -365,11 +365,9 @@ module.exports =
             'code-annotations:load-current-editor': () =>
                 return @loadCurrentEditor()
             'code-annotations:hide-container': (event) =>
-                # make the event continue bubbling upward
+                # make the event continue bubble upward
                 event.abortKeyBinding()
                 return @hideContainer()
-        for commandName, func of @commands
-            func.commandName = commandName
         @subscriptions.add atom.commands.add('atom-workspace', @commands)
         return @
 
@@ -407,10 +405,9 @@ module.exports =
 
         editorData = @_getEditorData(editor)
 
+        line = editor.lineTextForBufferRow(point.row)
         # correct range to end of line
-        # (== (length of comment character + space) + line.length + indentation but indentation as spaces is unknown)
-        lineLength = editor.getTextInBufferRange([[point.row, 0], [point.row + 1, 0]]).length - 1
-        range = [range[0], [point.row, lineLength]]
+        range = [range[0], [point.row, line.length]]
 
         marker = editor.markBufferRange(range)
         try
@@ -437,14 +434,13 @@ module.exports =
         patternData = CommentCharacters.format(CommentCharacters[grammar.name])
         if patternData?
             @annotationRegexCache[grammar.name] = new RegExp(
-                CodeAnnotations.SINGLE_LINE_WHITESPACE_REGEX_STR +
-                patternData.begin +
+                "(#{CodeAnnotations.SINGLE_LINE_WHITESPACE_REGEX_STR}#{patternData.begin})" +
                 CodeAnnotations.CODE_KEYWORD +
-                # must begin with word character (like most common identifiers)
-                "\\w+.*" +
-                patternData.end,
+                # name must begin with word character (like most common identifiers)
+                "(\\w+.*)" +
+                "(#{patternData.end})",
                 "g"
             )
             return @annotationRegexCache[grammar.name]
         # ...some grammars don't have comments (e.g. JSON)
-        throw new Error("Could not find a regular expression for grammar '#{grammar.name}'.")
+        throw new Error("Could not find how to create comments for grammar '#{grammar.name}'.")

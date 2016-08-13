@@ -60,7 +60,7 @@ module.exports = class CodeAnnotationContainer
     _addEventListeners: (element) ->
         # buttons
         element.find(".btn.delete").click (event) =>
-            if Settings.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
+            if Config.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
                 return @
             @codeAnnotation.delete()
             return @hide()

@@ -4,3 +4,14 @@
     # "ctrl-alt-a a": "code-annotations:add-code-annotation-with-file"
     # "ctrl-alt-a a c": "code-annotations:add-code-annotation-with-content"
     # "ctrl-alt-a d": "code-annotations:delete-code-annotation"
+
+
+# NOTE: for differentiating between OSs use the following
+# '.platform-darwin, .platform-darwin .command-palette atom-text-editor':
+#   'cmd-shift-p': 'command-palette:toggle'
+#
+# '.platform-win32, .platform-win32 .command-palette atom-text-editor':
+#   'ctrl-shift-p': 'command-palette:toggle'
+#
+# '.platform-linux, .platform-linux .command-palette atom-text-editor':
+#   'ctrl-shift-p': 'command-palette:toggle'
