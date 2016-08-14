@@ -103,6 +103,7 @@ module.exports = class CodeAnnotationContainer
         return @element[0]
 
     destroy: () ->
+        @atomWorkspaceView.removeClass("has-code-annotations-container")
         @element.remove()
         return @
 

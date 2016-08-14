@@ -1,5 +1,6 @@
 module.exports =
     C: "//"
+    "C#": "//"
     CoffeeScript: "#"
     CSS:
         begin: "/*"
@@ -8,6 +9,8 @@ module.exports =
     "GitHub Markdown":
         begin: "<!--"
         end: "-->"
+    Go: "//"
+    Haskell: "--"
     HTML:
         begin: "<!--"
         end: "-->"
@@ -17,12 +20,21 @@ module.exports =
     Java: "//"
     JavaScript: "//"
     LaTeX: "%"
+    MATLAB: "%"
+    "Objective-C": "//"
+    "Objective-C++": "//"
+    Octave: ["#", "%"]
+    Perl: "#"
+    "Perl 6": "#"
     PHP: ["//", "#"]
     Python: "#"
+    R: "#"
     Ruby: "#"
-    "Shell Script": "#"
-    SCSS: "//"
     Sass: "//"
+    Scala: "//"
+    SCSS: "//"
+    "Shell Script": "#"
+    SQL: "--"
 
     # creates the same kinf of object for all language data (independent of how it was written down)
     format: (value) ->
