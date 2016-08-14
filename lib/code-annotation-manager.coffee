@@ -81,6 +81,7 @@ module.exports =
         assetDirectory = @_getAssetDirectoryForEditor(editor)
         if not assetDirectory?
             assetDirectory = @_initAssetDirectory(editor)
+            @_initEditor(editor, editor.getPath())
 
         dialog = new CodeAnnotationNameDialog()
         dialog.attach().onSubmit (name) =>
@@ -303,7 +304,6 @@ module.exports =
             Utils.createFile([assetDirectoryPath, CodeAnnotations.ASSET_NAMES_FILE], "{}")
             @assetDirectories.push(assetDirectory)
             @assetManagers[assetDirectoryPath] = new AssetManager(assetDirectoryPath)
-            @_initEditor(editor)
         return assetDirectory
 
     # get the name of the codeAnnotation at the given point
@@ -405,6 +405,8 @@ module.exports =
         editor.setCursorBufferPosition([point.row, line.length - 1])
 
         editorData = @_getEditorData(editor)
+        if not editorData?
+            @_initEditor(editor)
 
         line = editor.lineTextForBufferRow(point.row)
         # correct range to end of line
