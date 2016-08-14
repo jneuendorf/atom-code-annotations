@@ -1,5 +1,13 @@
 # Change Log
 
+## [v1.1.2](https://github.com/jneuendorf/code-annotations/tree/v1.1.2) (2016-08-14)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.1...v1.1.2)
+
+**Fixed bugs:**
+
+- Annotation content not updated [\#8](https://github.com/jneuendorf/code-annotations/issues/8)
+- Can't call .edit\(\) of null [\#7](https://github.com/jneuendorf/code-annotations/issues/7)
+
 ## [v1.1.1](https://github.com/jneuendorf/code-annotations/tree/v1.1.1) (2016-08-14)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.0...v1.1.1)
 
