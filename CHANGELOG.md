@@ -1,5 +1,16 @@
 # Change Log
 
+## [v1.1.1](https://github.com/jneuendorf/code-annotations/tree/v1.1.1) (2016-08-14)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.0...v1.1.1)
+
+**Implemented enhancements:**
+
+- changelog generator [\#1](https://github.com/jneuendorf/code-annotations/issues/1)
+
+**Fixed bugs:**
+
+- creating and deleting annotations incorrect [\#6](https://github.com/jneuendorf/code-annotations/issues/6)
+
 ## [v1.1.0](https://github.com/jneuendorf/code-annotations/tree/v1.1.0) (2016-08-13)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.0.2...v1.1.0)
 
