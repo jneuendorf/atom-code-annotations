@@ -10,11 +10,12 @@ module.exports = class LinkRenderer extends FrameRenderer
     @isTextBased: true
     @description: "Render a web page"
 
-    _baseUrl: () ->
-        return "#{fs.readFileSync(@asset.getPath())}".trim()
+    _baseUrl: (clearCache) ->
+        # return "#{fs.readFileSync(@asset.getPath())}".trim()
+        return @asset.readSync(clearCache).trim()
 
-    _buildUrl: () ->
-        return @_baseUrl()
+    _buildUrl: (codeAnnotationManager, clearCache) ->
+        return @_baseUrl(clearCache)
 
     _createSrcElement: () ->
         return document.createElement("webview")

@@ -44,8 +44,8 @@ module.exports = class AssetRenderer
             return @fileExtension
         return @fileExtension[0]
 
-    render: (codeAnnotationManager) ->
-        element = @_render(codeAnnotationManager)
+    render: (codeAnnotationManager, clearCache = false) ->
+        element = @_render(codeAnnotationManager, clearCache)
         classes = "#{element.className} rendered #{Utils.camelToKebab(@constructor.name)}"
         parent = @constructor.parent
         while parent?
@@ -58,7 +58,7 @@ module.exports = class AssetRenderer
     # afterShow: (codeAnnotationManager) ->
     #     return @
 
-    _render: (codeAnnotationManager) ->
+    _render: (codeAnnotationManager, clearCache) ->
         throw new Error("_render() method must be implemented by '#{@constructor.name}'.")
 
     isTextBased: () ->

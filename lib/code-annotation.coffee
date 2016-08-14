@@ -38,10 +38,6 @@ module.exports = class CodeAnnotation
     _addEventListenersToGutterIcon: (gutterIcon) ->
         gutterIcon.addEventListener "click", (event) =>
             return @show()
-            # try
-            #     @show()
-            # catch error
-            #     atom.notifications.addError(error.message)
         return gutterIcon
 
     _createWrapper: () ->
@@ -67,8 +63,12 @@ module.exports = class CodeAnnotation
         throw new Error("Found no renderer for asset '#{filename}' of code annotation '#{@name}'.")
 
     _updateElement: () ->
-        @element = null
+        @_resetElement()
         @show()
+        return @
+
+    _resetElement: () ->
+        @element = null
         return @
 
     ###########################################################################################
@@ -77,7 +77,7 @@ module.exports = class CodeAnnotation
     show: () ->
         if not @element?
             @element = @_createWrapper()
-            @element.appendChild @renderer.render(@codeAnnotationManager)
+            @element.appendChild @renderer.render(@codeAnnotationManager, true)
         @codeAnnotationManager.showContainer(@, @element)
         @renderer.afterShow?(@codeAnnotationManager)
         return @
@@ -104,7 +104,10 @@ module.exports = class CodeAnnotation
     edit: () ->
         # load asset contents into a TextEditor
         if @renderer.isTextBased()
-            atom.workspace.open(@assetFile.getPath())
+            atom.workspace.open(@assetFile.getPath()).then (editor) =>
+                editor.onDidSave (event) =>
+                    @_resetElement()
+                    return @
         # choose new file as asset
         else
             paths = Utils.chooseFile()

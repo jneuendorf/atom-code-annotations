@@ -11,23 +11,23 @@ module.exports = class FrameRenderer extends AssetRenderer
         @frame = null
 
     # this method must be implemented by subclasses
-    # _baseUrl: () ->
+    # _baseUrl: (clearCache) ->
     #     return "some path"
 
     _createSrcElement: () ->
         return document.createElement("iframe")
 
-    _buildUrl: (codeAnnotationManager) ->
+    _buildUrl: (codeAnnotationManager, clearCache) ->
         container = codeAnnotationManager.codeAnnotationContainer
-        return """#{@_baseUrl()}
+        return """#{@_baseUrl(clearCache)}
             ?width=#{container.width}
             &height=#{container.height}
             &textColor=#{codeAnnotationManager.textColor}
             &backgroundColor=#{codeAnnotationManager.backgroundColor}""".replace(/\s/g, "")
 
-    _render: (codeAnnotationManager) ->
+    _render: (codeAnnotationManager, clearCache) ->
         frame = @_createSrcElement()
-        frame.src = @_buildUrl(codeAnnotationManager)
+        frame.src = @_buildUrl(codeAnnotationManager, clearCache)
         @frame = frame
         return frame
 
