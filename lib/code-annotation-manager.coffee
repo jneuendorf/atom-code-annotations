@@ -280,8 +280,13 @@ module.exports =
         editor.onDidChangePath () =>
             newEditorPath = editor.getPath()
             @initializedEditors[newEditorPath] = @initializedEditors[editorPath]
+            @_uninitEditor(editor)
             delete @initializedEditors[editorPath]
             editorPath = newEditorPath
+            return @
+
+        editor.onDidDestroy () =>
+            @_uninitEditor(editor)
             return @
 
         @initializedEditors[editorPath] = {
@@ -291,6 +296,11 @@ module.exports =
             editor
             gutter
         }
+        return @
+
+    _uninitEditor: (editor) ->
+        console.log "uninitializing editor w/ path: #{editor.getPath()}"
+        delete @initializedEditors[editor.getPath()]
         return @
 
     _registerRenderers: () ->
