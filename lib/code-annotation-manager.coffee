@@ -276,8 +276,7 @@ module.exports =
 
         # TODO: what happens if a TextEditor's file is moved into another project (with another code-annotations folder)??
         # when an editor is renamed the data must be associated with the editor's new path
-        # TODO: dispose the handler when deactivating
-        editor.onDidChangePath () =>
+        @subscriptions.add editor.onDidChangePath () =>
             newEditorPath = editor.getPath()
             @initializedEditors[newEditorPath] = @initializedEditors[editorPath]
             @_uninitEditor(editor)
@@ -285,7 +284,7 @@ module.exports =
             editorPath = newEditorPath
             return @
 
-        editor.onDidDestroy () =>
+        @subscriptions.add editor.onDidDestroy () =>
             @_uninitEditor(editor)
             return @
 
