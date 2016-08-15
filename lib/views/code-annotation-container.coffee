@@ -111,9 +111,6 @@ module.exports = class CodeAnnotationContainer
         @element.css("display", "block")
         @width = @element.width()
         @height = @element.height()
-        # @element.show 0, () =>
-        #     @width = @element.width()
-        #     @height = @element.height()
         return @
 
     hide: () ->

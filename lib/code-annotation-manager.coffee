@@ -99,14 +99,25 @@ module.exports =
             return @
         assetManager.set(name, paths[0])
             .save()
-        @_createNewCodeAnnotation(editor, point, name, assetManager, paths[0])
+        codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager, paths[0])
+        # cleanup the created files
+        if not codeAnnotation?
+            assetManager.delete(name)
+                .save()
+            throw new Error("Could not add code annotation. Please report this bug!")
         return @
 
     addCodeAnnotationWithContent: (editor, point, name, assetManager) ->
         assetManager.createFromName(name)
             .save()
         codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager)
-        codeAnnotation.edit()
+        if codeAnnotation?
+            codeAnnotation.edit()
+        # cleanup the created files
+        else
+            assetManager.delete(name)
+                .save()
+            throw new Error("Could not add code annotation. Please report this bug!")
         return @
 
     deleteCodeAnnotation: (point) ->
@@ -224,7 +235,6 @@ module.exports =
         grammar = editor.getGrammar()
         try
             regex = @_getAnnotationRegex(grammar)
-            console.log regex
         # comments not supported => do not modify editor
         catch error
             @ignoredEditors[editorPath] = editor
@@ -252,24 +262,17 @@ module.exports =
         codeAnnotations = []
         for range, i in ranges
             marker = editor.markBufferRange(range)
-            try
-                codeAnnotation = new CodeAnnotation(
-                    @
-                    {editor, marker, gutter}
-                    {
-                        assetManager
-                        assetDirectory
-                        name: assetData[i].name
-                        line: assetData[i].line
-                    }
-                    @fallbackRenderer
-                )
+            codeAnnotation = @_instantiateCodeAnnotation(
+                {editor, marker, gutter}
+                {
+                    assetManager
+                    assetDirectory
+                    name: assetData[i].name
+                    line: assetData[i].line
+                }
+            )
+            if codeAnnotation?
                 codeAnnotations.push codeAnnotation
-            catch error
-                atom.notifications.addError("Could not load code annotation.", {
-                    detail: error.message
-                })
-                console.error error.message
 
         # TODO: what happens if a TextEditor's file is moved into another project (with another code-annotations folder)??
         # when an editor is renamed the data must be associated with the editor's new path
@@ -393,6 +396,10 @@ module.exports =
     # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
     _createNewCodeAnnotation: (editor, point, name, assetManager) ->
+        editorData = @_getEditorData(editor)
+        if not editorData?
+            throw new Error("The editor with path '#{editor.getPath()}' has not been initialized but it should. Please report this bug!")
+
         indentation = editor.indentationForBufferRow(point.row)
         range = [[point.row, 0], [point.row, 0]]
         line = "#{CodeAnnotations.CODE_KEYWORD.trim()} #{name}\n"
@@ -404,28 +411,32 @@ module.exports =
         editor.setIndentationForBufferRow(point.row, indentation)
         editor.setCursorBufferPosition([point.row, line.length - 1])
 
-        editorData = @_getEditorData(editor)
-        if not editorData?
-            @_initEditor(editor)
-
         line = editor.lineTextForBufferRow(point.row)
         # correct range to end of line
         range = [range[0], [point.row, line.length]]
-
         marker = editor.markBufferRange(range)
+
+        codeAnnotation = @_instantiateCodeAnnotation(
+            {editor, marker, gutter: editorData.gutter}
+            {assetManager, assetDirectory: editorData.assetDirectory, name, line}
+        )
+        if codeAnnotation?
+            editorData.codeAnnotations.push codeAnnotation
+        return codeAnnotation
+
+    _instantiateCodeAnnotation: (editorData, assetData) ->
         try
             codeAnnotation = new CodeAnnotation(
                 @
-                {editor, marker, gutter: editorData.gutter}
-                {assetManager, assetDirectory: editorData.assetDirectory, name, line}
+                editorData
+                assetData
                 @fallbackRenderer
             )
-            editorData.codeAnnotations.push codeAnnotation
-            return codeAnnotation
         catch error
             codeAnnotation = null
-            atom.notifications.addError("Could not load code annotation.", {
+            atom.notifications.addError("Could not instantiate code annotation.", {
                 detail: error.message
+                dismissable: true
             })
             console.error error.message, error.stack
         return codeAnnotation
