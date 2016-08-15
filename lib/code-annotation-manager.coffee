@@ -12,7 +12,7 @@ Renderers = {AssetRenderer} = require "./asset-renderers/all-renderers"
 ShowAllView = require "./views/show-all-view"
 ShowCommandsView = require "./views/show-commands-view"
 CodeAnnotationContainer = require "./views/code-annotation-container"
-CodeAnnotationNameDialog = require "./views/asset-name-dialog.coffee"
+CodeAnnotationNameDialog = require "./views/asset-name-dialog"
 
 
 module.exports =
@@ -23,8 +23,8 @@ module.exports =
     # subscriptions:            CompositeDisposable
     # renderers:                Array of AssetRenderer
     # annotationRegexCache:     Object(String, RegExp)
-    # assetManagers: {}
-    # assetDirectories: []
+    # assetManagers:            Object(String, AssetManager)
+    # assetDirectories:         Array of Directory
     # initializedEditors:       Object(String, TextEditor
     # codeAnnotationContainer:  CodeAnnotationContainer
     # ignoredEditors:           Object(String, TextEditor)

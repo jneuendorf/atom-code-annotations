@@ -133,7 +133,7 @@ module.exports = class CodeAnnotation
         assetName = assetName.replace(path.extname(assetName), ".#{rendererClass.getFileExtension()}")
         @assetManager.renameAsset(@name, assetName)
             .save()
-        @assetFile = @codeAnnotationManager.assetDirectory.getFile(assetName)
+        @assetFile = @assetDirectory.getFile(assetName)
         @renderer = new rendererClass(@assetFile)
         @_updateElement()
         return @
