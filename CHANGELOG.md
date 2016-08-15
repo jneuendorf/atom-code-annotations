@@ -1,5 +1,12 @@
 # Change Log
 
+## [v1.1.3](https://github.com/jneuendorf/code-annotations/tree/v1.1.3) (2016-08-15)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.2...v1.1.3)
+
+**Fixed bugs:**
+
+- changing annotation types does not work [\#9](https://github.com/jneuendorf/code-annotations/issues/9)
+
 ## [v1.1.2](https://github.com/jneuendorf/code-annotations/tree/v1.1.2) (2016-08-14)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.1...v1.1.2)
 
