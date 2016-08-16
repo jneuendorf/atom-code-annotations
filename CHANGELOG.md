@@ -1,5 +1,13 @@
 # Change Log
 
+## [v1.1.4](https://github.com/jneuendorf/code-annotations/tree/v1.1.4) (2016-08-16)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.3...v1.1.4)
+
+**Implemented enhancements:**
+
+- add ability to reference an existing annotation [\#11](https://github.com/jneuendorf/code-annotations/issues/11)
+- gutter icon should indicated invalidated annotations [\#10](https://github.com/jneuendorf/code-annotations/issues/10)
+
 ## [v1.1.3](https://github.com/jneuendorf/code-annotations/tree/v1.1.3) (2016-08-15)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.2...v1.1.3)
 
