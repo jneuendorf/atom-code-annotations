@@ -1,5 +1,12 @@
 # Change Log
 
+## [v2.0.0](https://github.com/jneuendorf/code-annotations/tree/v2.0.0) (2016-08-16)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.4...v2.0.0)
+
+**Implemented enhancements:**
+
+- renamed html renderers [\#12](https://github.com/jneuendorf/code-annotations/issues/12)
+
 ## [v1.1.4](https://github.com/jneuendorf/code-annotations/tree/v1.1.4) (2016-08-16)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.3...v1.1.4)
 
