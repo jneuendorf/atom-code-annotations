@@ -1,15 +1,12 @@
-AssetRenderer = require './asset-renderer'
+FrameRenderer = require './frame-renderer'
 
-module.exports = class HtmlRenderer extends AssetRenderer
 
-    @parent: AssetRenderer
+module.exports = class HtmlRenderer extends FrameRenderer
+
+    @parent: FrameRenderer
     @fileExtension: ["html", "htm"]
     @isTextBased: true
-    @description: "Render HTML inline"
+    @description: "Render HTML in an iframe (this enables complete capsulation of CSS and JavaScript)"
 
-    _render: (codeAnnotationManager, clearCache) ->
-        # NOTE: wanted to use shadow dom. see http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom/
-        #       but javascript targeting inside shadow dom elements is weird...therefore there is the StandaloneHtmlRenderer
-        div = document.createElement("div")
-        div.innerHTML = @asset.readSync(clearCache)
-        return div
+    _baseUrl: () ->
+        return @asset.getPath()

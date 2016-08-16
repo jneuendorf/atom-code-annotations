@@ -71,8 +71,8 @@ module.exports =
     # PUBLIC (associated with commands)
 
     # CODE-ANNOTATION: image-testasset
+    # CODE-ANNOTATION: inline-html-testasset
     # CODE-ANNOTATION: html-testasset
-    # CODE-ANNOTATION: framed-html-testasset
     # CODE-ANNOTATION: text-testasset
     # CODE-ANNOTATION: url-testasset
 
