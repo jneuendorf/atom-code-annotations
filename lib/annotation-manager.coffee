@@ -6,12 +6,12 @@ Config = require "./config"
 Utils = require "./utils"
 
 AssetManager = require "./asset-manager"
-CodeAnnotation = require "./code-annotation"
+Annotation = require "./annotation"
 Renderers = {AssetRenderer} = require "./asset-renderers/all-renderers"
 
 ShowAllView = require "./views/show-all-view"
 ShowCommandsView = require "./views/show-commands-view"
-CodeAnnotationContainer = require "./views/code-annotation-container"
+CodeAnnotationContainer = require "./views/annotation-container"
 CodeAnnotationNameDialog = require "./views/asset-name-dialog"
 
 
@@ -76,7 +76,7 @@ module.exports =
     # CODE-ANNOTATION: text-testasset
     # CODE-ANNOTATION: url-testasset
 
-    addCodeAnnotation: (callback, point) ->
+    addAnnotation: (callback, point) ->
         editor = atom.workspace.getActiveTextEditor()
         assetDirectory = @_getAssetDirectoryForEditor(editor)
         if not assetDirectory?
@@ -88,32 +88,41 @@ module.exports =
             assetManager = @assetManagers[assetDirectory.getPath()]
             # TODO: make is possible to reference an existing annotation
             if assetManager.has(name) and Config.showReplaceConfirmDialog
-                if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
-                    return @
+                buttons = ["Replace", "Reference", "Cancel"]
+                choice = buttons[atom.confirm({
+                    message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)
+                    buttons
+                })]
+                switch choice
+                    when "Cancel"
+                        return @
+                    when "Reference"
+                        return @addExistingCodeAnnotation(editor, point, name, assetManager)
+                    # when "Replace" then continue
             callback.call(@, editor, point, name, assetManager)
             return @
         return @
 
-    addCodeAnnotationWithFile: (editor, point, name, assetManager) ->
+    addAnnotationWithFile: (editor, point, name, assetManager) ->
         paths = Utils.chooseFile("Now, choose an asset.")
         if not paths? or not paths.length
             return @
         assetManager.set(name, paths[0])
             .save()
-        codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager, paths[0])
+        annotation = @_createNewAnnotation(editor, point, name, assetManager)
         # cleanup the created files
-        if not codeAnnotation?
+        if not annotation?
             assetManager.delete(name)
                 .save()
             throw new Error("Could not add code annotation. Please report this bug!")
         return @
 
-    addCodeAnnotationWithContent: (editor, point, name, assetManager) ->
+    addAnnotationWithContent: (editor, point, name, assetManager) ->
         assetManager.createFromName(name)
             .save()
-        codeAnnotation = @_createNewCodeAnnotation(editor, point, name, assetManager)
-        if codeAnnotation?
-            codeAnnotation.edit()
+        annotation = @_createNewAnnotation(editor, point, name, assetManager)
+        if annotation?
+            annotation.edit()
         # cleanup the created files
         else
             assetManager.delete(name)
@@ -121,11 +130,15 @@ module.exports =
             throw new Error("Could not add code annotation. Please report this bug!")
         return @
 
-    deleteCodeAnnotation: (point) ->
-        editor = atom.workspace.getActiveTextEditor()
-        codeAnnotation = @_getCodeAnnotationAtPoint(editor, point)
+    addExistingCodeAnnotation: (editor, point, name, assetManager) ->
+        @_createNewAnnotation(editor, point, name, assetManager)
+        return @
 
-        if not codeAnnotation?
+    deleteAnnotation: (point) ->
+        editor = atom.workspace.getActiveTextEditor()
+        annotation = @_getCodeAnnotationAtPoint(editor, point)
+
+        if not annotation?
             atom.notifications.addInfo("There is no code annotation to remove.")
             return @
 
@@ -133,7 +146,7 @@ module.exports =
             return @
 
         try
-            codeAnnotation.delete()
+            annotation.delete()
         catch error
             throw new Error("code-annotations: Could not find a code annotation at the current cursor.")
         return @
@@ -158,7 +171,7 @@ module.exports =
     getAllCodeAnnotations: () ->
         annotations = {}
         for editorPath, editorData of @initializedEditors
-            annotations[editorPath] = editorData.codeAnnotations
+            annotations[editorPath] = editorData.annotations
         return annotations
 
     # API method for plugin packages to register their own renderers for file types
@@ -170,8 +183,8 @@ module.exports =
         @renderers.push rendererClass
         return @
 
-    showContainer: (codeAnnotation, renderedContent) ->
-        @codeAnnotationContainer.setCodeAnnotation(codeAnnotation)
+    showContainer: (annotation, renderedContent) ->
+        @codeAnnotationContainer.setCodeAnnotation(annotation)
             .setContent(renderedContent)
             .show()
         return @
@@ -259,10 +272,10 @@ module.exports =
             return true
 
         assetManager = @assetManagers[assetDirectory.getPath()]
-        codeAnnotations = []
+        annotations = []
         for range, i in ranges
-            marker = editor.markBufferRange(range)
-            codeAnnotation = @_instantiateCodeAnnotation(
+            marker = @_createAnnotationMarker(editor, range)
+            annotation = @_instantiateCodeAnnotation(
                 {editor, marker, gutter}
                 {
                     assetManager
@@ -271,8 +284,8 @@ module.exports =
                     line: assetData[i].line
                 }
             )
-            if codeAnnotation?
-                codeAnnotations.push codeAnnotation
+            if annotation?
+                annotations.push annotation
 
         # support renaming open editors' files - changing unopen files won't be listened to
         @subscriptions.add editor.onDidChangePath () =>
@@ -287,7 +300,7 @@ module.exports =
         @initializedEditors[editorPath] = {
             assetDirectory
             assetManager
-            codeAnnotations
+            annotations
             editor
             gutter
         }
@@ -295,8 +308,8 @@ module.exports =
 
     _uninitEditor: (editor, editorPath) ->
         if @initializedEditors[editorPath]?
-            for codeAnnotation in @initializedEditors[editorPath].codeAnnotations
-                codeAnnotation.destroy()
+            for annotation in @initializedEditors[editorPath].annotations
+                annotation.destroy()
             Utils.getGutterWithName(editor, CodeAnnotations.GUTTER_NAME).destroy()
             delete @initializedEditors[editorPath]
         return @
@@ -320,11 +333,11 @@ module.exports =
             @assetManagers[assetDirectoryPath] = new AssetManager(assetDirectoryPath)
         return assetDirectory
 
-    # get the name of the codeAnnotation at the given point
+    # get the name of the annotation at the given point
     _getCodeAnnotationAtPoint: (editor, point) ->
-        for codeAnnotation in @_getEditorData(editor).codeAnnotations
-            if codeAnnotation.marker.getBufferRange().start.row is point.row
-                return codeAnnotation
+        for annotation in @_getEditorData(editor).annotations
+            if annotation.marker.getBufferRange().start.row is point.row
+                return annotation
         return null
 
     # takes care of removing the unnecessary stuff (i.e. dom nodes)
@@ -373,8 +386,8 @@ module.exports =
 
         # move asset files to new assetDirectory and update according references
         newAssetManager = @assetManagers[newAssetDirectory.getPath()]
-        for codeAnnotation in oldEditorData.codeAnnotations
-            name = codeAnnotation.name
+        for annotation in oldEditorData.annotations
+            name = annotation.name
             if newAssetManager.has(name)
                 if Config.showReplaceConfirmDialog
                     if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
@@ -390,18 +403,23 @@ module.exports =
 
     _registerCommands: () ->
         @commands =
-            'code-annotations:add-code-annotation-with-file': () =>
-                return @addCodeAnnotation(
-                    @addCodeAnnotationWithFile
+            'code-annotations:add-annotation-with-file': () =>
+                return @addAnnotation(
+                    @addAnnotationWithFile
                     atom.workspace.getActiveTextEditor().getCursorBufferPosition()
                 )
-            'code-annotations:add-code-annotation-with-content': () =>
-                return @addCodeAnnotation(
-                    @addCodeAnnotationWithContent
+            'code-annotations:add-annotation-with-content': () =>
+                return @addAnnotation(
+                    @addAnnotationWithContent
                     atom.workspace.getActiveTextEditor().getCursorBufferPosition()
                 )
-            'code-annotations:delete-code-annotation': () =>
-                return @deleteCodeAnnotation(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
+            'code-annotations:add-existing-annotation': () =>
+                return @addAnnotation(
+                    @addExistingCodeAnnotation
+                    atom.workspace.getActiveTextEditor().getCursorBufferPosition()
+                )
+            'code-annotations:delete-annotation': () =>
+                return @deleteAnnotation(atom.workspace.getActiveTextEditor().getCursorBufferPosition())
             'code-annotations:show-all': () =>
                 return @showAll()
             'code-annotations:show-commands': () =>
@@ -432,12 +450,41 @@ module.exports =
         }
         return @
 
+    _createAnnotationMarker: (editor, range) ->
+        marker = editor.markBufferRange(range, {invalidate: "surround"})
+        marker.setProperties {
+            originalText: editor.getTextInBufferRange(range).trim()
+        }
+        @subscriptions.add marker.onDidChange (event) =>
+            console.log event
+            properties = marker.getProperties()
+            if event.textChanged
+                currentRange = marker.getBufferRange()
+                markerText = editor.getTextInBufferRange(currentRange).trim()
+                annotation = properties.annotation
+                if markerText.length > 0
+                    console.log "#{currentRange}"
+                    # non-whitespace text changes => custom invalidate
+                    if properties.originalText isnt markerText
+                        annotation.invalidate()
+                    # changed text back to oringal => it's valid again
+                    else
+                        annotation.validate()
+                else
+                    editorData = @initializedEditors[editor.getPath()]
+                    editorData.annotations = (a for a in editorData.annotations when a isnt annotation)
+                    if Config.showDeleteConfirmDialog and Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
+                        annotation.delete(false)
+                    else
+                        annotation.destroy()
+            return @
+        return marker
     ###
     # Creates an entirely new code annotation.
     # Therefore, an asset is copied and the .names.cson is updated.
     # @param Object assetManager Equals this.assetManagers[current editor's asset path].
     ###
-    _createNewCodeAnnotation: (editor, point, name, assetManager) ->
+    _createNewAnnotation: (editor, point, name, assetManager) ->
         editorData = @_getEditorData(editor)
         if not editorData?
             throw new Error("The editor with path '#{editor.getPath()}' has not been initialized but it should. Please report this bug!")
@@ -456,32 +503,34 @@ module.exports =
         line = editor.lineTextForBufferRow(point.row)
         # correct range to end of line
         range = [range[0], [point.row, line.length]]
-        marker = editor.markBufferRange(range)
+        # marker = editor.markBufferRange(range, {invalidate: "inside"})
+        # marker = @_createAnnotationMarker(editor, range)
+        marker = @_createAnnotationMarker(editor, range)
 
-        codeAnnotation = @_instantiateCodeAnnotation(
+        annotation = @_instantiateCodeAnnotation(
             {editor, marker, gutter: editorData.gutter}
             {assetManager, assetDirectory: editorData.assetDirectory, name, line}
         )
-        if codeAnnotation?
-            editorData.codeAnnotations.push codeAnnotation
-        return codeAnnotation
+        if annotation?
+            editorData.annotations.push annotation
+        return annotation
 
     _instantiateCodeAnnotation: (editorData, assetData) ->
         try
-            codeAnnotation = new CodeAnnotation(
+            annotation = new Annotation(
                 @
                 editorData
                 assetData
                 @fallbackRenderer
             )
         catch error
-            codeAnnotation = null
+            annotation = null
             atom.notifications.addError("Could not instantiate code annotation.", {
                 detail: error.message
                 dismissable: true
             })
             console.error error.message, error.stack
-        return codeAnnotation
+        return annotation
 
     _getAnnotationRegex: (grammar) ->
         if @annotationRegexCache[grammar.name]?

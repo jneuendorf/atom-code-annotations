@@ -35,7 +35,7 @@ module.exports = class CodeAnnotationContainer
     # CONSTRUCTOR
     constructor: (codeAnnotationManager) ->
         @codeAnnotationManager = codeAnnotationManager
-        @codeAnnotation = null
+        @annotation = null
         @nameElement = null
         @content = null
         @textEditorView = null
@@ -62,10 +62,10 @@ module.exports = class CodeAnnotationContainer
         element.find(".btn.delete").click (event) =>
             if Config.showDeleteConfirmDialog and not Utils.confirm({message: CodeAnnotations.DELETE_CONFIRM_MESSAGE})
                 return @
-            @codeAnnotation.delete()
+            @annotation.delete()
             return @hide()
         element.find(".btn.edit").click (event) =>
-            return @codeAnnotation.edit()
+            return @annotation.edit()
         element.find(".btn.disappear").click (event) =>
             return @hide()
         element.find(".btn.change-type").click (event) =>
@@ -83,7 +83,7 @@ module.exports = class CodeAnnotationContainer
             # on enter
             if evt.which is 13
                 newName = @textEditorView.getText()
-                @codeAnnotation.updateName(newName)
+                @annotation.updateName(newName)
                 @nameElement.text(newName)
                 @toggleMiniTextEditor()
             return true
@@ -127,15 +127,15 @@ module.exports = class CodeAnnotationContainer
         @content.append(element)
         return @
 
-    setCodeAnnotation: (codeAnnotation) ->
-        @codeAnnotation = codeAnnotation
+    setCodeAnnotation: (annotation) ->
+        @annotation = annotation
         return @
 
     setContent: (content) ->
         @content.children().detach()
         @content.append(content)
-        @nameElement.text(@codeAnnotation.name)
-        @textEditorView.getModel().setText(@codeAnnotation.name)
+        @nameElement.text(@annotation.name)
+        @textEditorView.getModel().setText(@annotation.name)
         return @
 
     # for editing the asset name
@@ -145,5 +145,5 @@ module.exports = class CodeAnnotationContainer
         return @
 
     changeAnnotationType: (rendererClass) ->
-        @codeAnnotation.changeType(rendererClass)
+        @annotation.changeType(rendererClass)
         return @

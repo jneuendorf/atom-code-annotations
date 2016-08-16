@@ -1,16 +1,18 @@
-path = require "path"
 {Directory} = require 'atom'
+{$} = require 'atom-space-pen-views'
+path = require "path"
 
 Utils = require './utils'
 CodeAnnotations = require "./constants"
 
 
-module.exports = class CodeAnnotation
+module.exports = class Annotation
 
     constructor: (codeAnnotationManager, editorData, assetData, fallbackRenderer) ->
         @codeAnnotationManager = codeAnnotationManager
 
         {@editor, @marker, gutter} = editorData
+        @marker.setProperties({annotation: @})
 
         {@assetManager, @assetDirectory, @line, @name} = assetData
         @element = null
@@ -18,6 +20,7 @@ module.exports = class CodeAnnotation
         @assetFile = null
         @renderer = null
         @fallbackRenderer = fallbackRenderer or null
+        @gutterIcon = null
 
         @_init(gutter)
 
@@ -28,6 +31,7 @@ module.exports = class CodeAnnotation
         gutterIcon = @_createGutterIcon()
         gutter.decorateMarker(@marker, {item: gutterIcon})
         @_addEventListenersToGutterIcon(gutterIcon)
+        @gutterIcon = $(gutterIcon)
         return @
 
     ###########################################################################################
@@ -139,12 +143,13 @@ module.exports = class CodeAnnotation
         return @
 
     # removes the annotation from code and file system
-    delete: () ->
-        # strip "CODE-ANNOTATION: " for comment so the name remains for comment semantics
-        @editor.setTextInBufferRange(
-            @marker.getBufferRange()
-            @line.replace(CodeAnnotations.CODE_KEYWORD, " ")
-        )
+    delete: (changeBufferText = true) ->
+        if changeBufferText
+            # strip "CODE-ANNOTATION: " for comment so the name remains for comment semantics
+            @editor.setTextInBufferRange(
+                @marker.getBufferRange()
+                @line.replace(CodeAnnotations.CODE_KEYWORD, " ")
+            )
         # remove entry from names.cson + remove asset file from file system
         @assetManager
             .delete @name
@@ -157,4 +162,14 @@ module.exports = class CodeAnnotation
         @element?.remove()
         # remove gutter marker + decoration (== gutter icon)
         @marker.destroy()
+        return @
+
+    # this method is called when the marker becomes invalid
+    invalidate: () ->
+        @gutterIcon.addClass("invalid")
+        return @
+
+    # this method is called when the marker becomes valid
+    validate: () ->
+        @gutterIcon.removeClass("invalid")
         return @
