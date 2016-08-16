@@ -385,39 +385,6 @@ module.exports =
         @_reinitializeEditor(editor, editorPath)
         return @
 
-    # _onDidRenameAsset: () ->
-    #     console.log arguments
-    #     debugger
-    #     newEditorPath = editor.getPath()
-    #     newAssetDirectory = @_getAssetDirectoryForEditor(editor, false)
-    #     oldEditorData = @initializedEditors[oldEditorPath]
-    #
-    #     # editor has been moved within the same project folder => just update key of @initializedEditors
-    #     if newAssetDirectory?.getPath() is oldEditorData.assetDirectory.getPath()
-    #         delete @initializedEditors[oldEditorPath]
-    #         @initializedEditors[newEditorPath] = oldEditorData
-    #         oldEditorPath = newEditorPath
-    #         return @
-    #
-    #     # editor has been moved into another project folder
-    #     # no .code-annotations directory => create it or stop right here
-    #     if not newAssetDirectory?
-    #         newAssetDirectory = @_initAssetDirectory(editor)
-    #
-    #     # move asset files to new assetDirectory and update according references
-    #     newAssetManager = @assetManagers[newAssetDirectory.getPath()]
-    #     for codeAnnotation in oldEditorData.codeAnnotations
-    #         name = codeAnnotation.name
-    #         if newAssetManager.has(name)
-    #             if Config.showReplaceConfirmDialog
-    #                 if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
-    #                     continue
-    #             newAssetManager.delete(name)
-    #         assetManager.move(name, newAssetManager)
-    #
-    #     @_reinitializeEditor(editor, editorPath)
-    #     return @
-
     _getEditorData: (editor) ->
         return @initializedEditors[editor.getPath()] or null
 
@@ -439,8 +406,6 @@ module.exports =
                 return @showAll()
             'code-annotations:show-commands': () =>
                 return @showCommands()
-            'code-annotations:copy-assets': () =>
-                return @copyAssets()
             'code-annotations:reload': () =>
                 return @reload()
             'code-annotations:load-current-editor': () =>
