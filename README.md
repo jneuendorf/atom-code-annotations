@@ -62,31 +62,31 @@ The container is made visible by clicking on the icon displayed in the [gutter](
 
 ## Supported grammars
 
-- C
-- C#
-- CoffeeScript
-- CSS
-- C++
-- GitHub Markdown
-- Go
-- Haskell
-- HTML
-- HTML (Ruby - ERB)
-- Java
-- JavaScript
-- LaTeX
-- MATLAB
-- Objective-C
-- Objective-C++
-- Octave
-- Perl
-- Perl 6
-- PHP
-- Python
-- R
-- Ruby
-- Sass
-- Scala
-- SCSS
-- Shell Script
-- SQL
+- [C](https://atom.io/packages/language-c)
+- [C#](https://atom.io/packages/language-csharp)
+- [CoffeeScript](https://atom.io/packages/language-coffee-script)
+- [CSS](https://atom.io/packages/language-css)
+- [C++](https://atom.io/packages/language-c)
+- [GitHub Flavored Markdown](https://atom.io/packages/language-gfm)
+- [Go](https://atom.io/packages/language-go)
+- [Haskell](https://atom.io/packages/language-haskell)
+- [HTML](https://atom.io/packages/language-html)
+- [HTML (Ruby - ERB)](https://atom.io/packages/language-ruby)
+- [Java](https://atom.io/packages/language-java)
+- [JavaScript](https://atom.io/packages/language-javascript)
+- [LaTeX](https://atom.io/packages/language-latex)
+- [MATLAB](https://atom.io/packages/language-matlab)
+- [Objective-C](https://atom.io/packages/language-objective-c)
+- [Objective-C++](https://atom.io/packages/language-objective-c)
+- [Octave](https://atom.io/packages/language-matlab)
+- [Perl](https://atom.io/packages/language-perl)
+- [Perl 6](https://atom.io/packages/language-perl)
+- [PHP](https://atom.io/packages/language-php)
+- [Python](https://atom.io/packages/language-python)
+- [R](https://atom.io/packages/language-r)
+- [Ruby](https://atom.io/packages/language-ruby)
+- [Sass](https://atom.io/packages/language-sass)
+- [Scala](https://atom.io/packages/language-scala)
+- [SCSS](https://atom.io/packages/language-scss)
+- [Shell Script](https://atom.io/packages/language-shellscript)
+- [SQL](https://atom.io/packages/language-sql)

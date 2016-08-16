@@ -17,6 +17,12 @@ module.exports = class AssetManager
         @file = "#{path}/#{CodeAnnotations.ASSET_NAMES_FILE}"
         @data = CSON.readFileSync(@file)
 
+    getAssetDirectoryPath: () ->
+        return @dir
+
+    getNamesFilePath: () ->
+        return @file
+
     has: (name) ->
         return @data[name]?
 
@@ -48,11 +54,18 @@ module.exports = class AssetManager
         @data[codeAnnotationName] = newAssetName
         return @
 
+    # returns if an annotation was replace
+    move: (codeAnnotationName, targetAssetManager) ->
+        targetAssetManager.set(codeAnnotationName, path.join(@dir, @data[codeAnnotationName]))
+            .save()
+        @delete(codeAnnotationName)
+            .save()
+        return @
+
     # set data and copy file
     set: (codeAnnotationName, asset) ->
         assetName = "#{@_asciiFilename(codeAnnotationName)}#{path.extname(asset)}".toLowerCase()
         @data[codeAnnotationName] = assetName
-        console.log asset
         # copy asset to local .code-annotations directory
         fs.copyFileSync(asset, path.join(@dir, assetName))
         return @

@@ -138,6 +138,7 @@ module.exports = class CodeAnnotation
         @_updateElement()
         return @
 
+    # removes the annotation from code and file system
     delete: () ->
         # strip "CODE-ANNOTATION: " for comment so the name remains for comment semantics
         @editor.setTextInBufferRange(
@@ -148,6 +149,12 @@ module.exports = class CodeAnnotation
         @assetManager
             .delete @name
             .save()
-        # remove gutter marker + decoration
+        @destroy()
+        return @
+
+    # destroys the instance
+    destroy: () ->
+        @element?.remove()
+        # remove gutter marker + decoration (== gutter icon)
         @marker.destroy()
         return @

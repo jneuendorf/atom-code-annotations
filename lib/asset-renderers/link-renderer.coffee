@@ -3,6 +3,7 @@ fs = require "fs"
 FrameRenderer = require './frame-renderer'
 
 
+# TODO: use ajax loader
 module.exports = class LinkRenderer extends FrameRenderer
 
     @parent: FrameRenderer

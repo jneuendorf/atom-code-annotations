@@ -11,3 +11,5 @@ module.exports =
     DELETE_CONFIRM_MESSAGE: "Really delete?"
     REPLACE_CONFIRM_MESSAGE: (name) ->
         return "Asset with name '#{name}' already exists. Replace it?"
+    # CREATE_ASSET_DIRECTORY_CONFIRM_MESSAGE: (editorPath) ->
+    #     return "There is no asset directory where for '#{editorPath}'. Create one and continue?"

@@ -1,4 +1,4 @@
-{CompositeDisposable, Directory, Range, TextEditor} = require "atom"
+{CompositeDisposable, Directory, File, Range, TextEditor} = require "atom"
 
 CommentCharacters = require "./comment-characters"
 CodeAnnotations = require "./constants"
@@ -86,6 +86,7 @@ module.exports =
         dialog = new CodeAnnotationNameDialog()
         dialog.attach().onSubmit (name) =>
             assetManager = @assetManagers[assetDirectory.getPath()]
+            # TODO: make is possible to reference an existing annotation
             if assetManager.has(name) and Config.showReplaceConfirmDialog
                 if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
                     return @
@@ -203,12 +204,11 @@ module.exports =
         try
             @_registerElements()
         catch error
-            atom.notifications.addInfo("Custom DOM elements already registered")
+            atom.notifications.addInfo("Custom DOM elements already registered.")
 
         @_registerCommands()
         @_loadAssetManagers()
         @_registerRenderers()
-        # @codeAnnotationContainer.addRendererButtons()
 
         if not Config.manuallyLoadCodeAnnotations
             atom.workspace.observeActivePaneItem (editor) =>
@@ -274,18 +274,14 @@ module.exports =
             if codeAnnotation?
                 codeAnnotations.push codeAnnotation
 
-        # TODO: what happens if a TextEditor's file is moved into another project (with another code-annotations folder)??
-        # when an editor is renamed the data must be associated with the editor's new path
+        # support renaming open editors' files - changing unopen files won't be listened to
         @subscriptions.add editor.onDidChangePath () =>
-            newEditorPath = editor.getPath()
-            @initializedEditors[newEditorPath] = @initializedEditors[editorPath]
-            @_uninitEditor(editor)
-            delete @initializedEditors[editorPath]
-            editorPath = newEditorPath
-            return @
+            @_onDidChangeEditorPath(editor, editorPath)
+            editorPath = editor.getPath()
+            return true
 
         @subscriptions.add editor.onDidDestroy () =>
-            @_uninitEditor(editor)
+            delete @initializedEditors[editorPath]
             return @
 
         @initializedEditors[editorPath] = {
@@ -297,10 +293,16 @@ module.exports =
         }
         return @
 
-    _uninitEditor: (editor) ->
-        console.log "uninitializing editor w/ path: #{editor.getPath()}"
-        delete @initializedEditors[editor.getPath()]
+    _uninitEditor: (editor, editorPath) ->
+        if @initializedEditors[editorPath]?
+            for codeAnnotation in @initializedEditors[editorPath].codeAnnotations
+                codeAnnotation.destroy()
+            Utils.getGutterWithName(editor, CodeAnnotations.GUTTER_NAME).destroy()
+            delete @initializedEditors[editorPath]
         return @
+
+    _reinitializeEditor: (editor, editorPath) ->
+        return @_uninitEditor(editor, editorPath)._initEditor(editor, editorPath)
 
     _registerRenderers: () ->
         for name, config of Config.configData.renderers.properties when Config[name] is true
@@ -338,10 +340,10 @@ module.exports =
             @assetManagers[path] = new AssetManager(path)
         return @
 
-    _getAssetDirectoryForEditor: (editor) ->
+    _getAssetDirectoryForEditor: (editor, useCache = true) ->
         editorPath = editor.getPath()
         # return from "cache"
-        if @initializedEditors[editorPath]?.assetDirectory?
+        if @initializedEditors[editorPath]?.assetDirectory? and useCache
             return @initializedEditors[editorPath].assetDirectory
         # actually find the dir
         for assetDirectory in @assetDirectories
@@ -351,6 +353,70 @@ module.exports =
         # # found no asset directory => maybe there is non yet => check in all projects
         # throw new Error("Cannot add a code annotation to files outside of the current projects.")
         return null
+
+    _onDidChangeEditorPath: (editor, oldEditorPath) ->
+        newEditorPath = editor.getPath()
+        newAssetDirectory = @_getAssetDirectoryForEditor(editor, false)
+        oldEditorData = @initializedEditors[oldEditorPath]
+
+        # editor has been moved within the same project folder => just update key of @initializedEditors
+        if newAssetDirectory?.getPath() is oldEditorData.assetDirectory.getPath()
+            delete @initializedEditors[oldEditorPath]
+            @initializedEditors[newEditorPath] = oldEditorData
+            oldEditorPath = newEditorPath
+            return @
+
+        # editor has been moved into another project folder
+        # no .code-annotations directory => create it or stop right here
+        if not newAssetDirectory?
+            newAssetDirectory = @_initAssetDirectory(editor)
+
+        # move asset files to new assetDirectory and update according references
+        newAssetManager = @assetManagers[newAssetDirectory.getPath()]
+        for codeAnnotation in oldEditorData.codeAnnotations
+            name = codeAnnotation.name
+            if newAssetManager.has(name)
+                if Config.showReplaceConfirmDialog
+                    if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
+                        continue
+                newAssetManager.delete(name)
+            assetManager.move(name, newAssetManager)
+
+        @_reinitializeEditor(editor, editorPath)
+        return @
+
+    # _onDidRenameAsset: () ->
+    #     console.log arguments
+    #     debugger
+    #     newEditorPath = editor.getPath()
+    #     newAssetDirectory = @_getAssetDirectoryForEditor(editor, false)
+    #     oldEditorData = @initializedEditors[oldEditorPath]
+    #
+    #     # editor has been moved within the same project folder => just update key of @initializedEditors
+    #     if newAssetDirectory?.getPath() is oldEditorData.assetDirectory.getPath()
+    #         delete @initializedEditors[oldEditorPath]
+    #         @initializedEditors[newEditorPath] = oldEditorData
+    #         oldEditorPath = newEditorPath
+    #         return @
+    #
+    #     # editor has been moved into another project folder
+    #     # no .code-annotations directory => create it or stop right here
+    #     if not newAssetDirectory?
+    #         newAssetDirectory = @_initAssetDirectory(editor)
+    #
+    #     # move asset files to new assetDirectory and update according references
+    #     newAssetManager = @assetManagers[newAssetDirectory.getPath()]
+    #     for codeAnnotation in oldEditorData.codeAnnotations
+    #         name = codeAnnotation.name
+    #         if newAssetManager.has(name)
+    #             if Config.showReplaceConfirmDialog
+    #                 if not Utils.confirm({message: CodeAnnotations.REPLACE_CONFIRM_MESSAGE(name)})
+    #                     continue
+    #             newAssetManager.delete(name)
+    #         assetManager.move(name, newAssetManager)
+    #
+    #     @_reinitializeEditor(editor, editorPath)
+    #     return @
 
     _getEditorData: (editor) ->
         return @initializedEditors[editor.getPath()] or null
@@ -373,6 +439,8 @@ module.exports =
                 return @showAll()
             'code-annotations:show-commands': () =>
                 return @showCommands()
+            'code-annotations:copy-assets': () =>
+                return @copyAssets()
             'code-annotations:reload': () =>
                 return @reload()
             'code-annotations:load-current-editor': () =>
