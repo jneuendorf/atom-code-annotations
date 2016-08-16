@@ -456,14 +456,12 @@ module.exports =
             originalText: editor.getTextInBufferRange(range).trim()
         }
         @subscriptions.add marker.onDidChange (event) =>
-            console.log event
             properties = marker.getProperties()
             if event.textChanged
                 currentRange = marker.getBufferRange()
                 markerText = editor.getTextInBufferRange(currentRange).trim()
                 annotation = properties.annotation
                 if markerText.length > 0
-                    console.log "#{currentRange}"
                     # non-whitespace text changes => custom invalidate
                     if properties.originalText isnt markerText
                         annotation.invalidate()
@@ -479,6 +477,7 @@ module.exports =
                         annotation.destroy()
             return @
         return marker
+        
     ###
     # Creates an entirely new code annotation.
     # Therefore, an asset is copied and the .names.cson is updated.
@@ -503,8 +502,6 @@ module.exports =
         line = editor.lineTextForBufferRow(point.row)
         # correct range to end of line
         range = [range[0], [point.row, line.length]]
-        # marker = editor.markBufferRange(range, {invalidate: "inside"})
-        # marker = @_createAnnotationMarker(editor, range)
         marker = @_createAnnotationMarker(editor, range)
 
         annotation = @_instantiateCodeAnnotation(
@@ -517,12 +514,7 @@ module.exports =
 
     _instantiateCodeAnnotation: (editorData, assetData) ->
         try
-            annotation = new Annotation(
-                @
-                editorData
-                assetData
-                @fallbackRenderer
-            )
+            annotation = new Annotation(@, editorData, assetData, @fallbackRenderer)
         catch error
             annotation = null
             atom.notifications.addError("Could not instantiate code annotation.", {
