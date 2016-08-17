@@ -1,22 +1,32 @@
 {
-  "name": "code-annotations",
-  "description": "An atom package for creating inline code annotations",
-  "main": "./lib/annotation-manager",
-  "version": "2.0.0",
-  "keywords": [],
-  "activationCommands": {},
-  "repository": "https://github.com/jneuendorf/code-annotations",
-  "license": "MIT",
-  "engines": {
-    "atom": ">=1.0.0 <2.0.0"
-  },
-  "dependencies": {
-    "atom-space-pen-views": "~2.2.0",
-    "fs-plus": "~2.9.1",
-    "path": "~0.12.7",
-    "season": "~5.3.0"
-  },
-  "devDependencies": {
-    "coffeelint": "~1.15.7"
-  }
+    "name": "code-annotations",
+    "description": "An atom package for annotating your source with anything",
+    "main": "./lib/annotation-manager",
+    "version": "2.0.0",
+    "keywords": [
+        "code",
+        "annotate",
+        "annotation",
+        "documentation"
+    ],
+    "author": {
+        "name": "Jim Neuendorf",
+        "url": "https://github.com/jneuendorf"
+    },
+    "activationCommands": {},
+    "repository": "https://github.com/jneuendorf/code-annotations",
+    "bugs": "https://github.com/jneuendorf/code-annotations/issues",
+    "license": "MIT",
+    "engines": {
+        "atom": ">=1.0.0 <2.0.0"
+    },
+    "dependencies": {
+        "atom-space-pen-views": "~2.2.0",
+        "fs-plus": "~2.9.1",
+        "path": "~0.12.7",
+        "season": "~5.3.0"
+    },
+    "devDependencies": {
+        "coffeelint": "~1.15.7"
+    }
 }
