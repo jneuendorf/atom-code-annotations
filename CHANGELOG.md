@@ -1,5 +1,12 @@
 # Change Log
 
+## [v2.1.0](https://github.com/jneuendorf/code-annotations/tree/v2.1.0) (2016-08-18)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.0.0...v2.1.0)
+
+**Closed issues:**
+
+- enable plugin packages [\#13](https://github.com/jneuendorf/code-annotations/issues/13)
+
 ## [v2.0.0](https://github.com/jneuendorf/code-annotations/tree/v2.0.0) (2016-08-16)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v1.1.4...v2.0.0)
 
