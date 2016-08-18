@@ -13,15 +13,33 @@ module.exports = class AssetRenderer
     constructor: (asset) ->
         @asset = asset
 
-    @isSubclassOf: (clss) ->
-        if clss is @
-            return false
-        c = @
-        while c.parent?
-            c = c.parent
-            if c is clss
-                return true
-        return false
+    @getName: () ->
+        return @name
+
+    # this class method checks if the given class has all necessary class and instance methods
+    # and if it does
+    @ensureSameApi: (rendererClass) ->
+        if rendererClass.prototype instanceof AssetRenderer
+            return rendererClass
+
+        isValid = rendererClass::_render instanceof Function and
+            rendererClass.getName instanceof Function and
+            rendererClass.fileExtension? and
+            typeof rendererClass.isTextBased is "boolean"
+
+        if not isValid
+            return null
+
+        # minimal api is ok => create new class as subclass of AssetRenderer to make sure entire api is there
+        # note that coffeescript's extends is in-place
+        class AdjustedRenderer extends @
+
+        for key in Object.keys(rendererClass)
+            AdjustedRenderer[key] = rendererClass[key]
+        for key in Object.keys(rendererClass.prototype)
+            AdjustedRenderer::[key] = rendererClass::[key]
+        AdjustedRenderer.parent = @
+        return AdjustedRenderer
 
     @supports: (filename) ->
         regex = /\./g
@@ -46,10 +64,10 @@ module.exports = class AssetRenderer
 
     render: (codeAnnotationManager, clearCache = false) ->
         element = @_render(codeAnnotationManager, clearCache)
-        classes = "#{element.className} rendered #{Utils.camelToKebab(@constructor.name)}"
+        classes = "#{element.className} rendered #{Utils.camelToKebab(@constructor.getName())}"
         parent = @constructor.parent
         while parent?
-            classes += " #{Utils.camelToKebab(parent.name)}"
+            classes += " #{Utils.camelToKebab(parent.getName())}"
             parent = parent.parent
         element.className = classes
         return element
@@ -59,14 +77,10 @@ module.exports = class AssetRenderer
     #     return @
 
     _render: (codeAnnotationManager, clearCache) ->
-        throw new Error("_render() method must be implemented by '#{@constructor.name}'.")
+        throw new Error("_render() method must be implemented by '#{@constructor.getName()}'.")
 
     isTextBased: () ->
         return @constructor.isTextBased
 
     getFileExtension: () ->
         return @constructor.fileExtension
-
-    setAsset: (asset) ->
-        @asset = asset
-        return @

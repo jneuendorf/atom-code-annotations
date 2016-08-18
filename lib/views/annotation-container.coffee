@@ -69,7 +69,7 @@ module.exports = class CodeAnnotationContainer
         element.find(".btn.disappear").click (event) =>
             return @hide()
         element.find(".btn.change-type").click (event) =>
-            return @changeTypeView.show(@codeAnnotationManager.renderers)
+            return @changeTypeView.show(@codeAnnotationManager.rendererClasses)
         # asset name elements' events
         @nameElement.dblclick () =>
             @toggleMiniTextEditor()

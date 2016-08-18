@@ -11,21 +11,21 @@ module.exports = class ChangeTypeView extends SelectListView
     getFilterKey: () ->
         return "searchString"
 
-    beforeShow: (renderers) ->
+    beforeShow: (rendererClasses) ->
         items = []
-        for renderer in renderers
-            if typeof renderer.fileExtension isnt "string"
-                fileExtension = renderer.fileExtension.join(" ")
-                fileExtensionLabel = renderer.fileExtension.join(", ")
+        for rendererClass in rendererClasses
+            if typeof rendererClass.fileExtension isnt "string"
+                fileExtension = rendererClass.fileExtension.join(" ")
+                fileExtensionLabel = rendererClass.fileExtension.join(", ")
             else
-                fileExtension = renderer.fileExtension
-                fileExtensionLabel = renderer.fileExtension
+                fileExtension = rendererClass.fileExtension
+                fileExtensionLabel = rendererClass.fileExtension
             items.push {
-                name: renderer.name
+                name: rendererClass.getName()
                 fileExtension
                 fileExtensionLabel
-                searchString: "#{renderer.name} #{fileExtension}"
-                rendererClass: renderer
+                searchString: "#{rendererClass.getName()} #{fileExtension}"
+                rendererClass: rendererClass
             }
         return items
 

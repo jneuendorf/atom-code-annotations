@@ -21,7 +21,7 @@ module.exports =
     # INSTANCE PROPERTIES
     # commands:                 Object(String, Function)
     # subscriptions:            CompositeDisposable
-    # renderers:                Array of AssetRenderer
+    # rendererClasses:          Array of AssetRenderer
     # annotationRegexCache:     Object(String, RegExp)
     # assetManagers:            Object(String, AssetManager)
     # assetDirectories:         Array of Directory
@@ -42,7 +42,7 @@ module.exports =
 
         @commands = null
         @subscriptions = new CompositeDisposable()
-        @renderers = []
+        @rendererClasses = []
         @annotationRegexCache = {}
         @assetManagers = {}
         @assetDirectories = []
@@ -66,6 +66,18 @@ module.exports =
         #       after git pull the passed data could then be invalid
         #       -> user must have the possibility to manually reload the asset files
         return {a: 10}
+
+    #######################################################################################
+    # PUBLIC (services)
+
+    # API method for plugin packages to register their own renderers for file types
+    registerRenderer: (rendererClass) ->
+        adjustedRendererClass = AssetRenderer.ensureSameApi(rendererClass)
+        if not adjustedRendererClass?
+            throw new Error("Invalid asset renderer '#{rendererClass.getName?() or rendererClass.name}'. Expected a subclass of AssetRenderer or a class that has an equivalent API.")
+        console.log "registering #{adjustedRendererClass.getName()}"
+        @rendererClasses.push adjustedRendererClass
+        return @
 
     #######################################################################################
     # PUBLIC (associated with commands)
@@ -174,15 +186,6 @@ module.exports =
             annotations[editorPath] = editorData.annotations
         return annotations
 
-    # API method for plugin packages to register their own renderers for file types
-    registerRenderer: (rendererClass) ->
-        if rendererClass in @renderers
-            throw new Error("The AssetRenderer is already defined to file type '#{rendererClass.fileExtension}'.")
-        if not rendererClass.isSubclassOf AssetRenderer
-            throw new Error("Invalid asset renderer. Expected a subclass of AssetRenderer.")
-        @renderers.push rendererClass
-        return @
-
     showContainer: (annotation, renderedContent) ->
         @codeAnnotationContainer.setCodeAnnotation(annotation)
             .setContent(renderedContent)
@@ -251,7 +254,7 @@ module.exports =
         # comments not supported => do not modify editor
         catch error
             @ignoredEditors[editorPath] = editor
-            console.log "unsupported grammer (no comments available => thus no annotations). error: #{error.message}", editor
+            console.log "unsupported grammer (no comments available => thus no annotations). error: #{error.message}", editorPath
             return @
 
         console.log "initializing editor w/ path: #{editorPath}"
@@ -477,7 +480,7 @@ module.exports =
                         annotation.destroy()
             return @
         return marker
-        
+
     ###
     # Creates an entirely new code annotation.
     # Therefore, an asset is copied and the .names.cson is updated.
@@ -521,7 +524,7 @@ module.exports =
                 detail: error.message
                 dismissable: true
             })
-            console.error error.message, error.stack
+            console.error error, assetData
         return annotation
 
     _getAnnotationRegex: (grammar) ->

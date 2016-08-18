@@ -57,7 +57,7 @@ module.exports = class Annotation
         filename = assetFile.getBaseName()
         renderer = fallbackRenderer
         maxPriority = -1
-        for rendererClass in @codeAnnotationManager.renderers
+        for rendererClass in @codeAnnotationManager.rendererClasses
             {result, priority} = rendererClass.supports(filename)
             if result is true and priority > maxPriority
                 renderer = rendererClass

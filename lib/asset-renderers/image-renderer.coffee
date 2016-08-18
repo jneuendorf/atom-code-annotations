@@ -9,7 +9,7 @@ module.exports = class ImageRenderer extends AssetRenderer
     @isTextBased: false
     @description: "Render images as &lt;img&gt; tags (currently supports png, gif, jpg, jpeg and bmp)"
 
-    _render: (codeAnnotationManager) ->
+    _render: (codeAnnotationManager, clearCache) ->
         img = document.createElement("img")
         img.src = @asset.getPath()
         return img

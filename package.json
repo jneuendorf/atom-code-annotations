@@ -28,5 +28,12 @@
     },
     "devDependencies": {
         "coffeelint": "~1.15.7"
+    },
+    "consumedServices": {
+        "renderer": {
+            "versions": {
+                "1.0.0": "registerRenderer"
+            }
+        }
     }
 }
