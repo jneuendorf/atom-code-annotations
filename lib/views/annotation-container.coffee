@@ -15,10 +15,10 @@ module.exports = class CodeAnnotationContainer
             <div class="hidden"></div>
             <div class="top block">
                 <div class="row">
-                    <div class="col-xs-5 left-col">
+                    <div class="name">
                         <h4 class="code-annotation-name" title="double click to edit"></h4>
                     </div>
-                    <div class="col-xs-7">
+                    <div class="buttons">
                         <button class="inline-block btn icon icon-trashcan delete">Delete</button>
                         <button class="inline-block btn icon icon-x disappear">Close</button>
                         <button class="inline-block btn icon icon-pencil edit">Edit content</button>
@@ -94,7 +94,7 @@ module.exports = class CodeAnnotationContainer
         @content = element.find(".content")
         @nameElement = element.find(".code-annotation-name")
         @textEditorView = new TextEditorView({mini: true})
-        element.find(".left-col").append(@textEditorView)
+        element.find(".name").append(@textEditorView)
         @changeTypeView = new ChangeTypeView()
         @changeTypeView.codeAnnotationContainer = @
         return element

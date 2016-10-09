@@ -15,7 +15,7 @@ By default, this package can render the following kinds of content:
 - links / URLs
 - plain text
 
-Further renderers can be added by installing code-annotation plugin packages (TODO).
+Further renderers can be added by installing code-annotation plugin packages.
 
 
 ## Usage
@@ -75,6 +75,7 @@ The container is made visible by clicking on the icon displayed in the [gutter](
 - [Java](https://atom.io/packages/language-java)
 - [JavaScript](https://atom.io/packages/language-javascript)
 - [LaTeX](https://atom.io/packages/language-latex)
+- [Less](https://atom.io/packages/language-less)
 - [MATLAB](https://atom.io/packages/language-matlab)
 - [Objective-C](https://atom.io/packages/language-objective-c)
 - [Objective-C++](https://atom.io/packages/language-objective-c)

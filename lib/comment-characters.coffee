@@ -20,6 +20,7 @@ module.exports =
     Java: "//"
     JavaScript: "//"
     LaTeX: "%"
+    Less: "//"
     MATLAB: "%"
     "Objective-C": "//"
     "Objective-C++": "//"
