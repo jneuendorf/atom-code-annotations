@@ -1,5 +1,11 @@
 # Change Log
 
+## [v2.1.2](https://github.com/jneuendorf/code-annotations/tree/v2.1.2) (2017-01-10)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.1.1...v2.1.2)
+
+## [v2.1.1](https://github.com/jneuendorf/code-annotations/tree/v2.1.1) (2016-10-09)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.1.0...v2.1.1)
+
 ## [v2.1.0](https://github.com/jneuendorf/code-annotations/tree/v2.1.0) (2016-08-18)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.0.0...v2.1.0)
 
