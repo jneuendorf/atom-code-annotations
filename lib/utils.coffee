@@ -53,7 +53,7 @@ module.exports = class Utils
     @getGutterWithName: (editor, gutterName) ->
         for gutter in editor.getGutters() when gutter.name is gutterName
             return gutter
-        console.log "editor was", editor
+        # console.log "editor was", editor
         debugger
         return null
 

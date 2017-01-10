@@ -35,7 +35,7 @@ module.exports =
     # PUBLIC (ATOM API)
 
     activate: (state) ->
-        console.log "could deserialize:", state
+        # console.log "could deserialize:", state
         # those are set in the constructor of the CodeAnnotationContainer
         @textColor = null
         @backgroundColor = null
@@ -75,7 +75,7 @@ module.exports =
         adjustedRendererClass = AssetRenderer.ensureSameApi(rendererClass)
         if not adjustedRendererClass?
             throw new Error("Invalid asset renderer '#{rendererClass.getName?() or rendererClass.name}'. Expected a subclass of AssetRenderer or a class that has an equivalent API.")
-        console.log "registering #{adjustedRendererClass.getName()}"
+        # console.log "registering #{adjustedRendererClass.getName()}"
         @rendererClasses.push adjustedRendererClass
         return @
 
@@ -257,7 +257,7 @@ module.exports =
             console.log "unsupported grammer (no comments available => thus no annotations). error: #{error.message}", editorPath
             return @
 
-        console.log "initializing editor w/ path: #{editorPath}"
+        # console.log "initializing editor w/ path: #{editorPath}"
         gutter = editor.addGutter({
             name: CodeAnnotations.GUTTER_NAME
             priority: Config.gutterPriority
