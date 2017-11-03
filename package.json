@@ -1,39 +1,48 @@
 {
-  "name": "code-annotations",
-  "description": "An atom package for annotating your source with anything",
-  "main": "./lib/annotation-manager",
-  "version": "2.1.3",
-  "keywords": [
-    "code",
-    "annotate",
-    "annotation",
-    "documentation"
-  ],
-  "author": {
-    "name": "Jim Neuendorf",
-    "url": "https://github.com/jneuendorf"
-  },
-  "activationCommands": {},
-  "repository": "https://github.com/jneuendorf/code-annotations",
-  "bugs": "https://github.com/jneuendorf/code-annotations/issues",
-  "license": "MIT",
-  "engines": {
-    "atom": ">=1.0.0 <2.0.0"
-  },
-  "dependencies": {
-    "atom-space-pen-views": "~2.2.0",
-    "fs-plus": "~2.9.1",
-    "path": "~0.12.7",
-    "season": "~5.3.0"
-  },
-  "devDependencies": {
-    "coffeelint": "~1.15.7"
-  },
-  "consumedServices": {
-    "renderer": {
-      "versions": {
-        "1.0.0": "registerRenderer"
-      }
+    "name": "code-annotations",
+    "description": "An atom package for annotating your source with anything",
+    "main": "lib/annotation-manager.js",
+    "version": "2.1.3",
+    "keywords": [
+        "code",
+        "annotate",
+        "annotation",
+        "documentation"
+    ],
+    "author": {
+        "name": "Jim Neuendorf",
+        "url": "https://github.com/jneuendorf"
+    },
+    "activationCommands": {},
+    "repository": "https://github.com/jneuendorf/code-annotations",
+    "bugs": "https://github.com/jneuendorf/code-annotations/issues",
+    "license": "MIT",
+    "engines": {
+        "atom": ">=1.0.0 <2.0.0"
+    },
+    "dependencies": {
+        "atom-space-pen-views": "~2.2.0",
+        "fs-plus": "~2.9.1",
+        "path": "~0.12.7",
+        "season": "~5.3.0"
+    },
+    "devDependencies": {
+        "babel-eslint": "^7.2.3",
+        "babel-plugin-transform-decorators-legacy": "^1.3.4",
+        "eslint": "^4.6.1"
+    },
+    "providedServices": {
+        "atom.file-icons": {
+            "versions": {
+                "1.0.0": "provideTreeViewIcons"
+            }
+        }
+    },
+    "consumedServices": {
+        "renderer": {
+            "versions": {
+                "1.0.0": "registerRenderer"
+            }
+        }
     }
-  }
 }

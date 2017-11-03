@@ -1,0 +1,24 @@
+parser: babel-eslint
+env:
+    es6: true
+    browser: true
+    node: true
+parserOptions:
+    ecmaVersion: 6
+    ecmaFeatures:
+        experimentalObjectRestSpread: true
+    sourceType: module
+globals:
+    atom: true
+rules:
+    arrow-parens: [error, as-needed]
+    eol-last: 0
+    new-cap: 0
+    no-debugger: 1
+    no-undef: 2
+    no-underscore-dangle: 0
+    no-unused-vars: [error, {vars: all, args: none}]
+    no-use-before-define: 0
+    quotes: [error, single, {avoidEscape: true}]
+    semi: [error, never]
+    strict: 0
