@@ -11,6 +11,7 @@ parserOptions:
 globals:
     atom: true
 rules:
+    array-bracket-spacing: [error, never]
     arrow-parens: [error, as-needed]
     eol-last: 0
     new-cap: 0
@@ -19,6 +20,7 @@ rules:
     no-underscore-dangle: 0
     no-unused-vars: [error, {vars: all, args: none}]
     no-use-before-define: 0
+    object-curly-spacing:  [error, never]
     quotes: [error, single, {avoidEscape: true}]
     semi: [error, never]
     strict: 0
