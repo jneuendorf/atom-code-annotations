@@ -13,6 +13,9 @@
         "name": "Jim Neuendorf",
         "url": "https://github.com/jneuendorf"
     },
+    "scripts": {
+        "lint": "eslint 'lib/**'"
+    },
     "activationCommands": {},
     "repository": "https://github.com/jneuendorf/code-annotations",
     "bugs": "https://github.com/jneuendorf/code-annotations/issues",
