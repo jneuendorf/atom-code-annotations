@@ -14,7 +14,7 @@
         }
         {
             "label": "Delete annotation"
-            "command": "code-annotations:delete-annotation"
+            "command": "code-annotations:delete-annotations"
         }
     ]
 "menu": [{
@@ -36,7 +36,7 @@
             }
             {
                 "label": "Delete"
-                "command": "code-annotations:delete-annotation"
+                "command": "code-annotations:delete-annotations"
             }
             {
                 "label": "Show all"
