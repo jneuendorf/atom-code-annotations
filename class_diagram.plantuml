@@ -1,0 +1,40 @@
+@startuml
+hide empty members
+
+class AnnotationManager
+together {
+    class AnnotationsDb
+    class RawAnnotation <<Pseudo>>
+    class Annotation
+}
+
+class AssetRenderer
+class FrameRenderer
+class HtmlRenderer
+class InlineHtmlRenderer
+class LinkRenderer
+class TextRenderer
+
+class AtomTextEditor
+
+note bottom of AnnotationsDb
+    One for each folder in
+    <i>atom.project.getDirectories()</i>.
+end note
+
+
+AssetRenderer <|-- TextRenderer
+AssetRenderer <|-- InlineHtmlRenderer
+AssetRenderer <|-- ImageRenderer
+AssetRenderer <|-- FrameRenderer
+FrameRenderer <|-- HtmlRenderer
+FrameRenderer <|-- LinkRenderer
+
+Annotation "1" --> "1" AssetRenderer
+RawAnnotation "1" <-- "1" AssetRenderer
+AnnotationsDb "1" -> "*" RawAnnotation
+RawAnnotation "1" . "1" Annotation
+AnnotationManager "1" --> "*" AtomTextEditor
+AtomTextEditor "1" --> "*" RawAnnotation
+AtomTextEditor "1" --- "*" Annotation
+@enduml
