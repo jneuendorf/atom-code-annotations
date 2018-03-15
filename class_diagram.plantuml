@@ -11,7 +11,6 @@ together {
 class AssetRenderer
 class FrameRenderer
 class HtmlRenderer
-class InlineHtmlRenderer
 class LinkRenderer
 class TextRenderer
 
@@ -24,7 +23,6 @@ end note
 
 
 AssetRenderer <|-- TextRenderer
-AssetRenderer <|-- InlineHtmlRenderer
 AssetRenderer <|-- ImageRenderer
 AssetRenderer <|-- FrameRenderer
 FrameRenderer <|-- HtmlRenderer

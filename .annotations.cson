@@ -20,12 +20,6 @@
         }
         {
             lineNumber: 20
-            title: 'iframe'
-            content: "<html>\n<body>\n<h1>Check this</h1>\n<div>It's a complete web page.</div>\n</body>\n</html>"
-            type: 'frame'
-        }
-        {
-            lineNumber: 20
             title: 'URL'
             content: 'https://atom.io/'
             type: 'link'
