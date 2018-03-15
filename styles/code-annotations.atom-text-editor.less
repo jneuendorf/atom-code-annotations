@@ -26,6 +26,18 @@ code-annotation-container {
     top: 10%;
     z-index: 100;
 
+    .select-list .list-group .status.icon {
+        float: right;
+        margin-left: 16px;
+
+        &.icon-x {
+            color: @text-color-error;
+        }
+        &.icon-pencil {
+            color: @text-color-info;
+        }
+    }
+
     // pseudo styling for exposing styles to javascript
     .syntax--hidden {
         background-color: @app-background-color;
@@ -77,7 +89,7 @@ code-annotation-container {
     }
 
     .btn {
-        &.disappear, &.edit, &.change-type {
+        &.disappear, &.edit {
             float: right;
             margin: 0 6px;
         }
