@@ -21,6 +21,6 @@ rules:
     no-unused-vars: [error, {vars: all, args: none, varsIgnorePattern: _+}]
     no-use-before-define: 0
     object-curly-spacing:  [error, never]
-    quotes: [error, single, {avoidEscape: true}]
+    quotes: [error, single, {avoidEscape: true, allowTemplateLiterals: true}]
     semi: [error, never]
     strict: 0

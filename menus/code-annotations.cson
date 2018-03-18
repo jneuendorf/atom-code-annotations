@@ -1,37 +1,42 @@
-"context-menu":
-    "atom-text-editor": [
+'context-menu':
+    'atom-text-editor': [
         {
-            "label": "Add annotation (file)"
-            "command": "code-annotations:add-annotation-with-file"
-        }
-        {
-            "label": "Add annotation (content)"
-            "command": "code-annotations:add-annotation-with-content"
-        }
-        {
-            "label": "Add annotation (existing)"
-            "command": "code-annotations:add-existing-annotation"
-        }
-        {
-            "label": "Delete annotation"
-            "command": "code-annotations:delete-annotations"
+            label: 'Code Annotations'
+            submenu: [
+                {
+                    'label': 'Add annotation (file)'
+                    'command': 'code-annotations:add-annotation-with-file'
+                }
+                {
+                    'label': 'Add annotation (content)'
+                    'command': 'code-annotations:add-annotation-with-content'
+                }
+                {
+                    'label': 'Add annotation (existing)'
+                    'command': 'code-annotations:add-existing-annotation'
+                }
+                {
+                    'label': 'Delete annotation'
+                    'command': 'code-annotations:delete-annotations'
+                }
+            ]
         }
     ]
-"menu": [{
-    "label": "Packages"
-    "submenu": [{
-        "label": "Code Annotations"
-        "submenu": [
+'menu': [{
+    'label': 'Packages'
+    'submenu': [{
+        'label': 'Code Annotations'
+        'submenu': [
             {
-                "label": "Add (file)"
-                "command": "code-annotations:add-annotation-with-file"
+                'label': 'Add (file)'
+                'command': 'code-annotations:add-annotation-with-file'
             }
             {
-                "label": "Add (content)"
-                "command": "code-annotations:add-annotation-with-content"
+                'label': 'Add (content)'
+                'command': 'code-annotations:add-annotation-with-content'
             }
             {
-                "label": "Add (existing)"
+                'label': 'Add (existing)'
                 "command": "code-annotations:add-existing-annotation"
             }
             {
