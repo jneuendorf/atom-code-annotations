@@ -4,60 +4,44 @@
             label: 'Code Annotations'
             submenu: [
                 {
-                    'label': 'Add annotation (file)'
-                    'command': 'code-annotations:add-annotation-with-file'
+                    label: 'Add annotation'
+                    command: 'code-annotations:add-annotation'
                 }
                 {
-                    'label': 'Add annotation (content)'
-                    'command': 'code-annotations:add-annotation-with-content'
-                }
-                {
-                    'label': 'Add annotation (existing)'
-                    'command': 'code-annotations:add-existing-annotation'
-                }
-                {
-                    'label': 'Delete annotation'
-                    'command': 'code-annotations:delete-annotations'
+                    label: 'Delete annotation'
+                    command: 'code-annotations:delete-annotations'
                 }
             ]
         }
     ]
 'menu': [{
-    'label': 'Packages'
-    'submenu': [{
-        'label': 'Code Annotations'
-        'submenu': [
+    label: 'Packages'
+    submenu: [{
+        label: 'Code Annotations'
+        submenu: [
             {
-                'label': 'Add (file)'
-                'command': 'code-annotations:add-annotation-with-file'
+                label: 'Add annotation'
+                command: 'code-annotations:add-annotation'
             }
             {
-                'label': 'Add (content)'
-                'command': 'code-annotations:add-annotation-with-content'
+                label: "Delete"
+                command: "code-annotations:delete-annotations"
             }
             {
-                'label': 'Add (existing)'
-                "command": "code-annotations:add-existing-annotation"
+                label: "Show all"
+                command: "code-annotations:show-all"
             }
             {
-                "label": "Delete"
-                "command": "code-annotations:delete-annotations"
+                label: "Show commands"
+                command: "code-annotations:show-commands"
             }
             {
-                "label": "Show all"
-                "command": "code-annotations:show-all"
+                label: "Load current editor"
+                command: "code-annotations:load-current-editor"
             }
             {
-                "label": "Show commands"
-                "command": "code-annotations:show-commands"
-            }
-            {
-                "label": "Load current editor"
-                "command": "code-annotations:load-current-editor"
-            }
-            {
-                "label": "Reload"
-                "command": "code-annotations:reload"
+                label: "Reload"
+                command: "code-annotations:reload"
             }
         ]
     }]

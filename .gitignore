@@ -3,4 +3,4 @@
 compiled_source
 main-built.js
 node_modules
-npm-debug.log
+*.log
