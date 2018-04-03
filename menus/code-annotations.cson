@@ -32,10 +32,6 @@
                 command: "code-annotations:show-all"
             }
             {
-                label: "Show commands"
-                command: "code-annotations:show-commands"
-            }
-            {
                 label: "Load current editor"
                 command: "code-annotations:load-current-editor"
             }
