@@ -36,6 +36,7 @@ module.exports =
     SCSS: "//"
     "Shell Script": "#"
     SQL: "--"
+    TypeScript: "//"
 
     # creates the same kinf of object for all language data (independent of how it was written down)
     format: (value) ->
