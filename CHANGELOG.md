@@ -1,5 +1,22 @@
 # Change Log
 
+## [Unreleased](https://github.com/jneuendorf/code-annotations/tree/HEAD)
+
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.1.3...HEAD)
+
+**Implemented enhancements:**
+
+- Switch to JavaScript [\#20](https://github.com/jneuendorf/code-annotations/issues/20)
+
+**Closed issues:**
+
+- Deprecated selector in `code-annotations\styles\code-annotations.atom-text-editor.less` [\#16](https://github.com/jneuendorf/code-annotations/issues/16)
+- Deprecated selector in `code-annotations/styles/code-annotations.atom-text-editor.less` [\#15](https://github.com/jneuendorf/code-annotations/issues/15)
+
+**Merged pull requests:**
+
+- Replaces deprecated style selectors [\#19](https://github.com/jneuendorf/code-annotations/pull/19) ([edahlseng](https://github.com/edahlseng))
+
 ## [v2.1.3](https://github.com/jneuendorf/code-annotations/tree/v2.1.3) (2017-01-11)
 [Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.1.2...v2.1.3)
 

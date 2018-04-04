@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-
+# apm publish [<newversion> | major | minor | patch | build]
 if [[ $# -eq 0 ]]; then
     kind="patch"
 else
