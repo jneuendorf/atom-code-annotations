@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "atom-space-pen-views": "~2.2.0",
+        "fs-extra": "^5.0.0",
         "fs-plus": "~2.9.1",
         "lodash.flattendepth": "^4.7.0",
         "lodash.groupby": "^4.6.0",
