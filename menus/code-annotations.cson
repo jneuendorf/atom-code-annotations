@@ -32,6 +32,10 @@
                 command: "code-annotations:show-all"
             }
             {
+                label: "Edit Raw"
+                command: "code-annotations:edit-raw"
+            }
+            {
                 label: "Load current editor"
                 command: "code-annotations:load-current-editor"
             }
