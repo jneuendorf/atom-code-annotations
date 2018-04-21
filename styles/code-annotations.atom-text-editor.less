@@ -12,7 +12,7 @@
 @middle-line-top: @top-block-height;
 @bottom-block-top: @middle-line-top + @middle-line-height;
 
-code-annotation-container {
+.code-annotations-mount-point .annotation-container {
     background-color: @app-background-color;
     border: 2px solid @base-border-color;
     bottom: 10%;
@@ -123,6 +123,16 @@ code-annotation-container {
             color: @text-color;
             width: 99%;
         }
+    }
+
+    .fallback-message {
+        font-size: 1.8rem;
+        font-weight: 100;
+        text-align: center;
+    }
+
+    webview {
+        height: 100%;
     }
 }
 
