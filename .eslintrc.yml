@@ -13,8 +13,13 @@ globals:
     atom: true
 plugins:
     - react
+    - import
 extends:
     - plugin:react/recommended
+    - plugin:import/errors
+    - plugin:import/warnings
+settings:
+    import/core-modules: [atom]
 rules:
     array-bracket-spacing: [error, never]
     arrow-parens: [error, as-needed]
