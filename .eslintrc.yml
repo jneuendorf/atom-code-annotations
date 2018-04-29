@@ -35,6 +35,7 @@ rules:
     quotes: [error, single, {avoidEscape: true, allowTemplateLiterals: true}]
     semi: [error, never]
     strict: 0
+    import/no-named-as-default-member: 0
     react/jsx-boolean-value: 0
     react/jsx-no-undef: error
     react/jsx-uses-react: 1
