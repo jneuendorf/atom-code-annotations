@@ -45,4 +45,5 @@ rules:
     # only 1 stateful component (class)
     react/no-multi-comp: [error, ignoreStateless: true]
     react/no-unknown-property: 1
+    react/prop-types: [error, {ignore: [children]}]
     react/self-closing-comp: 1
