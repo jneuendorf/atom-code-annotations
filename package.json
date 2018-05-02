@@ -24,9 +24,9 @@
         "atom": ">=1.13.0 <2.0.0"
     },
     "dependencies": {
-        "atom-space-pen-views": "~2.2.0",
         "classnames": "^2.2.5",
         "fs-extra": "^5.0.0",
+        "fuzzaldrin": "^2.1.0",
         "lodash.flattendepth": "^4.7.0",
         "lodash.groupby": "^4.6.0",
         "lodash.uniqueid": "^4.0.1",
