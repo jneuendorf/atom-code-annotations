@@ -1,2 +1,4 @@
-"atom-workspace.has-code-annotations-container":
-    "escape": "code-annotations:hide-container"
+'atom-workspace.has-code-annotations-container':
+    'escape': 'code-annotations:hide-container'
+    'up': 'code-annotations:select-previous-annotation'
+    'down': 'code-annotations:select-next-annotation'
