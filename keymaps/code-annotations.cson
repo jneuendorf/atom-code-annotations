@@ -1,4 +1,13 @@
+# Cross-platform
 'atom-workspace.has-code-annotations-container':
     'escape': 'code-annotations:hide-container'
     'up': 'code-annotations:select-previous-annotation'
     'down': 'code-annotations:select-next-annotation'
+# macOS
+'.platform-darwin atom-workspace.has-code-annotations-container':
+    'cmd-up': 'code-annotations:move-annotation-up'
+    'cmd-down': 'code-annotations:move-annotation-down'
+# Linux / Windows
+'.platform-win32 atom-workspace.has-code-annotations-container, .platform-linux atom-workspace.has-code-annotations-container':
+    'ctrl-up': 'code-annotations:move-annotation-up'
+    'ctrl-down': 'code-annotations:move-annotation-down'
