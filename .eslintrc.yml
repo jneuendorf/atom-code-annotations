@@ -19,7 +19,7 @@ extends:
     - plugin:import/errors
     - plugin:import/warnings
 settings:
-    import/core-modules: [atom]
+    import/core-modules: [atom, remote]
 rules:
     array-bracket-spacing: [error, never]
     arrow-parens: [error, as-needed]
