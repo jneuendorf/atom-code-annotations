@@ -52,6 +52,7 @@
             right: 0;
             top: 0;
             transition: opacity 200ms;
+            z-index: 10;
             &:hover {
                 opacity: 1;
             }
@@ -64,8 +65,24 @@
             text-align: center;
         }
 
-        webview {
+        .webview-wrapper {
             height: 100%;
+            position: relative;
+            width: 100%;
+
+            .loading {
+                left: ~'calc(50% - 32px)';
+                position: absolute;
+                top: ~'calc(50% - 32px)';
+            }
+
+            webview {
+                bottom: 0;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
         }
     }
 }
