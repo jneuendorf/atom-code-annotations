@@ -1,7 +1,6 @@
 // The ui-variables file is provided by base themes provided by Atom.
 //
-// See https://github.com/atom/atom-dark-ui/blob/master/styles/ui-variables.less
-// for a full listing of what's available.
+// See https://git.io/vp9EG for a full listing of what's available.
 @import "ui-variables";
 
 
@@ -74,6 +73,7 @@
                 left: ~'calc(50% - 32px)';
                 position: absolute;
                 top: ~'calc(50% - 32px)';
+                z-index: 1;
             }
 
             webview {
@@ -82,6 +82,7 @@
                 position: absolute;
                 right: 0;
                 top: 0;
+                z-index: 10;
             }
         }
     }
