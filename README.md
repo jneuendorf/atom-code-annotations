@@ -3,8 +3,10 @@
 ## Description
 
 This is an atom package for creating code annotations.
-An annotation is a piece of content that has a name and can be displayed in atom.
-While working only the name of the code annotation is visible but it can be shown by clicking on the pin icon (in the atom gutter)
+An annotation is a piece of content with a title that can be displayed in [Atom](https://atom.io/).
+Code Annotations will not show up in your code but can nonetheless be using along with a VCS.
+Another advantage is that your annotations no longer depend on code comments meaning you can effectively comment code that does not have a comment syntax (e.g. [Support for comments in package.json](https://github.com/npm/npm/issues/4482)).
+Annotations appear as icons in the Atom gutter and can be revealed by clicking these icons.
 
 ![Basic usage](https://github.com/jneuendorf/code-annotations/raw/master/gifs/basic-usage.gif)
 
