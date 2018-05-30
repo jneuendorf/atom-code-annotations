@@ -4,6 +4,10 @@
 @import "ui-variables";
 
 
+@container-padding: 6px;
+@inner-padding: 5px;
+
+
 .code-annotations-mount-point {
     .backdrop {
         background-color: contrast(@app-background-color);
@@ -21,16 +25,20 @@
         box-shadow: 0 0 10px 0 @app-background-color;
         box-sizing: border-box;
         overflow: hidden;
-        padding: 6px;
+        padding: @container-padding;
         position: absolute;
         z-index: 100;
 
         > .col {
             display: inline-block;
             height: 100%;
-            padding: 5px 10px 5px 5px;
+            padding: @inner-padding 10px @inner-padding @inner-padding;
             position: relative;
             vertical-align: top;
+
+            &.content {
+                overflow: scroll;
+            }
         }
 
         .select-list .status.icon {
@@ -48,8 +56,8 @@
         .btn.hide-container {
             opacity: 0.6;
             position: absolute;
-            right: 0;
-            top: 0;
+            right: @container-padding + @inner-padding;
+            top: @container-padding + @inner-padding;
             transition: opacity 200ms;
             z-index: 10;
             &:hover {

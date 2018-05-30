@@ -14,17 +14,20 @@ By default, this package can render the following kinds of content:
 
 - images
 - html
-- links / URLs
+- URLs
 - plain text
 
-Further renderers can be added by installing code-annotation plugin packages.
+Further renderers can be added by
+
+- installing code-annotation plugin packages (for versions `^2` see the [example plugin](https://github.com/jneuendorf/code-annotations-test)) or
+- creating Pull Requests.
 
 
 ## Usage
 
 ### Creation and destruction
 
-Code annotations can be added and deleted from the context menu, from the `ShowCommandsView`, and of course from the command palette.
+Code annotations can be added and deleted from the packages menu and of course from the command palette.
 When adding or removing the position is the current (or last) cursor is relevant (so just right clicking to a certain position is insufficient (for now)).
 A new annotation is added above the line of the cursor; for deleting one the cursor must be at the annotation's line.
 
@@ -37,59 +40,26 @@ When creating an annotation its contents can be set in 2 ways:
 	- All annotations from text input are displayed as plain text first. The type can be changed later.
 
 
-### Navigating to annotations
+### Commands, shortcuts
 
-With the `show-all` command a select list containing all package commands
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| `add-annotation` | | Adds an annotation. Data is input using some dialogs. |
+| `show-all` | | Displays all annotations of the current project. Choosing one opens the corresponding file at the annotated line. |
+| `edit-raw` | | Opens `.annotations.cson` for editing annotations manually. |
+| `hide-container` | `escape` | Hides/closes the annotation container. |
+| `select-previous-annotation` | `up` | Displays the previous annotation in the list. |
+| `select-next-annotation` | `down` | Displays the next annotation in the list. |
+| `move-annotation-up` | `cmd-up` / `ctrl-up` | Moves the currently selected annotation up the list. |
+| `move-annotation-down` | `cmd-down` / `ctrl-down` | Moves the currently selected annotation down the list. |
+| `migrate` | | Migrates annotation data from `v2` to `v3`. |
 
-
-### Shortcuts
-
-There are only 2: `ctrl-alt-c ctrl-alt-c` and `escape`.
-
-Yes, the first is what it looks like - `ctr-alt-c` twice in a row.
-This shortcut shows a select list with the commands of the package (so this is kinda like a prefiltered command palette).
-
-`escape` is for hiding the container (see next section).
-
-The reasoning behind this is to avoid conflicts with other packages without making it harder to use the package without the mouse.
+(`cmd` is used for macOS, `ctrl` for Linux and Windows.)
 
 
 ### Showing annotations (rendering)
 
-Each annotation is associated with a file. The file extension of that file determines how the file contents are rendered in the popup (called `CodeAnnotationContainer`).
-Thus the `hide-container` command (which is triggered on `escape`).
-
-The container is made visible by clicking on the icon displayed in the [gutter](https://atom.io/docs/api/latest/Gutter) - currently this is a pin icon.
+The container is made visible by clicking on the icon displayed in the [gutter](https://atom.io/docs/api/latest/Gutter) - a pin icon by default.
+The `hide-container` command closes it (which is triggered on `escape`).
 
 
-## Supported grammars
-
-- [C](https://atom.io/packages/language-c)
-- [C#](https://atom.io/packages/language-csharp)
-- [CoffeeScript](https://atom.io/packages/language-coffee-script)
-- [CSS](https://atom.io/packages/language-css)
-- [C++](https://atom.io/packages/language-c)
-- [GitHub Flavored Markdown](https://atom.io/packages/language-gfm)
-- [Go](https://atom.io/packages/language-go)
-- [Haskell](https://atom.io/packages/language-haskell)
-- [HTML](https://atom.io/packages/language-html)
-- [HTML (Ruby - ERB)](https://atom.io/packages/language-ruby)
-- [Java](https://atom.io/packages/language-java)
-- [JavaScript](https://atom.io/packages/language-javascript)
-- [LaTeX](https://atom.io/packages/language-latex)
-- [Less](https://atom.io/packages/language-less)
-- [MATLAB](https://atom.io/packages/language-matlab)
-- [Objective-C](https://atom.io/packages/language-objective-c)
-- [Objective-C++](https://atom.io/packages/language-objective-c)
-- [Octave](https://atom.io/packages/language-matlab)
-- [Perl](https://atom.io/packages/language-perl)
-- [Perl 6](https://atom.io/packages/language-perl)
-- [PHP](https://atom.io/packages/language-php)
-- [Python](https://atom.io/packages/language-python)
-- [R](https://atom.io/packages/language-r)
-- [Ruby](https://atom.io/packages/language-ruby)
-- [Sass](https://atom.io/packages/language-sass)
-- [Scala](https://atom.io/packages/language-scala)
-- [SCSS](https://atom.io/packages/language-scss)
-- [Shell Script](https://atom.io/packages/language-shellscript)
-- [SQL](https://atom.io/packages/language-sql)
