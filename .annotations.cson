@@ -23,4 +23,13 @@
     content: "https://atom.io/"
     type: "link"
   }
+  {
+    lineNumber: 20
+    title: "project relative file URL"
+    content: '''
+      file://$code-annotations/class_diagram.png
+      
+    '''
+    type: "link"
+  }
 ]
