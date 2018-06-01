@@ -74,3 +74,23 @@ The container is made visible by clicking on the icon displayed in the [gutter](
 The `hide-container` command closes it (which is triggered on `escape`).
 
 
+### Changes since `v2.x`
+
+#### Removed
+
+- `reload` and `show-commands` commands and menu items
+- iframe renderer
+- removed context menu entries
+
+#### New Features
+
+- multiple annotations per line
+- annotations stick to lines automatically
+- `edit-raw` command and menu item for editing the database manually
+- the gutter icon can now be customized from the package's settings
+- navigate through a line's annotations with the keyboard
+- rearrange a line's annotations with the keyboard
+
+#### Misc
+
+- less logging pollution when not in dev mode
