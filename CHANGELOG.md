@@ -1,8 +1,24 @@
 # Change Log
 
-## [Unreleased](https://github.com/jneuendorf/code-annotations/tree/HEAD)
+## [v3.0.0](https://github.com/jneuendorf/code-annotations/tree/v3.0.0) (2018-06-01)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.2.0...v3.0.0)
 
-[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.1.3...HEAD)
+**Implemented enhancements:**
+
+- Use async version of atom.confirm [\#29](https://github.com/jneuendorf/code-annotations/issues/29)
+- Refactoring / finalization [\#25](https://github.com/jneuendorf/code-annotations/issues/25)
+- React JS [\#21](https://github.com/jneuendorf/code-annotations/issues/21)
+- Consider referencing comments by file + line number [\#18](https://github.com/jneuendorf/code-annotations/issues/18)
+- disable annotations in asset directory [\#14](https://github.com/jneuendorf/code-annotations/issues/14)
+
+**Closed issues:**
+
+- Movable annotations [\#27](https://github.com/jneuendorf/code-annotations/issues/27)
+- Uncaught Error: The editor with path ... [\#23](https://github.com/jneuendorf/code-annotations/issues/23)
+- Settings option for gutter icon [\#22](https://github.com/jneuendorf/code-annotations/issues/22)
+
+## [v2.2.0](https://github.com/jneuendorf/code-annotations/tree/v2.2.0) (2018-04-04)
+[Full Changelog](https://github.com/jneuendorf/code-annotations/compare/v2.1.3...v2.2.0)
 
 **Implemented enhancements:**
 
