@@ -2,11 +2,14 @@
   {
     lineNumber: 20
     title: "Text"
-    content: '''
-      text annotation2345
-
-    '''
+    content: "text annotation"
     type: "text"
+  }
+  {
+    lineNumber: 20
+    title: "HTML"
+    content: "<strong>HTML annotation</strong>"
+    type: "html"
   }
   {
     lineNumber: 20
@@ -16,17 +19,17 @@
   }
   {
     lineNumber: 20
-    title: "project relative file URL"
-    content: '''
-      file://$code-annotations/class_diagram.png
-
-    '''
+    title: "URL"
+    content: "https://atom.io/"
     type: "link"
   }
   {
     lineNumber: 20
-    title: "URL"
-    content: "https://atom.io/"
+    title: "project relative file URL"
+    content: '''
+      file://$code-annotations/class_diagram.png
+      
+    '''
     type: "link"
   }
 ]
