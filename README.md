@@ -94,3 +94,34 @@ The `hide-container` command closes it (which is triggered on `escape`).
 #### Misc
 
 - less logging pollution when not in dev mode
+
+
+## Contribution
+
+### Setting up the package
+
+```bash
+apm develop code-annotations
+cd ~/github/code-annotations
+atom . --dev
+```
+
+or
+
+```bash
+git clone https://github.com/jneuendorf/code-annotations.git
+cd code-annotations
+apm link
+atom .
+# or
+# apm link --dev
+# atom . --dev
+```
+
+### Thanks to
+
+- [edahlseng](https://github.com/edahlseng)
+  for the motivation that led to `v3.0` and ideas for improving quality and
+  performance of the package.
+- [bradleyDean](https://github.com/bradleyDean)
+  for feedback and inspiration
