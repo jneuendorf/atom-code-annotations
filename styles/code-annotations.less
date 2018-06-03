@@ -41,15 +41,22 @@
             }
         }
 
-        .select-list .status.icon {
-            float: right;
-            margin-left: 16px;
-
-            &.icon-x, &.icon-trashcan {
-                color: @text-color-error;
+        .select-list {
+            ol.list-group {
+                // For some reason 'pdf-view's dependecy 'atom-space-pen-views'
+                // sets this to 312px globally.
+                max-height: none;
             }
-            &.icon-pencil {
-                color: @text-color-info;
+            .status.icon {
+                float: right;
+                margin-left: 16px;
+
+                &.icon-x, &.icon-trashcan {
+                    color: @text-color-error;
+                }
+                &.icon-pencil {
+                    color: @text-color-info;
+                }
             }
         }
 

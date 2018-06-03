@@ -21,7 +21,7 @@
   "bugs": "https://github.com/jneuendorf/code-annotations/issues",
   "license": "MIT",
   "engines": {
-    "atom": ">=1.13.0 <2.0.0"
+    "atom": ">=1.25.0 <2.0.0"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
