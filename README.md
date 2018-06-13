@@ -63,6 +63,7 @@ Renders plain text.
 | `select-next-annotation` | `down` | Displays the next annotation in the list. |
 | `move-annotation-up` | `cmd-up` / `ctrl-up` | Moves the currently selected annotation up the list. |
 | `move-annotation-down` | `cmd-down` / `ctrl-down` | Moves the currently selected annotation down the list. |
+| `show-qr-code` | | Shows the QR code that's required for the [mobile app](#app). |
 | `migrate` | | Migrates annotation data from `v2` to `v3`. |
 
 (`cmd` is used for macOS, `ctrl` for Linux and Windows.)
@@ -74,15 +75,35 @@ The container is made visible by clicking on the icon displayed in the [gutter](
 The `hide-container` command closes it (which is triggered on `escape`).
 
 
-### Changes since `v2.x`
+## <a name="commands"></a>Mobile App
 
-#### Removed
+There is a mobile app belonging to this Atom package.
+It is located in the `AtomCodeAnnotations` folder.
+
+The app can be used for taking photos.
+These photos can then be sent to Atom as code annotations.
+In order for the app to send the photo it needs to know an IP address which it gets by reading the QR code that can be shown with the `show-qr-code` command.
+
+### Distribution
+
+#### iOS
+
+The app should be deployable using Apple's *Ad Hoc Distribution*.
+
+#### Android
+
+TODO...
+
+
+## Changes since `v2.x`
+
+### Removed
 
 - `reload` and `show-commands` commands and menu items
 - iframe renderer
 - removed context menu entries
 
-#### New Features
+### New Features
 
 - multiple annotations per line
 - annotations stick to lines automatically
@@ -91,7 +112,7 @@ The `hide-container` command closes it (which is triggered on `escape`).
 - navigate through a line's annotations with the keyboard
 - rearrange a line's annotations with the keyboard
 
-#### Misc
+### Misc
 
 - less logging pollution when not in dev mode
 
