@@ -98,26 +98,9 @@ TODO. These links look helpful though:
 - https://facebook.github.io/react-native/docs/signed-apk-android.html
 
 
-## Changes since `v2.x`
+## Changelog (since `v2.x`)
 
-### Removed
-
-- `reload` and `show-commands` commands and menu items
-- iframe renderer
-- removed context menu entries
-
-### New Features
-
-- multiple annotations per line
-- annotations stick to lines automatically
-- `edit-raw` command and menu item for editing the database manually
-- the gutter icon can now be customized from the package's settings
-- navigate through a line's annotations with the keyboard
-- rearrange a line's annotations with the keyboard
-
-### Misc
-
-- less logging pollution when not in dev mode
+See [releases](https://github.com/jneuendorf/code-annotations/releases).
 
 
 ## Contribution
