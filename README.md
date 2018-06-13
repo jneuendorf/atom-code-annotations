@@ -92,7 +92,10 @@ The app should be deployable using Apple's *Ad Hoc Distribution*.
 
 #### Android
 
-TODO...
+TODO. These links look helpful though:
+
+- https://stackoverflow.com/questions/35935060/
+- https://facebook.github.io/react-native/docs/signed-apk-android.html
 
 
 ## Changes since `v2.x`
