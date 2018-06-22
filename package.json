@@ -24,6 +24,7 @@
     "atom": ">=1.25.0 <2.0.0"
   },
   "dependencies": {
+    "atom-select-list-react": "^1.0.0",
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.3",
     "classnames": "^2.2.5",
@@ -39,8 +40,8 @@
     "mime": "^2.2.0",
     "prop-types": "^15.6.1",
     "qrcode": "^1.2.0",
-    "react": "^16.4.0",
-    "react-dom": "^16.3.2",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "react-is": "^16.3.2",
     "react-markdown": "^3.3.2",
     "season": "^6.0.2",
