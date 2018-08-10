@@ -18,8 +18,13 @@ const config = {
         library: '',
     },
     externals: {
+        // Because bundling doesn't work for some reason
         express: 'express',
         season: 'season',
+        // because likely other package use them as well
+        react: 'react',
+        'react-dom': 'react-dom',
+        // because it's Atom specific
         atom: 'atom',
         remote: 'remote',
     },
