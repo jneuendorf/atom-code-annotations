@@ -20,8 +20,8 @@
     "bundle:prod": "NODE_ENV=production webpack --progress"
   },
   "activationCommands": {},
-  "repository": "https://github.com/jneuendorf/code-annotations",
-  "bugs": "https://github.com/jneuendorf/code-annotations/issues",
+  "repository": "https://github.com/jneuendorf/atom-code-annotations",
+  "bugs": "https://github.com/jneuendorf/atom-code-annotations/issues",
   "license": "MIT",
   "engines": {
     "atom": ">=1.25.0 <2.0.0"
