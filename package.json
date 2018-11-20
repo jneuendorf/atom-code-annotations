@@ -2,7 +2,7 @@
   "name": "code-annotations",
   "description": "An atom package for annotating your source with anything",
   "main": "dist/main.js",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "keywords": [
     "atom",
     "code",
