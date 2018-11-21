@@ -6,7 +6,7 @@
 
 @container-padding: 6px;
 @inner-padding: 5px;
-
+@icon-margin-left: 16px;
 
 .code-annotations-mount-point {
     .backdrop {
@@ -47,9 +47,16 @@
                 // sets this to 312px globally.
                 max-height: none;
             }
+            .primary-line, .secondary-line {
+                display: block;
+            }
             .status.icon {
                 float: right;
-                margin-left: 16px;
+                margin-left: @icon-margin-left;
+                // Twice its height. Equals the height of the primary and
+                // secondary line. This way those block elements become
+                // less wide which makes text-overflow work.
+                height: 48px;
 
                 &.icon-x, &.icon-trashcan {
                     color: @text-color-error;
