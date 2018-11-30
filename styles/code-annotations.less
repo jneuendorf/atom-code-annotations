@@ -125,7 +125,6 @@
 }
 
 
-
 .code-annotation-gutter-icon {
     cursor: pointer;
     text-align: center;
@@ -133,5 +132,44 @@
 
     &:before {
         font-size: 13px;
+    }
+}
+
+
+.tree-view {
+    li.file.entry {
+        // Common styles for default icons and file-icons.
+        &.annotated, &.annotated--file-icons {
+            span.name {
+                // Ensure relative positioning because absolute positioning is used below.
+                // Btw, 'linter-ui-default' also defines this.
+                position: relative;
+
+                &.icon:after {
+                    background-color: @text-color-info;
+                    border-radius: 50%;
+                    content: '';
+                    height: 3px;
+                    position: absolute;
+                    transform: translateX(-50%);
+                    width: 3px;
+                }
+            }
+        }
+        // Default icons
+        &.annotated {
+            span.name.icon:after {
+                bottom: 0px;
+                left: 12px / 2;
+            }
+        }
+        // file-icons
+        &.annotated--file-icons {
+            span.name.icon:after {
+                bottom: 1px;
+                left: 16px / 2;
+            }
+        }
+
     }
 }

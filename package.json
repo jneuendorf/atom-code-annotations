@@ -64,17 +64,15 @@
     "webpack": "^4.16.0",
     "webpack-cli": "^3.0.8"
   },
-  "providedServices": {
-    "atom.file-icons": {
-      "versions": {
-        "1.0.0": "provideTreeViewIcons"
-      }
-    }
-  },
   "consumedServices": {
     "renderer": {
       "versions": {
         "1.0.0": "registerRenderer"
+      }
+    },
+    "tree-view": {
+      "versions": {
+        "^1.0.0": "consumeTreeView"
       }
     }
   },
