@@ -4,10 +4,15 @@ This is an atom package for creating code annotations.
 An annotation is a piece of content with a title that can be displayed in [Atom](https://atom.io/).
 Code Annotations will not show up in your code but can nonetheless be used along with a VCS.
 
-An advantage over `v2.x` is that annotations no longer depend on code comments meaning you can effectively comment code that does not have a comment syntax (e.g. [comments in package.json](https://github.com/npm/npm/issues/4482)).
+Annotated files have a modified icon in the tree view.
+By default, this package provides correct styles for `tree-view`'s default icons and the `file-icons` package.
+
+![Tree-view icons (file-icons)](images/annotated-file-icon.png)
+![Tree-view icons](images/annotated-file-icon2.png)
+
 Annotations appear as icons in the Atom gutter and can be revealed by clicking these icons.
 
-![Basic usage](https://github.com/jneuendorf/code-annotations/raw/master/gifs/basic-usage.gif)
+![Basic usage](images/basic-usage.gif)
 
 By default, this package can render the 4 [types](#types) of content.
 Further renderers can be added by
@@ -15,6 +20,7 @@ Further renderers can be added by
 - installing code-annotation plugin packages (for versions `v2.x` see the [example plugin](https://github.com/jneuendorf/code-annotations-test)) or
 - creating Pull Requests.
 
+An advantage over `v2.x` is that annotations no longer depend on code comments meaning you can effectively comment code that does not have a comment syntax (e.g. [comments in package.json](https://github.com/npm/npm/issues/4482)).
 
 ## Usage
 
@@ -73,6 +79,37 @@ Renders plain text.
 
 The container is made visible by clicking on the icon displayed in the [gutter](https://atom.io/docs/api/latest/Gutter) - a pin icon by default.
 The `hide-container` command closes it (which is triggered on `escape`).
+
+
+### File icons in the tree view panel
+
+By default, a dot will be displayed below annotated files' icons.
+This can be turned off in the package's settings (or by setting `display: none;` in the `:after` selectors shown below).
+
+For customizing the position of the dot add something like this to your `styles.less` (which you can open in via the menu: Atom > Stylesheet...).
+
+```less
+.tree-view li.file.entry {
+    // Default icons
+    &.annotated {
+        span.name.icon:after {
+            bottom: 0px;
+            left: 12px / 2;
+        }
+    }
+    // file-icons
+    &.annotated--file-icons {
+        span.name.icon:after {
+            bottom: 1px;
+            left: 16px / 2;
+        }
+    }
+}
+```
+
+If you use a different icon provider (other than `tree-view`'s default icons or `file-icons`), customize the `annotated` class.
+
+For complete customization of the icon highlighting you can add any other CSS rules, of course.
 
 
 ## <a name="commands"></a>Mobile App
